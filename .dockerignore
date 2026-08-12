@@ -1,22 +1,31 @@
-# Keep the build context small and the image free of anything secret or local.
-# Note what is *not* excluded: data/, tests/fixtures/cassettes/, and two files in
-# outputs/ are all needed at runtime and are copied explicitly by the Dockerfile.
+# Keep the build context small and the image free of anything local or secret.
+#
+# Patterns here are matched against the whole relative path, not per path segment,
+# so a bare `__pycache__` only matches one at the root. Nested ones need `**/`,
+# which is why bytecode was reaching the image until it was written this way.
+#
+# Note what is deliberately *not* excluded: data/, tests/fixtures/cassettes/, and
+# two files in outputs/ are needed at runtime and copied explicitly by the Dockerfile.
 
+# Secrets and local environment.
 .env
 .env.*
 !.env.sample
+.venv
+venv
+.python-version
 
 .git
 .gitattributes
 .gitignore
 
-.venv
-venv
-__pycache__
-*.pyc
-.pytest_cache
+# Bytecode and tool caches, at any depth.
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
 .cache
-.python-version
 
 # Run artifacts: regenerated on demand, and large.
 outputs/runs
@@ -26,12 +35,14 @@ outputs/prompt_trace.json
 # Not ours to publish, and not needed to run anything.
 InterviewAssignment.*
 
-# Not needed to serve the app.
+# Not needed to serve the app: docs, planning notes, dev tooling, and the tests
+# themselves. The cassettes under tests/fixtures/ are the exception.
 docs
 project_plans
 scripts
 tests/test_*.py
 tests/conftest.py
+tests/__init__.py
 tests/fixtures/expected_mapping.json
 *.md
 *.docx
