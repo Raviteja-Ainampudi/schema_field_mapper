@@ -16,6 +16,9 @@ confirm_changeset = false
 fail_on_empty_changeset = false
 resolve_image_repos = true           # let SAM create and manage the ECR repository
 image_repositories = []
+resolve_s3 = true                    # the template body is staged in S3 even when the
+                                     # only artifact is a container image, so the
+                                     # managed bucket is needed as well as the ECR repo
 
 [default.delete.parameters]
 no_prompts = true

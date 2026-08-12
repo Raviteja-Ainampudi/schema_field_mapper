@@ -9,11 +9,14 @@ Description: >
 Parameters:
   ReservedConcurrency:
     Type: Number
-    Default: 5
-    MinValue: 1
+    Default: 0
+    MinValue: 0
     Description: >
-      Hard ceiling on simultaneous runs. This is the main spend guard on a URL with
-      no authentication - each concurrent run can call Bedrock.
+      Hard ceiling on simultaneous runs, the main spend guard on a URL with no
+      authentication. 0 means do not reserve, which is not merely a default: AWS
+      requires 100 unreserved executions to remain available at all times, so an
+      account whose total limit is below 100 plus this number cannot reserve at
+      all. On such an account the account-wide limit is itself the ceiling.
 
   MaxTokensPerRun:
     Type: Number
@@ -54,6 +57,7 @@ Parameters:
 Conditions:
   HasBudgetEmail: !Not [!Equals [!Ref BudgetEmail, ""]]
   HasArtifactBucket: !Not [!Equals [!Ref ArtifactBucket, ""]]
+  HasReservedConcurrency: !Not [!Equals [!Ref ReservedConcurrency, 0]]
 
 Resources:
   MapperFunction:
@@ -76,7 +80,10 @@ Resources:
       # The work is I/O-bound on Bedrock, so memory buys cold-start speed rather
       # than throughput. 1024 MB is the point where extra memory stops helping.
       MemorySize: 1024
-      ReservedConcurrentExecutions: !Ref ReservedConcurrency
+      ReservedConcurrentExecutions: !If
+        - HasReservedConcurrency
+        - !Ref ReservedConcurrency
+        - !Ref AWS::NoValue
       Environment:
         Variables:
           # AWS_REGION and AWS_DEFAULT_REGION are set by Lambda and are reserved,

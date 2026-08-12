@@ -50,7 +50,21 @@ OVERRIDES=()
 [ -n "${BUDGET_EMAIL:-}" ] && OVERRIDES+=("BudgetEmail=$BUDGET_EMAIL")
 [ -n "${ACCESS_TOKEN:-}" ] && OVERRIDES+=("AccessToken=$ACCESS_TOKEN")
 [ -n "${ARTIFACT_BUCKET:-}" ] && OVERRIDES+=("ArtifactBucket=$ARTIFACT_BUCKET")
-[ -n "${CONCURRENCY:-}" ] && OVERRIDES+=("ReservedConcurrency=$CONCURRENCY")
+
+# Reserving concurrency requires 100 unreserved executions to remain available, so
+# on an account whose total limit is small - new accounts start at 10 - any
+# reservation is rejected and the deploy fails at the last step. Check first and
+# say so, rather than letting CloudFormation roll back.
+if [ -n "${CONCURRENCY:-}" ] && [ "${CONCURRENCY}" != "0" ]; then
+  LIMIT="$(aws lambda get-account-settings --query 'AccountLimit.ConcurrentExecutions' --output text 2>/dev/null || echo 0)"
+  NEEDED=$((100 + CONCURRENCY))
+  if [ "$LIMIT" -lt "$NEEDED" ]; then
+    echo "  WARNING: account concurrency limit is $LIMIT; reserving $CONCURRENCY needs $NEEDED." >&2
+    echo "           Deploying without a reservation. The account limit of $LIMIT is the ceiling." >&2
+  else
+    OVERRIDES+=("ReservedConcurrency=$CONCURRENCY")
+  fi
+fi
 
 echo
 echo "=== build image"
