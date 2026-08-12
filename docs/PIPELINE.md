@@ -47,6 +47,31 @@ Stage 1 seeing **names without types** is deliberate. Routing is a three-way cho
 needs vocabulary, not data types, and withholding types keeps the prompt small enough that
 the constraint proof stays comfortably clear of any threshold.
 
+## Which model runs which stage
+
+"Cheap" and "Strong" above are three configurable roles, not three hardcoded models. They are
+the **Router**, **Cheap pass**, and **Mapper** selectors in the header, `--router-model`,
+`--cheap-mapper-model`, and `--mapper-model` on the CLI, and `BEDROCK_ROUTER_MODEL`,
+`BEDROCK_CHEAP_MAPPER_MODEL`, `BEDROCK_MAPPER_MODEL` in `.env`:
+
+| Role | Stages it serves | Job | Default |
+| --- | --- | --- | --- |
+| Router | 1 route; the `rewrite` reasoning repair in stage 4 | Name-vocabulary matching over a handful of collections | Nova Lite |
+| Cheap pass | 3 adjudicate, first attempt at every field | Decide the majority of fields from a six-candidate shortlist | Claude Haiku 4.5 |
+| Mapper | 3 escalations, 3c reflect, `tiebreak` in stage 4; **all** of stage 3 when the cascade is off | Semantic judgment on the calls the cheap pass was unsure of | Claude Sonnet 4.5 |
+
+`Settings.mapper_chain()` is the whole cascade: `[cheap, mapper]` when the cascade is enabled
+and the two differ, otherwise `[mapper]`. Escalation is triggered by the cheap model's own
+reported confidence (`< 0.80`, before blending, because the retrieval margin is the same
+whichever model answered), while reflection is triggered by the blended score (`< 0.75`).
+Reasoning for each role, and how to choose between models, is in
+[USAGE.md](USAGE.md#why-there-are-three-model-choices).
+
+One consequence worth stating plainly: **the model id is part of the cassette key**, so
+replaying offline reproduces the recorded run only with the recorded models and the cascade
+on. A different model or a disabled cascade means a request that was never recorded, and the
+run stops with `CassetteMissing` rather than quietly answering from the wrong recording.
+
 ## A run, end to end
 
 ```mermaid

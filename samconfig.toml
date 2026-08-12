@@ -1,0 +1,21 @@
+# Defaults for `sam build` and `sam deploy`, so a deploy is one command and two
+# people deploying get the same stack rather than two subtly different ones.
+version = 0.1
+
+[default.global.parameters]
+stack_name = "schema-field-mapper"
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.deploy.parameters]
+region = "us-east-1"                 # where the us.* Bedrock inference profiles are enabled
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = false
+fail_on_empty_changeset = false
+resolve_image_repos = true           # let SAM create and manage the ECR repository
+image_repositories = []
+
+[default.delete.parameters]
+no_prompts = true

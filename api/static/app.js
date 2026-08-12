@@ -70,7 +70,51 @@ async function* sseStream(response) {
   }
 }
 
+/* The six stages, keyed by the ids the pipeline emits on `stage_start`, so the
+   header strip doubles as a live position indicator during a run. Stages 4 and
+   5 share a card: they are one deterministic tail from a reader's point of
+   view. */
+const PIPELINE = [
+  { ids: ["0"], idx: "0", name: "Normalize", kind: "code", note: "Dot-notation paths, expanded legacy abbreviations." },
+  { ids: ["1"], idx: "1", name: "Route", kind: "llm", note: "One call per table, column names only, picks a collection." },
+  { ids: ["2"], idx: "2", name: "Retrieve", kind: "code", note: "Retrieval-augmented shortlist of candidate paths, scored in code." },
+  { ids: ["3"], idx: "3", name: "Adjudicate", kind: "llm", note: "Model cascade judges only that shortlist, never both schemas." },
+  { ids: ["3c"], idx: "3c", name: "Reflect", kind: "llm", note: "Evaluator–optimizer critic re-checks the least confident calls." },
+  { ids: ["4", "5"], idx: "4–5", name: "Verify", kind: "code", note: "Invented paths, collisions and coverage, then assembly." },
+];
+
 /* ------------------------------------------------------------- components */
+
+/**
+ * The pipeline explained across the width of the header rather than as one
+ * paragraph: what each stage does, and which three of the six actually call a
+ * model. Lights up stage by stage while a run streams.
+ */
+function PipelineStrip({ active, done }) {
+  return html`<div class="approach">
+    <div class="approach-lead">
+      <span class="approach-k">Pipeline</span>
+      <span class="approach-v">six stages · three model calls</span>
+    </div>
+    <ol class="approach-steps">
+      ${PIPELINE.map((stage) => {
+        const isActive = stage.ids.includes(active);
+        const isDone = !isActive && stage.ids.some((id) => done.includes(id));
+        return html`<li
+          key=${stage.name}
+          class=${`stage-card ${isActive ? "active" : ""} ${isDone ? "done" : ""}`}
+        >
+          <div class="head">
+            <span class="idx">${stage.idx}</span>
+            <span class="name">${stage.name}</span>
+            <span class=${`tag ${stage.kind}`}>${stage.kind === "llm" ? "LLM" : "code"}</span>
+          </div>
+          <div class="note">${stage.note}</div>
+        </li>`;
+      })}
+    </ol>
+  </div>`;
+}
 
 function Meter({ label, value, sub, tone }) {
   return html`<div class=${`meter ${tone || ""}`}>
@@ -719,6 +763,11 @@ function HelpPanel({ health, onOpenInput }) {
           <tr><td>4–5 · Validate, assemble</td><td class="muted">no</td><td>Contract, invented-path guard, collisions, coverage</td></tr>
         </tbody>
       </table>
+      <p class="note">
+        That table is the strip across the top of the page, one card per stage with its
+        <code>LLM</code> or <code>code</code> tag. During a run the current stage is outlined and
+        finished ones turn green, so you can see what is happening as well as how far along it is.
+      </p>
       <p>The patterns doing the work, and what each one buys:</p>
       <ul>
         <li>
@@ -803,6 +852,52 @@ function HelpPanel({ health, onOpenInput }) {
           take the artifact from <strong>Mapping JSON</strong>.
         </li>
       </ol>
+
+      <h3 class="section">Why there are three model choices</h3>
+      <p>
+        A run is not one kind of call repeated. It is three jobs with different difficulty and
+        very different volume, so each gets its own model rather than one dropdown forcing a
+        single compromise. They are three positions in one escalation chain, not three
+        alternatives:
+      </p>
+      <table class="grid">
+        <thead>
+          <tr><th>Selector</th><th>Makes these calls</th><th>Why it is separate</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Router</td>
+            <td>Stage 1, one per table</td>
+            <td>Picks a collection from column <em>names</em> only — vocabulary matching over three candidates. A strong model buys nothing here</td>
+          </tr>
+          <tr>
+            <td>Cheap pass</td>
+            <td>Stage 3, first attempt at every field</td>
+            <td>The high-volume role. Most columns are decidable by a small model once retrieval has narrowed them to six candidates</td>
+          </tr>
+          <tr>
+            <td>Mapper</td>
+            <td>Escalations, reflection, tie-breaks — and all of stage 3 with <strong>cascade</strong> off</td>
+            <td>The judgment calls: enum decoding, lossy transforms, two candidates that both look right. Artifact quality tracks this one</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        The cheap pass answers first; any field it was less than <code>0.80</code> sure of is
+        re-asked of the mapper. Scores are then blended with the retrieval margin, and anything
+        still under <code>0.75</code> reaches the reflection critic, also on the mapper model.
+        <strong>Coverage &amp; quality</strong> reports what fraction actually escalated, and
+        <strong>Cost</strong> prices the same run against every other model so you can compare
+        without paying twice.
+      </p>
+      <p class="note">
+        Two non-obvious ones. Setting the cheap pass to the same model as the mapper turns the
+        cascade off whatever the toggle says — the chain collapses and there is nowhere to
+        escalate to. And model ids are part of the replay key, so changing any selector (or
+        unticking <strong>cascade</strong>) while <strong>offline</strong> is ticked stops the run
+        with <code>CassetteMissing</code>: the recordings are of the default trio. Model choices
+        mean something on a live run.
+      </p>
 
       <h3 class="section">What you can upload</h3>
       <p>
@@ -1050,10 +1145,12 @@ function App() {
   const [decisions, setDecisions] = useState([]);
   const [runId, setRunId] = useState(null);
   const [routing, setRouting] = useState({});
+  const [stageProgress, setStageProgress] = useState({ active: null, done: [] });
 
   const [activeTable, setActiveTable] = useState(null);
   const [selected, setSelected] = useState(null);
   const [tab, setTab] = useState("decision");
+  const [jsonSeen, setJsonSeen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [rows, setRows] = useState([]);
   const [segments, setSegments] = useState([]);
@@ -1140,6 +1237,8 @@ function App() {
     setDecisions([]);
     setSelected(null);
     setLog([]);
+    setJsonSeen(false);
+    setStageProgress({ active: null, done: [] });
     note(offline ? "Replaying recorded cassettes." : "Starting live run against Bedrock.");
 
     try {
@@ -1172,8 +1271,13 @@ function App() {
               `(${data.models.mapper}).`
           );
         } else if (event === "stage_start") {
+          setStageProgress((prev) => ({ active: data.stage, done: prev.done }));
           note(`stage ${data.stage}: ${data.label}`);
         } else if (event === "stage_end") {
+          setStageProgress((prev) => ({
+            active: prev.active === data.stage ? null : prev.active,
+            done: prev.done.includes(data.stage) ? prev.done : [...prev.done, data.stage],
+          }));
           note(`stage ${data.stage} finished in ${data.duration_ms}ms`);
         } else if (event === "route") {
           setRouting((prev) => ({ ...prev, [data.table]: data.collection }));
@@ -1217,6 +1321,7 @@ function App() {
       note(String(err.message || err), "err");
     } finally {
       setRunning(false);
+      setStageProgress((prev) => ({ active: null, done: prev.done }));
     }
   }, [sourceText, destText, routerModel, mapperModel, cheapModel, cascade, reflection, offline]);
 
@@ -1269,6 +1374,16 @@ function App() {
     setTab("help");
     setCollapsed(false);
   }, []);
+
+  /** The model settings the cassettes were recorded with, so replay can work. */
+  const restoreRecordedSettings = useCallback(() => {
+    if (!health?.defaults) return;
+    setRouterModel(health.defaults.router_model);
+    setMapperModel(health.defaults.mapper_model);
+    setCheapModel(health.defaults.cheap_mapper_model);
+    setCascade(health.defaults.cascade !== false);
+    note("Restored the models and cascade the recordings were made with.");
+  }, [health, note]);
 
   /* Validate whatever is in the two editors, debounced. Free endpoint, so the
      user learns their paste is understood before spending a run on it. */
@@ -1452,9 +1567,27 @@ function App() {
 
   const totalFields = schemaInfo?.source.fields || report?.coverage.source_fields_total || 0;
   const progress = totalFields ? Math.min(1, liveWires.length / totalFields) : 0;
-  // Replay is keyed by request hash, so edited schemas have no recording to
-  // replay. Say so before the run rather than letting it fail mid-stage.
-  const replayGap = offline && edited && parse?.ok !== false;
+  // Replay is keyed by a request hash that covers the schemas, the prompts and
+  // the model id, so any of those can leave a run with nothing to replay. Name
+  // what is uncovered before the run rather than letting it die mid-stage on
+  // CassetteMissing. Reflection is safe to switch off: skipping recorded calls
+  // is not the same as needing unrecorded ones.
+  const defaults = health?.defaults;
+  const changedModels = defaults
+    ? [
+        routerModel && routerModel !== defaults.router_model ? "router" : null,
+        mapperModel && mapperModel !== defaults.mapper_model ? "mapper" : null,
+        cascade && cheapModel && cheapModel !== defaults.cheap_mapper_model ? "cheap pass" : null,
+      ].filter(Boolean)
+    : [];
+  const replayGaps = [];
+  if (offline && parse?.ok !== false) {
+    if (edited) replayGaps.push("your edited schemas");
+    if (changedModels.length) replayGaps.push(`a ${changedModels.join(" or ")} model it never called`);
+    if (!cascade) replayGaps.push("the cascade switched off");
+  }
+  const replayGap = replayGaps.length > 0;
+  const settingsGap = replayGap && (changedModels.length > 0 || !cascade);
   const pairing = parse?.pairing;
   const mismatch = pairing && pairing.verdict !== "aligned" ? pairing : null;
 
@@ -1477,24 +1610,22 @@ function App() {
           </div>
         </div>
         <p class="pitch">
-          Migrating a relational schema to documents means deciding, for every single column, where it
-          lands and how its type and values convert. A six-stage pipeline does that here: retrieval
-          narrows each column to its few plausible destinations, then a language model on Amazon
-          Bedrock judges only that shortlist, and a critic pass re-examines whatever it was least sure
-          about. Every column comes back with a destination path, a type transform, a confidence
-          score, and a one-sentence rationale — reasoning you can audit rather than a black box.
+          An LLM pipeline on Amazon Bedrock maps every column of a MySQL schema onto a MongoDB
+          document path — each decision carrying a type transform, a confidence score, and a
+          rationale you can audit. No single prompt ever sees both schemas.
           <button class="link" onClick=${openHelp}>How the AI works</button>
         </p>
         <div class="badges">
           <span class="badge ai">Amazon Bedrock</span>
-          <span class="badge">LLM + retrieval</span>
           ${report && html`<span class=${`badge ${report.mode === "live" ? "live" : "offline"}`}>${report.mode}</span>`}
           ${report &&
           html`<span class=${`badge ${report.diagnostics.ok ? "ok" : "fail"}`}>
             ${report.diagnostics.ok ? "valid" : "invalid"}
           </span>`}
-          <a class="badge linkish" href="/docs" target="_blank" rel="noopener">API docs</a>
-          <button class="badge linkish" onClick=${openHelp}>Guide</button>
+          <span class="badge-links">
+            <a class="badge linkish" href="/docs" target="_blank" rel="noopener">API docs</a>
+            <button class="badge linkish" onClick=${openHelp}>Guide</button>
+          </span>
         </div>
       </div>
 
@@ -1563,7 +1694,7 @@ function App() {
             title=${parse?.ok === false
               ? "Fix the input schema before running; see the Input data tab"
               : replayGap
-                ? "Offline replay has no recording for your schemas; untick offline to map them live"
+                ? "Offline replay has no recording for these settings; untick offline to run it live"
                 : "Map every source field with the current input and settings"}
           >
             ${running ? "Running…" : "Run pipeline"}
@@ -1571,9 +1702,15 @@ function App() {
         </div>
         ${replayGap &&
         html`<p class="run-hint">
-          Replay only covers the bundled schemas. Untick <strong>offline</strong> to map your own
-          input with a live model run, or reset the input under
-          <button class="link" onClick=${openInput}>Input data</button>.
+          Replay reproduces one recorded run, and that recording does not cover
+          ${" " + replayGaps.join(", nor ")}. Untick <strong>offline</strong> to run it live${edited
+            ? html`, reset the input under <button class="link" onClick=${openInput}>Input data</button>`
+            : ""}${settingsGap
+            ? html`, or
+                <button class="link" onClick=${restoreRecordedSettings}>
+                  restore the recorded settings
+                </button>`
+            : ""}.
         </p>`}
         ${mismatch &&
         html`<p class=${`run-hint ${mismatch.verdict === "unrelated" ? "bad" : ""}`}>
@@ -1581,6 +1718,8 @@ function App() {
           <button class="link" onClick=${openInput}>Check the input</button>
         </p>`}
       </div>
+
+      ${html`<${PipelineStrip} active=${stageProgress.active} done=${stageProgress.done} />`}
     </header>
 
     <div class="meterbar">
@@ -1739,16 +1878,29 @@ function App() {
           ["cost", "Cost"],
           ["timeline", "Timeline"],
           ["json", "Mapping JSON"],
-        ].map(
-          ([key, label]) => html`<button
+        ].map(([key, label]) => {
+          // The JSON tab holds the artifact the assignment asks for; the other
+          // tabs only explain how it was produced, so it gets accent styling and
+          // a short glow once a run has something to hand over.
+          const deliverable = key === "json";
+          const classes = [
+            tab === key ? "on" : "",
+            deliverable ? "deliverable" : "",
+            deliverable && mapping && !jsonSeen ? "ready" : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+          return html`<button
             key=${key}
-            class=${tab === key ? "on" : ""}
+            class=${classes}
+            title=${deliverable ? "Pipeline output — copy or download the mapping document" : undefined}
             onClick=${() => {
               setTab(key);
               setCollapsed(false);
+              if (deliverable) setJsonSeen(true);
             }}
-          >${label}</button>`
-        )}
+          >${deliverable ? html`<span class="deliverable-mark" aria-hidden="true">◆</span>` : null}${label}</button>`;
+        })}
         <span class="spacer"></span>
         <button onClick=${() => setCollapsed(!collapsed)}>${collapsed ? "Expand" : "Collapse"}</button>
       </div>

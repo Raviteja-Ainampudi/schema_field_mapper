@@ -123,6 +123,20 @@ with `bash scripts/dev.sh bedrock`, then `bash scripts/dev.sh run`. Never commit
 
 Full walkthrough: [docs/QUICKSTART.md](docs/QUICKSTART.md).
 
+## Deploying it
+
+The same app runs as a container-image Lambda behind a streaming function URL — no API
+Gateway, no server, nothing billed while idle:
+
+```bash
+BUDGET_EMAIL=you@example.com bash scripts/deploy.sh          # build, push, deploy, print the URL
+bash scripts/smoke_deployed.sh <url>                         # verify, including that progress streams
+```
+
+The image also runs unchanged on a laptop (`docker run -p 8081:8080 ...`), because the Lambda
+adapter is an extension that does nothing outside Lambda — so the deployed artifact is testable
+before it is deployed. Details, spend guards, and teardown: [docs/DEPLOY.md](docs/DEPLOY.md).
+
 ## Results on the assignment schemas
 
 | | |
@@ -133,7 +147,7 @@ Full walkthrough: [docs/QUICKSTART.md](docs/QUICKSTART.md).
 | LLM calls | 11 |
 | Cost | about $0.04 per live run with the default cascade |
 | Validation | contract, coverage, and every path in-schema: passing |
-| Tests | 264, all offline |
+| Tests | 286, all offline |
 
 Deliverable: [`outputs/mapping_legacy_hrm_to_people_platform.json`](outputs/mapping_legacy_hrm_to_people_platform.json),
 alongside `run_report.json` and `prompt_trace.json`.
@@ -144,6 +158,14 @@ An interactive mapping graph rather than a data grid: source columns on the left
 destination leaf paths on the right, one wire per decision coloured by confidence, animating
 in as batches resolve over SSE. Bring your own schemas by paste, drag-and-drop, upload, or a
 bundled sample — four formats are accepted and detected from the content.
+
+The header carries the six stages as one card each, tagged `LLM` or `code` and lit stage by
+stage while a run streams, so the pipeline explains itself in place. Beside them are three
+model selectors rather than one, because routing, the first pass over every field, and the
+escalations are three different jobs: **Router** matches table names, **Cheap pass** decides
+the majority from a six-candidate shortlist, and **Mapper** takes only what the cheap pass was
+unsure of. That split is why a full run costs about four cents —
+[why, in detail](docs/USAGE.md#why-there-are-three-model-choices).
 
 Guides: [docs/USAGE.md](docs/USAGE.md) · [docs/INPUT_FORMATS.md](docs/INPUT_FORMATS.md)
 
@@ -175,6 +197,7 @@ Reference: [docs/API.md](docs/API.md).
 | [docs/API.md](docs/API.md) | HTTP endpoints, CLI flags, smoke scripts, request lifecycle |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System context, components, data model, deployment |
 | [docs/PIPELINE.md](docs/PIPELINE.md) | The six stages, run sequence, decision states, cost control |
+| [docs/DEPLOY.md](docs/DEPLOY.md) | AWS deploy, streaming setup, spend guards, teardown |
 | [project_plans/schema_field_mapper_plan.md](project_plans/schema_field_mapper_plan.md) | Design, cost model, deployment, acceptance criteria |
 
 ## Deliverables

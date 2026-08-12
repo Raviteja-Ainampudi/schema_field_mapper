@@ -26,8 +26,14 @@ used = set(re.findall(r"<\$\{(\w+)\}", text))
 for name in sorted(used - defined):
     problems.append(f"component used but not defined: {name}")
 
-# Tab keys rendered must have a matching panel branch.
-tab_keys = set(re.findall(r'\["(\w+)",\s*"[^"]+"\]', text))
+# Tab keys rendered must have a matching panel branch. Scoped to the array that
+# follows class="tabs": scanning the whole file matched any ["a", "b"] pair, and
+# the PIPELINE stage list (`ids: ["4", "5"]`) was reported as an unhandled tab.
+tabs_at = text.find('class="tabs"')
+tabs_block = text[tabs_at : tabs_at + 900] if tabs_at != -1 else ""
+if not tabs_block:
+    problems.append('could not find the tab strip (class="tabs")')
+tab_keys = set(re.findall(r'\["(\w+)",\s*"[^"]+"\]', tabs_block))
 handled = set(re.findall(r'tab === "(\w+)"', text))
 for key in sorted(tab_keys - handled):
     problems.append(f"tab '{key}' has no panel branch")

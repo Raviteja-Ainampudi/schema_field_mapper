@@ -41,6 +41,7 @@ flowchart TD
 | Region | What it is for |
 | --- | --- |
 | Header | Title, byline, what the tool does, run status badges, links to the API docs and Guide |
+| Pipeline strip | One card per stage — which three call a model, what the other three do in code — lit stage by stage while a run streams |
 | Input chip (top right) | What the next run will map — `database → database`, counts, `bundled` or `edited`. Click to open the input panel |
 | Model row | Router, mapper, and cheap-pass model per role |
 | Toggles | `cascade`, `reflect`, `offline`, and **Run pipeline** |
@@ -50,6 +51,30 @@ flowchart TD
 | Right column | Destination leaf paths, ordered to follow the source so wires stay near-parallel |
 | Table tabs | `emp_master → employees` and the other pairings |
 | Bottom drawer | Guide, Input data, Decision, Constraint proof, Coverage & quality, Cost, Timeline, Mapping JSON |
+
+### The pipeline strip
+
+Running the full width of the header, under the title and the controls, is one card per
+stage. It answers "what is this thing actually doing" without opening the Guide, and it is
+where the explanation lives instead of in a paragraph beside the title:
+
+| Card | Calls a model | What happens |
+| --- | --- | --- |
+| `0` Normalize | no | Flatten nested paths to dot notation, expand legacy abbreviations |
+| `1` Route | **yes** | One call per table, seeing column names only, picks its collection |
+| `2` Retrieve | no | Retrieval-augmented shortlist: scored candidate paths per column |
+| `3` Adjudicate | **yes** | The model cascade judges only that shortlist, never both schemas |
+| `3c` Reflect | **yes** | An evaluator-optimizer critic re-checks the least confident calls |
+| `4-5` Verify | no | Invented-path guard, collisions, coverage, then assembly |
+
+The `LLM` or `code` tag on each card is the honest answer to how much of this is a model:
+three of the six stages, and each of those three sees a deliberately narrow slice of the
+problem. Same six stages as [PIPELINE.md](PIPELINE.md), same ids the backend streams.
+
+While a run is in flight the strip is also the position indicator: the current stage is
+outlined in blue and pulses, finished stages turn green. The wires tell you *how much* is
+done, the strip tells you *what* is being done — useful when a live run pauses on a stage and
+you want to know whether it is routing, adjudicating, or already past the model calls.
 
 ## A first run
 
@@ -221,16 +246,59 @@ hits, and what the run would have cost on other models. An offline run reports t
 
 **Mapping JSON** — the deliverable, with copy and download.
 
-## Controls that change cost or quality
+## Why there are three model choices
+
+A run is not one kind of model call repeated. It is three different jobs with different
+difficulty, different volume, and therefore different economics, so the header exposes one
+model per **role** rather than a single "which model" dropdown. One dropdown would force you
+to either pay strong-model prices for name matching, or send the genuinely hard semantic calls
+to a cheap model. Splitting the roles is what makes a full run cost about four cents.
+
+| Selector | Which calls it makes | Why it is its own choice | Default |
+| --- | --- | --- | --- |
+| **Router** | Stage 1, one call per source table. Also the short reasoning-rewrite repair in stage 4 | It picks a collection for a table from column *names* only — vocabulary matching over three candidates, not reasoning. Spending a strong model here buys nothing measurable | Nova Lite |
+| **Cheap pass** | The first attempt at **every** field in stage 3, in batches of eight | This is the high-volume role: most columns (`f_name` → `fullName.firstName`) are decidable by a small model once retrieval has narrowed them to six candidates. It exists so the strong model is only spent where it is needed | Claude Haiku 4.5 |
+| **Mapper** | Stage 3 escalations, the stage 3c reflection pass, and tie-breaks in stage 4. With **cascade** off, all of stage 3 | The strong model, reserved for the judgment calls: enum decoding, lossy type transforms, two candidates that both look plausible. Artifact quality tracks this one | Claude Sonnet 4.5 |
+
+The handoff between the last two is the **cascade**: the cheap pass answers, and any field it
+was less than `0.80` sure of is re-asked of the mapper. Those answers are then blended with
+the retrieval margin, and anything still under `0.75` goes to the reflection critic — which
+runs on the mapper model too. So the three selectors are not three alternatives; they are
+three positions in one escalation chain, and `escalation rate` under **Coverage & quality**
+tells you how much of the work actually reached the top of it.
+
+### Choosing them
+
+| If you want | Set |
+| --- | --- |
+| The sane default | Leave all three. About $0.04 for the 34-column assignment pair |
+| To spend less | Router to Nova Micro and cheap pass to Nova Lite. Watch the escalation rate: past roughly a third, the cascade is paying twice per field and a better cheap model is cheaper overall |
+| Maximum quality, cost no object | Mapper **and** cheap pass to Sonnet 4.5, or untick **cascade** to send every field straight to the mapper |
+| To see what a model is worth | Run it, then read **Cost** — it prices the same run against every other model in the registry, so you can compare without paying twice |
+
+Two behaviours worth knowing, because neither is obvious from the dropdowns:
+
+- **Setting the cheap pass to the same model as the mapper turns the cascade off**, whatever
+  the toggle says. The chain collapses to a single model, and nothing escalates because
+  there is nowhere to escalate to.
+- **The model ids are part of the replay key.** The 11 cassettes were recorded with the three
+  defaults, so a changed selector while **offline** is ticked asks for a recording that does
+  not exist. The same goes for unticking **cascade**, which sends stage 3 to a model
+  combination that was never recorded. Rather than dying mid-stage on `CassetteMissing`, the
+  hint beside **Run pipeline** names what is uncovered and offers **restore the recorded
+  settings**. Unticking **reflect** offline is safe: skipping recorded calls is not the same as
+  needing unrecorded ones. Model choices only mean something on a live run.
+
+Whatever you pick is written into `run_report.json` under `models`, with labels, so an
+artifact says which models produced it.
+
+### The toggles beside them
 
 | Control | Effect |
 | --- | --- |
-| **Router** | Picks the table→collection pairing. A cheap model is appropriate; this is 3-way matching, not reasoning |
-| **Mapper** | The strong model for semantic judgment |
-| **Cheap pass** | First-pass model when cascade is on |
-| **cascade** | Cheap model first, escalating only low-confidence fields. Roughly a third of the cost with no meaningful accuracy loss |
-| **reflect** | A bounded critic pass over the weakest decisions. Touches a handful of fields, costs pennies |
-| **offline** | Replay recordings instead of calling Bedrock. Free |
+| **cascade** | Cheap model first, escalating only fields it was under `0.80` sure of. Roughly a third of the cost with no meaningful accuracy loss |
+| **reflect** | A bounded critic pass over decisions whose *blended* confidence is under `0.75`. Touches a handful of fields, costs pennies |
+| **offline** | Replay recordings instead of calling Bedrock. Free, and byte-identical to the recorded run |
 
 ## Testing over the API instead
 

@@ -1,0 +1,175 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Schema Field Mapper - a container-image Lambda behind a streaming function URL.
+  Chosen over a container service because traffic is a handful of reviewer visits:
+  idle cost is zero, there is nothing to keep warm, and a run is under a minute of
+  mostly waiting on Bedrock.
+
+Parameters:
+  ReservedConcurrency:
+    Type: Number
+    Default: 5
+    MinValue: 1
+    Description: >
+      Hard ceiling on simultaneous runs. This is the main spend guard on a URL with
+      no authentication - each concurrent run can call Bedrock.
+
+  MaxTokensPerRun:
+    Type: Number
+    Default: 120000
+    Description: Token ceiling for a single run, enforced before each call.
+
+  AccessToken:
+    Type: String
+    Default: ""
+    NoEcho: true
+    Description: >
+      Optional shared secret required on POST /api/run via X-Access-Token. Empty
+      means anyone with the URL can start a paid run. The browser UI does not send
+      this header, so setting it makes the deployed page read-only.
+
+  MonthlyBudgetUsd:
+    Type: Number
+    Default: 20
+    Description: Monthly account budget that triggers an alert. Only used if BudgetEmail is set.
+
+  BudgetEmail:
+    Type: String
+    Default: ""
+    Description: Email for the 80%-of-budget alert. Empty skips creating the budget.
+
+  ArtifactBucket:
+    Type: String
+    Default: ""
+    Description: >
+      Optional existing S3 bucket to mirror run artifacts into. Run history is
+      otherwise in memory only and resets when the execution environment recycles.
+
+  LogRetentionDays:
+    Type: Number
+    Default: 14
+    Description: CloudWatch log retention. Logs are the only record of a failed run.
+
+Conditions:
+  HasBudgetEmail: !Not [!Equals [!Ref BudgetEmail, ""]]
+  HasArtifactBucket: !Not [!Equals [!Ref ArtifactBucket, ""]]
+
+Resources:
+  MapperFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      # Consumed by `sam build`, which builds this image and pushes it to ECR.
+      DockerContext: .
+      Dockerfile: Dockerfile
+      DockerTag: latest
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-app"
+      PackageType: Image
+      # x86_64 to match the build host. arm64 is ~20% cheaper per ms but needs an
+      # emulated cross-build here, and at this traffic the difference is cents.
+      Architectures:
+        - x86_64
+      # A run is a dozen sequential Bedrock calls. 300s leaves headroom for a
+      # larger schema without allowing a wedged run to burn the full 15 minutes.
+      Timeout: 300
+      # The work is I/O-bound on Bedrock, so memory buys cold-start speed rather
+      # than throughput. 1024 MB is the point where extra memory stops helping.
+      MemorySize: 1024
+      ReservedConcurrentExecutions: !Ref ReservedConcurrency
+      Environment:
+        Variables:
+          # AWS_REGION and AWS_DEFAULT_REGION are set by Lambda and are reserved,
+          # so the Bedrock region is the deploy region. Deploy where your models
+          # are enabled - us-east-1 for the us.* inference profiles used here.
+          MAX_TOKENS_PER_RUN: !Ref MaxTokensPerRun
+          APP_ACCESS_TOKEN: !Ref AccessToken
+          ARTIFACT_BUCKET: !Ref ArtifactBucket
+          LOG_LEVEL: INFO
+          ENABLE_CASCADE: "true"
+          ENABLE_REFLECTION: "true"
+          ENABLE_RESPONSE_CACHE: "true"
+          ENABLE_EMBEDDINGS: "false"
+      FunctionUrlConfig:
+        AuthType: NONE
+        # Progress is served as Server-Sent Events. In the default BUFFERED mode
+        # Lambda holds the whole body and delivers it at the end, so the live
+        # graph would sit empty for a minute and then fill instantly. This must
+        # stay in step with AWS_LWA_INVOKE_MODE in the Dockerfile.
+        InvokeMode: RESPONSE_STREAM
+      Policies:
+        - Statement:
+            - Sid: InvokeBedrockModels
+              Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+                - bedrock:InvokeModelWithResponseStream
+              # Cross-region inference profiles (us.*) route to foundation models
+              # in several regions, so both the profile and the underlying models
+              # have to be allowed, in any region.
+              Resource:
+                - "arn:aws:bedrock:*::foundation-model/*"
+                - !Sub "arn:aws:bedrock:*:${AWS::AccountId}:inference-profile/*"
+        - !If
+          - HasArtifactBucket
+          - Statement:
+              - Sid: MirrorRunArtifacts
+                Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub "arn:aws:s3:::${ArtifactBucket}/runs/*"
+          - !Ref AWS::NoValue
+
+  # Declared explicitly for retention. Lambda would create this log group with
+  # never-expire retention, which quietly accumulates cost forever.
+  MapperLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${AWS::StackName}-app"
+      RetentionInDays: !Ref LogRetentionDays
+
+  # The per-run token cap bounds one run; nothing bounds how many runs strangers
+  # start. This is the backstop for that, and it is worth setting even at $20.
+  CostBudget:
+    Type: AWS::Budgets::Budget
+    Condition: HasBudgetEmail
+    Properties:
+      Budget:
+        BudgetName: !Sub "${AWS::StackName}-monthly"
+        BudgetType: COST
+        TimeUnit: MONTHLY
+        BudgetLimit:
+          Amount: !Ref MonthlyBudgetUsd
+          Unit: USD
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 80
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref BudgetEmail
+        - Notification:
+            NotificationType: FORECASTED
+            ComparisonOperator: GREATER_THAN
+            Threshold: 100
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref BudgetEmail
+
+Outputs:
+  AppUrl:
+    Description: Open this in a browser. Also the API base URL.
+    Value: !GetAtt MapperFunctionUrl.FunctionUrl
+
+  SmokeTestCommand:
+    Description: Verify the deployment, including that responses actually stream.
+    Value: !Sub "bash scripts/smoke_deployed.sh ${MapperFunctionUrl.FunctionUrl}"
+
+  FunctionName:
+    Value: !Ref MapperFunction
+
+  LogGroup:
+    Description: Where a failed run explains itself.
+    Value: !Ref MapperLogGroup

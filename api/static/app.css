@@ -131,9 +131,11 @@ header.topbar {
   background: linear-gradient(120deg, rgba(167, 139, 250, 0.22), rgba(34, 211, 238, 0.14));
 }
 
+/* One sentence only. The full explanation lives in the Guide, so the header
+   stays a header instead of becoming the first page of documentation. */
 .pitch {
   margin: 0;
-  max-width: 74ch;
+  max-width: 68ch;
   font-size: 12px;
   line-height: 1.5;
   color: var(--text-dim);
@@ -141,6 +143,9 @@ header.topbar {
 .pitch .link { font-size: 12px; margin-left: 4px; white-space: nowrap; }
 
 .badges { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+/* Status chips read left to right; the two navigation chips sit apart from
+   them so the row scans as one group, not six loose pills. */
+.badge-links { display: flex; align-items: center; gap: 6px; margin-left: auto; padding-left: 14px; }
 .badge.linkish {
   text-decoration: none;
   cursor: pointer;
@@ -153,8 +158,113 @@ header.topbar {
 }
 .badge.linkish:hover { border-color: var(--accent); background: rgba(56, 189, 248, 0.16); }
 
-@media (max-width: 1240px) {
+/* The "how it works" explanation, laid out across the full header width as one
+   card per stage instead of a paragraph in the corner. Each card lights up as
+   its stage streams, so the strip is also the run's position indicator. */
+.approach {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  padding-top: 11px;
+  border-top: 1px solid var(--line);
+}
+.approach-lead {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  flex: 0 0 auto;
+  max-width: 132px;
+  padding-right: 4px;
+}
+.approach-k {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  font-weight: 650;
+  color: var(--dest);
+}
+.approach-v { font-size: 10.5px; line-height: 1.35; color: var(--text-faint); }
+
+.approach-steps {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.stage-card {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 9px 7px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(16, 23, 31, 0.6);
+  transition: border-color 0.2s, background 0.2s;
+}
+.stage-card .head { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.stage-card .idx { font: 10px var(--mono); color: var(--text-faint); flex: 0 0 auto; }
+.stage-card .name {
+  font-size: 11.5px;
+  font-weight: 650;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stage-card .tag {
+  margin-left: auto;
+  flex: 0 0 auto;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  border: 1px solid var(--line-bright);
+  color: var(--text-faint);
+}
+.stage-card .tag.llm {
+  color: #cbb8ff;
+  border-color: #4b3d7a;
+  background: rgba(167, 139, 250, 0.16);
+}
+.stage-card .note { font-size: 10.5px; line-height: 1.35; color: var(--text-faint); }
+.stage-card.done { border-color: #1d4a3c; }
+.stage-card.done .idx { color: var(--high); }
+.stage-card.active {
+  border-color: var(--accent);
+  background: rgba(56, 189, 248, 0.1);
+  animation: stagepulse 1.5s ease-in-out infinite;
+}
+.stage-card.active .note, .stage-card.active .idx { color: var(--text-dim); }
+
+@keyframes stagepulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+  50% { box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.14); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-card.active { animation: none; }
+}
+
+@media (max-width: 1400px) {
+  .approach-lead { display: none; }
+}
+@media (max-width: 1180px) {
+  .approach-steps { flex-wrap: wrap; }
+  .stage-card { flex: 1 1 168px; }
+}
+@media (max-width: 1040px) {
   .pitch { display: none; }
+  .badge-links { margin-left: 0; padding-left: 0; }
+  .stage-card .note { display: none; }
 }
 
 .badge {
@@ -552,6 +662,40 @@ button.link:hover { background: none; color: #7dd3fc; }
 }
 .tabs button.on { background: var(--panel-2); border-color: var(--line-bright); color: var(--text); }
 .tabs .spacer { margin-left: auto; }
+
+/* The deliverable tab reads as the output among diagnostic tabs. */
+.tabs button.deliverable {
+  color: var(--accent);
+  background: rgba(56, 189, 248, 0.09);
+  border-color: rgba(56, 189, 248, 0.38);
+  font-weight: 600;
+}
+.tabs button.deliverable:hover:not(:disabled) {
+  background: rgba(56, 189, 248, 0.16);
+  border-color: var(--accent);
+}
+.tabs button.deliverable.on {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: var(--accent);
+  color: #eaf7ff;
+}
+.tabs button.deliverable .deliverable-mark {
+  margin-right: 6px;
+  font-size: 9px;
+  vertical-align: 1px;
+  opacity: 0.85;
+}
+/* Runs three times so it draws the eye without becoming permanent motion. */
+.tabs button.deliverable.ready { animation: deliverable-ready 1.7s ease-in-out 3; }
+
+@keyframes deliverable-ready {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+  50% { box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.22); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabs button.deliverable.ready { animation: none; }
+}
 
 .drawer-body { overflow: auto; padding: 12px 14px; min-height: 0; }
 

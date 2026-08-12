@@ -1,0 +1,41 @@
+# Keep the build context small and the image free of anything secret or local.
+# Note what is *not* excluded: data/, tests/fixtures/cassettes/, and two files in
+# outputs/ are all needed at runtime and are copied explicitly by the Dockerfile.
+
+.env
+.env.*
+!.env.sample
+
+.git
+.gitattributes
+.gitignore
+
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.cache
+.python-version
+
+# Run artifacts: regenerated on demand, and large.
+outputs/runs
+outputs/test_runs
+outputs/prompt_trace.json
+
+# Not needed to serve the app.
+docs
+project_plans
+scripts
+tests/test_*.py
+tests/conftest.py
+tests/fixtures/expected_mapping.json
+*.md
+*.docx
+LICENSE
+pytest.ini
+requirements-dev.txt
+Dockerfile
+.dockerignore
+template.yaml
+samconfig.toml

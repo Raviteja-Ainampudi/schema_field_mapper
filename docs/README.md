@@ -16,6 +16,7 @@ Developed by Raviteja Ainampudi.
 | Call the pipeline over HTTP or from the CLI | [API.md](API.md) |
 | See how the system is put together | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Follow the workflow stage by stage | [PIPELINE.md](PIPELINE.md) |
+| Put it on AWS behind a shareable URL | [DEPLOY.md](DEPLOY.md) |
 | Understand the design and the assignment constraint | [../project_plans/schema_field_mapper_plan.md](../project_plans/schema_field_mapper_plan.md) |
 | See the UI design rationale | [superpowers/specs/2026-08-11-schema-mapper-ui-design.md](superpowers/specs/2026-08-11-schema-mapper-ui-design.md) |
 
