@@ -585,19 +585,27 @@ const FORMAT_LABEL = {
  */
 function SchemaInput({ side, title, text, onText, samples, onSample, status }) {
   const [dragging, setDragging] = useState(false);
+  // The select is a controlled input, so it needs to remember the choice.
+  // Resetting it to "" every render is what made it always read "Load sample…"
+  // even after a file or sample had been loaded.
+  const [chosen, setChosen] = useState("");
   const fileRef = useRef(null);
 
   const readFile = useCallback(
     (file) => {
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = () => onText(String(reader.result), file.name);
+      reader.onload = () => {
+        onText(String(reader.result), file.name);
+        setChosen(file.name);
+      };
       reader.readAsText(file);
     },
     [onText]
   );
 
   const mine = samples.filter((s) => s.kind === side);
+  const known = mine.some((s) => s.name === chosen);
 
   return html`<div
     class=${`schema-input ${dragging ? "dragging" : ""}`}
@@ -615,9 +623,19 @@ function SchemaInput({ side, title, text, onText, samples, onSample, status }) {
     <div class="row-between" style="margin-bottom:6px">
       <h3 class="section" style="margin:0">${title}</h3>
       <div class="input-actions">
-        <select value="" onChange=${(e) => e.target.value && onSample(e.target.value, side)}>
+        <select
+          value=${chosen}
+          title=${chosen || "Load one of the bundled sample schemas"}
+          onChange=${(e) => {
+            const name = e.target.value;
+            if (!name) return;
+            setChosen(name);
+            onSample(name, side);
+          }}
+        >
           <option value="">Load sample…</option>
           ${mine.map((s) => html`<option key=${s.name} value=${s.name}>${s.name}</option>`)}
+          ${chosen && !known && html`<option value=${chosen}>${chosen}</option>`}
         </select>
         <button onClick=${() => fileRef.current?.click()}>Upload file</button>
         <input
@@ -637,8 +655,16 @@ function SchemaInput({ side, title, text, onText, samples, onSample, status }) {
       spellcheck="false"
       placeholder=${`Paste ${side === "source" ? "MySQL DDL or MySQL schema JSON" : "MongoDB schema JSON or sample documents"}, drop a file here, or load a sample.`}
       value=${text}
-      onInput=${(e) => onText(e.target.value)}
+      onInput=${(e) => {
+        setChosen("");
+        onText(e.target.value);
+      }}
     ></textarea>
+    <div class="accepts">
+      Accepts ${side === "source" ? "MySQL DDL or MySQL schema JSON" : "MongoDB schema JSON or mongoexport sample documents"}
+      · <code>.json</code> <code>.sql</code> <code>.txt</code> · drag and drop works
+      ${chosen ? html` · loaded <strong>${chosen}</strong>` : ""}
+    </div>
     <div class=${`parse-status ${status?.ok === false ? "bad" : status?.database ? "ok" : ""}`}>
       ${status?.ok === false
         ? html`<span>✕ ${status.error}</span>`
@@ -651,6 +677,152 @@ function SchemaInput({ side, title, text, onText, samples, onSample, status }) {
           </span>`
         : html`<span>Using the bundled ${side} schema.</span>`}
     </div>
+  </div>`;
+}
+
+/**
+ * The in-app guide. It exists because the interface has to explain itself to a
+ * reviewer who arrives with no context: what the tool is for, how to drive it,
+ * what it accepts, and how to reach the same pipeline over HTTP.
+ */
+function HelpPanel({ health, onOpenInput }) {
+  const offline = health?.offline_available;
+  return html`<div class="help">
+    <section>
+      <h3 class="section">What this does</h3>
+      <p>
+        It maps every field of a relational MySQL schema onto the right path in a MongoDB document
+        schema. For each source column it decides the destination path (dot notation for nested
+        paths like <code>fullName.firstName</code>), the type transform
+        (<code>TINYINT(1) -> Boolean</code>), a confidence score, a one-sentence reason, and any
+        migration caveat worth flagging. Columns with no honest destination are declared unmapped
+        rather than forced onto a weak match.
+      </p>
+      <h3 class="section">Why it is useful</h3>
+      <ul>
+        <li>
+          <strong>It removes the tedious part of a migration.</strong> Hand-mapping dozens of columns
+          is slow and error-prone; the output here is a reviewable artifact, not a guess.
+        </li>
+        <li>
+          <strong>Every decision is auditable.</strong> Select any field to see the candidate
+          shortlist it beat, the score breakdown, which model decided it, and whether a review pass
+          revised it.
+        </li>
+        <li>
+          <strong>The hard cases are surfaced, not buried.</strong> Confidence bands push ambiguous
+          columns to the top of your review queue, and lossy conversions carry an explicit note.
+        </li>
+        <li>
+          <strong>Cost is visible per run.</strong> A cheap model answers most fields and only
+          low-confidence ones escalate, so a full run costs a few cents.
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h3 class="section">Using it in three steps</h3>
+      <ol>
+        <li>
+          <strong>Give it your schemas.</strong> Open
+          <button class="link" onClick=${onOpenInput}>Input data</button> and paste, drop a file,
+          upload, or load a bundled sample. It ships with <code>legacy_hrm</code> and
+          <code>people_platform</code> already loaded, so you can skip this entirely.
+        </li>
+        <li>
+          <strong>Pick models and press Run pipeline.</strong> Wires animate in as each batch
+          resolves.
+          ${offline
+            ? html`Tick <strong>offline</strong> to replay ${health.cassette_count} recorded
+                exchanges with no AWS account and no spend.`
+            : ""}
+        </li>
+        <li>
+          <strong>Review, then export.</strong> Click a field or a wire for its full provenance, then
+          take the artifact from <strong>Mapping JSON</strong>.
+        </li>
+      </ol>
+
+      <h3 class="section">What you can upload</h3>
+      <p>
+        Files up to 200,000 characters with extension <code>.json</code>, <code>.sql</code>, or
+        <code>.txt</code>. The format is detected from the content, so the extension only has to be
+        readable text:
+      </p>
+      <table class="grid">
+        <thead>
+          <tr><th>Side</th><th>Accepted</th><th>Looks like</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Source</td>
+            <td>MySQL DDL</td>
+            <td><code>CREATE TABLE emp_master (...)</code>, comments included</td>
+          </tr>
+          <tr>
+            <td>Source</td>
+            <td>MySQL schema JSON</td>
+            <td><code>{"database": ..., "tables": {...}}</code></td>
+          </tr>
+          <tr>
+            <td>Destination</td>
+            <td>MongoDB schema JSON</td>
+            <td><code>{"database": ..., "collections": {...}}</code></td>
+          </tr>
+          <tr>
+            <td>Destination</td>
+            <td>MongoDB sample documents</td>
+            <td>Extended JSON from <code>mongoexport</code>; the schema is inferred</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note">
+        Column comments matter more than you would expect. A legend like
+        <code>A=Active, I=Inactive</code> is often the only signal that connects a cryptic
+        <code>rec_stat</code> to <code>employment.status</code>, so keep them in your DDL.
+      </p>
+    </section>
+
+    <section>
+      <h3 class="section">Testing it directly over the API</h3>
+      <p>
+        Everything the interface does is a plain HTTP endpoint, and the pipeline is the same code the
+        CLI runs. Interactive references:
+        <a href="/docs" target="_blank" rel="noopener">Swagger UI</a>,
+        <a href="/redoc" target="_blank" rel="noopener">ReDoc</a>, and the raw
+        <a href="/openapi.json" target="_blank" rel="noopener">OpenAPI schema</a>. Swagger UI lets
+        you run any of these from the browser with no setup.
+      </p>
+      <table class="grid">
+        <thead>
+          <tr><th>Endpoint</th><th>Does</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>POST /api/parse</code></td><td>Validate schema text and report what was understood. Free, no model call.</td></tr>
+          <tr><td><code>POST /api/run</code></td><td>Run the pipeline, streaming progress as Server-Sent Events.</td></tr>
+          <tr><td><code>GET /api/candidates</code></td><td>The deterministic shortlist for one field, with score components.</td></tr>
+          <tr><td><code>POST /api/preview</code></td><td>Execute the mapped transforms against one real row.</td></tr>
+          <tr><td><code>GET /api/contract</code></td><td>The JSON Schema the output is validated against.</td></tr>
+          <tr><td><code>GET /api/runs</code></td><td>Recent runs; <code>/api/runs/{id}/mapping.json</code> downloads one.</td></tr>
+        </tbody>
+      </table>
+      <p>Check your own schema parses, then map it, without opening this page:</p>
+      <pre class="json">${`curl -X POST localhost:8000/api/parse \\
+  -H 'content-type: application/json' \\
+  --data-binary @- <<'JSON'
+{"source_text": "CREATE TABLE t (id INT PRIMARY KEY, f_name VARCHAR(60));"}
+JSON
+
+curl -N -X POST localhost:8000/api/run \\
+  -H 'content-type: application/json' \\
+  -d '{"offline": true}'`}</pre>
+      <p class="note">
+        If the deployment sets <code>APP_ACCESS_TOKEN</code>, send it as an
+        <code>X-Access-Token</code> header on <code>/api/run</code>. Headless equivalent of a run:
+        <code>python -m schema_mapper.cli --offline</code>. Fuller guides live in the
+        repository's <code>docs/</code> folder.
+      </p>
+    </section>
   </div>`;
 }
 
@@ -928,6 +1100,11 @@ function App() {
     setCollapsed(false);
   }, []);
 
+  const openHelp = useCallback(() => {
+    setTab("help");
+    setCollapsed(false);
+  }, []);
+
   /* Validate whatever is in the two editors, debounced. Free endpoint, so the
      user learns their paste is understood before spending a run on it. */
   useEffect(() => {
@@ -1115,15 +1292,35 @@ function App() {
     <header class="topbar">
       <div class="brand">
         <div class="brand-title">
-          <h1>Schema Field Mapper</h1>
-          <p class="sub">MySQL → MongoDB, field by field</p>
+          <div class="mark" aria-hidden="true">
+            <span class="mark-col"></span>
+            <span class="mark-link"></span>
+            <span class="mark-col dest"></span>
+          </div>
+          <div>
+            <h1>Schema Field Mapper</h1>
+            <p class="byline">
+              Developed by <strong>Raviteja Ainampudi</strong>
+              <span class="sep">·</span>
+              <span class="route">MySQL → MongoDB, field by field</span>
+            </p>
+          </div>
         </div>
+        <p class="pitch">
+          Migrating a relational schema to documents means deciding, for every single column, where it
+          lands and how its type and values convert. This does that work in minutes instead of days:
+          each column gets a destination path, a type transform, a confidence score, and a
+          one-sentence rationale you can review — with the guesswork made visible rather than hidden.
+          <button class="link" onClick=${openHelp}>How it works</button>
+        </p>
         <div class="badges">
           ${report && html`<span class=${`badge ${report.mode === "live" ? "live" : "offline"}`}>${report.mode}</span>`}
           ${report &&
           html`<span class=${`badge ${report.diagnostics.ok ? "ok" : "fail"}`}>
             ${report.diagnostics.ok ? "valid" : "invalid"}
           </span>`}
+          <a class="badge linkish" href="/docs" target="_blank" rel="noopener">API docs</a>
+          <button class="badge linkish" onClick=${openHelp}>Guide</button>
         </div>
       </div>
 
@@ -1185,7 +1382,14 @@ function App() {
             />
             offline
           </label>
-          <button class="primary" onClick=${start} disabled=${running}>
+          <button
+            class="primary"
+            onClick=${start}
+            disabled=${running || parse?.ok === false}
+            title=${parse?.ok === false
+              ? "Fix the input schema before running; see the Input data tab"
+              : "Map every source field with the current input and settings"}
+          >
             ${running ? "Running…" : "Run pipeline"}
           </button>
         </div>
@@ -1299,7 +1503,9 @@ function App() {
                 <span class="mono">${activeTable || "?"} → ${collection || "?"}</span>
               </div>
               <div style="margin-top:6px">
-                Press <strong>Run pipeline</strong>, or load the committed artifact.
+                Press <strong>Run pipeline</strong>, or open
+                <button class="link" onClick=${openInput}>Input data</button>
+                to paste, upload, or load a different schema.
               </div>
             </div>
           </div>`}
@@ -1338,6 +1544,7 @@ function App() {
     <div class=${`drawer ${collapsed ? "collapsed" : ""}`}>
       <div class="tabs">
         ${[
+          ["help", "Guide"],
           ["input", "Input data"],
           ["decision", "Decision"],
           ["constraint", "Constraint proof"],
@@ -1374,6 +1581,7 @@ function App() {
         ${tab === "cost" && html`<${CostPanel} report=${report} />`}
         ${tab === "timeline" && html`<${TimelinePanel} report=${report} log=${log} />`}
         ${tab === "json" && html`<${JsonPanel} mapping=${mapping} runId=${runId} />`}
+        ${tab === "help" && html`<${HelpPanel} health=${health} onOpenInput=${openInput} />`}
         ${tab === "input" &&
         html`<${SchemaPanel}
           sourceText=${sourceText}

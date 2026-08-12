@@ -613,6 +613,31 @@ def parse_mysql_ddl(text: str) -> SourceSchema:
 # ---------------------------------------------------------------------------
 
 
+_FIELD_SPEC_KEYS = {"name", "type", "bson_type", "fields", "comment", "references"}
+
+# "ObjectId  -- ref -> employees._id" in the terse form.
+_DEST_REF = re.compile(r"\bref(?:erence[sd]?)?\s*(?:->|to)\s*([\w.]+)", re.IGNORECASE)
+
+
+def _dest_spec_from_string(spec: str) -> dict[str, Any]:
+    """Parse ``"ObjectId  -- ref -> employees._id"`` into a field spec.
+
+    This is the destination-side counterpart of the source shorthand, and it is
+    what you get by quoting the assignment's Dataset B pseudo-JSON. The trailing
+    comment is worth keeping rather than discarding: comment text is the single
+    strongest signal in candidate scoring.
+    """
+    body, _, comment = spec.partition("--")
+    comment = comment.strip() or None
+    out: dict[str, Any] = {"type": body.strip() or "String"}
+    if comment:
+        out["comment"] = comment
+        ref = _DEST_REF.search(comment)
+        if ref:
+            out["references"] = ref.group(1)
+    return out
+
+
 def _iter_field_specs(container: Any) -> Iterable[tuple[str, dict[str, Any]]]:
     """Accept either an ordered list of ``{"name": ...}`` or a name-keyed object."""
     if isinstance(container, list):
@@ -625,9 +650,17 @@ def _iter_field_specs(container: Any) -> Iterable[tuple[str, dict[str, Any]]]:
             if name.startswith("_comment"):
                 continue
             if isinstance(spec, dict):
-                yield name, spec
+                # A dict is a field spec only if it carries spec keys. Otherwise
+                # it is a nested sub-document written inline - the terse form of
+                # the assignment's own schema - and its children are the fields.
+                # Without this, `"fullName": {"firstName": ...}` parses as one
+                # leaf named fullName and both real paths vanish.
+                if spec and not (_FIELD_SPEC_KEYS & spec.keys()):
+                    yield name, {"type": "Object", "fields": spec}
+                else:
+                    yield name, spec
             else:
-                yield name, {"type": str(spec)}
+                yield name, _dest_spec_from_string(str(spec))
     else:
         raise SchemaParseError("Destination fields must be a list or object.")
 

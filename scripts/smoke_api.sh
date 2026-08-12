@@ -31,9 +31,10 @@ probe /api/health
 probe /api/models
 probe /api/schemas
 probe /api/contract
-probe /api/samples/mysql_information_schema.json
 probe /api/samples/legacy_hrm.ddl.sql
-probe /api/samples/people_platform.jsonschema.json
+probe /api/samples/tiny_crm.mysql.json
+probe /api/samples/people_platform.sample_docs.json
+probe /api/samples/tiny_crm.mongo.json
 probe /api/sample_rows
 probe /api/runs
 
@@ -57,28 +58,39 @@ printf 'stream bytes: %s\n' "$(wc -c < /tmp/run.sse)"
 printf 'event types seen:\n'
 grep '^event:' /tmp/run.sse | sort | uniq -c
 printf 'stage events:\n'
-grep '^data:' /tmp/run.sse | python3 - <<'PY'
+python3 - <<'PY'
 import json, sys
+
+# The event name, not a field in the payload, carries the type.
 final = None
-for line in sys.stdin:
-    payload = json.loads(line[5:])
-    kind = payload.get("type")
-    if kind == "stage":
-        print(f"  {payload['stage']:<12} {payload.get('detail','')}")
-    elif kind == "error":
-        print("  ERROR:", payload)
-    elif kind == "result":
-        final = payload
+event = None
+for line in open("/tmp/run.sse", encoding="utf-8"):
+    line = line.rstrip("\n")
+    if line.startswith("event:"):
+        event = line[6:].strip()
+    elif line.startswith("data:"):
+        payload = json.loads(line[5:])
+        if event == "stage_end":
+            print(f"  stage {payload['stage']:<3} {payload.get('label',''):<28} {payload['duration_ms']}ms")
+        elif event == "error":
+            print("  ERROR:", payload)
+        elif event == "result":
+            final = payload
 if final is None:
     print("  NO RESULT EVENT")
     sys.exit(1)
-doc = final["document"]
+doc = final["mapping"]
 rep = final["report"]
 pairs = sum(len(t["field_mappings"]) for t in doc["tables"])
+# The unmapped lists are per table, matching the assignment's nesting.
+unmapped_src = sum(len(t["unmapped_source_fields"]) for t in doc["tables"])
+unmapped_dst = sum(len(t["unmapped_destination_fields"]) for t in doc["tables"])
 print(f"\nmapping_version={doc['mapping_version']} tables={len(doc['tables'])} pairs={pairs}")
-print(f"unmapped_source={len(doc['unmapped_source_fields'])} unmapped_dest={len(doc['unmapped_destination_fields'])}")
-print(f"coverage_ok={rep['validation']['ok']} constraint={rep['constraint']['holds']}")
-print(f"cost_usd={rep['cost']['total_usd']} billed={rep['cost']['billed']} calls={rep['cost']['calls']}")
+print(f"unmapped_source={unmapped_src} unmapped_dest={unmapped_dst}")
+print(f"diagnostics_ok={rep['diagnostics']['ok']} both_schemas_in_a_prompt="
+      f"{rep['constraint']['prompts_containing_both_full_schemas']}")
+print(f"cost_usd={rep['cost']['total_usd']} billed={rep['cost']['billed']} "
+      f"calls={len(rep['cost']['calls'])}")
 print(f"run_id={final['run_id']}")
 PY
 

@@ -1,63 +1,134 @@
 # Schema Field Mapper
 
-AI pipeline that maps fields from a legacy MySQL HR schema (`legacy_hrm`) to a MongoDB people platform schema (`people_platform`), producing a single mapping JSON document.
+Maps **every field** of a legacy MySQL HR schema (`legacy_hrm`) to its semantic equivalent in
+a MongoDB people-platform schema (`people_platform`), producing one reviewable JSON document.
 
-Assignment details: `InterviewAssignment.txt`.
+Developed by **Raviteja Ainampudi**. Assignment text: `InterviewAssignment.txt`.
 
-## Setup
+## What it does and why that is useful
 
-Requires **Python 3.12+**. Dependencies in `requirements.txt` are cross-platform (Windows and Linux/WSL).
+Moving a relational schema to documents means deciding, for every single column, where it
+lands and how its type and values convert. Done by hand it is slow and easy to get subtly
+wrong; done by one large LLM prompt it is unverifiable. This produces, per column:
 
-**Important:** a `.venv` created on Windows cannot be used from WSL (and vice versa). Use the setup script on whichever OS you are running Python on; it removes the other platform's venv automatically.
+- the destination path in dot notation (`f_name` → `fullName.firstName`),
+- the type transform (`TINYINT(1) -> Boolean`, `CHAR(1) code -> String enum`),
+- a confidence score that is **blended**, not the model's self-report,
+- one plain-English sentence of reasoning,
+- and a note for anything lossy or needing migration work — or an honest declaration that a
+  column has no destination at all.
 
-### Windows (PowerShell)
+The result is a migration artifact you can review, not a black-box answer: every decision
+exposes the candidate shortlist it beat, the score components, and the model pass that
+decided it.
+
+## The constraint, and how it is satisfied
+
+The assignment forbids passing both schemas to an LLM in one prompt and taking the result as
+the finished mapping. The work is therefore decomposed into six stages, four of which use no
+LLM at all:
+
+```
+[0] normalize   no LLM   flatten nested paths to dot notation, expand abbreviations
+[1] route       LLM x3   one call per source table: its column names + collection names
+[2] shortlist   no LLM   top-6 destination paths per field, inside its matched collection
+[3] adjudicate  LLM xN   one call per ~8 fields, each carrying only its own 6 candidates
+[4] validate    no LLM   contract, hallucinated-path guard, collisions, coverage
+[5] assemble    no LLM   the deliverable + run report + prompt trace
+```
+
+This is **machine-checked, not asserted**. Every request is recorded with a manifest, and
+tests assert that no single prompt carried all 34 source fields or all 40 destination paths,
+and that no single response produced more than one table's mappings. The interface shows the
+same numbers live under **Constraint proof**.
+
+## Quickstart
+
+Python 3.12+. A `.venv` is not portable between Windows and WSL/Linux; each script replaces
+a foreign one.
 
 ```powershell
-.\scripts\setup_venv.ps1
+.\scripts\setup_venv.ps1          # Windows
 .\.venv\Scripts\Activate.ps1
 ```
 
-Manual equivalent:
-
-```powershell
-py -3 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-pip install -r requirements-dev.txt
-```
-
-### WSL / Linux / macOS
-
-WSL Ubuntu 20.04 ships Python 3.8 by default — install 3.12 once (see script output if missing):
-
 ```bash
-sudo apt update
-sudo apt install -y software-properties-common
-sudo add-apt-repository -y ppa:deadsnakes/ppa
-sudo apt update
-sudo apt install -y python3.12 python3.12-venv python3.12-dev
-```
-
-Then:
-
-```bash
-bash scripts/setup_venv.sh
+bash scripts/setup_venv.sh        # WSL / Linux / macOS
 source .venv/bin/activate
 ```
 
-Copy or edit `.env` for this project only (never commit it). Use LLM/provider keys you actually need here.
+Then, with no AWS account and no spend:
 
-## Run
+```bash
+bash scripts/dev.sh offline       # replay recordings, regenerate the committed artifact
+bash scripts/dev.sh test          # the full test suite
+bash scripts/dev.sh api           # the interface at http://localhost:8000
+```
 
-Pipeline entrypoint and commands will be documented here once the code exists.
+For a live Bedrock run, copy `.env.sample` to `.env`, fill in the AWS values, verify access
+with `bash scripts/dev.sh bedrock`, then `bash scripts/dev.sh run`. Never commit `.env`.
+
+Full walkthrough: [docs/QUICKSTART.md](docs/QUICKSTART.md).
+
+## Results on the assignment schemas
+
+| | |
+| --- | --- |
+| Coverage | 33 of 34 source fields mapped; `dob` declared unmapped, with a reason |
+| Destination | 33 of 40 leaf paths targeted; the 7 others are denormalized copies a migration fills by joining |
+| Mean confidence | 0.865 |
+| LLM calls | 11 |
+| Cost | about $0.04 per live run with the default cascade |
+| Validation | contract, coverage, and every path in-schema: passing |
+| Tests | 264, all offline |
+
+Deliverable: [`outputs/mapping_legacy_hrm_to_people_platform.json`](outputs/mapping_legacy_hrm_to_people_platform.json),
+alongside `run_report.json` and `prompt_trace.json`.
+
+## Interface
+
+An interactive mapping graph rather than a data grid: source columns on the left,
+destination leaf paths on the right, one wire per decision coloured by confidence, animating
+in as batches resolve over SSE. Bring your own schemas by paste, drag-and-drop, upload, or a
+bundled sample — four formats are accepted and detected from the content.
+
+Guides: [docs/USAGE.md](docs/USAGE.md) · [docs/INPUT_FORMATS.md](docs/INPUT_FORMATS.md)
+
+## Testing it directly over the API
+
+The interface is a client of a plain HTTP API, and that API runs the same pipeline the CLI
+runs. With the server up: **<http://localhost:8000/docs>** (Swagger UI, runs any endpoint
+from the browser), `/redoc`, `/openapi.json`.
+
+```bash
+# validate your own schema, free and without a model call
+curl -X POST localhost:8000/api/parse -H 'content-type: application/json' \
+  -d '{"source_text": "CREATE TABLE t (id INT PRIMARY KEY);"}'
+
+# run the pipeline, streaming progress
+curl -N -X POST localhost:8000/api/run -H 'content-type: application/json' \
+  -d '{"offline": true}'
+```
+
+Reference: [docs/API.md](docs/API.md).
+
+## Documentation
+
+| Document | Contents |
+| --- | --- |
+| [docs/QUICKSTART.md](docs/QUICKSTART.md) | Setup, first run, troubleshooting |
+| [docs/USAGE.md](docs/USAGE.md) | The interface, panel by panel |
+| [docs/INPUT_FORMATS.md](docs/INPUT_FORMATS.md) | The four accepted formats, with examples |
+| [docs/API.md](docs/API.md) | HTTP endpoints, CLI flags, smoke scripts |
+| [project_plans/schema_field_mapper_plan.md](project_plans/schema_field_mapper_plan.md) | Design, cost model, deployment, acceptance criteria |
 
 ## Deliverables
 
-- Working pipeline code
-- Generated mapping JSON for the provided schemas
-- Short write-up on prompt structure and design decisions
+- **Working pipeline code** — `src/schema_mapper/`, runnable with no AWS account via offline replay.
+- **Generated mapping JSON** — committed under `outputs/`, produced by a real Bedrock run.
+- **Write-up** — `docs/WRITEUP.md` (pending).
 
 ## Agent notes
 
-- Coding agents: see `AGENTS.md`
-- Durable session/decision log: `MEMORY.md`
+- Coding agents: `AGENTS.md`
+- Durable decision log: `MEMORY.md`
