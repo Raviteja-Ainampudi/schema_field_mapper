@@ -225,3 +225,7 @@ outputs/runs/
 # source of truth for what was asked; never pushed.
 InterviewAssignment.txt
 InterviewAssignment.docx
+
+# sam build output: a copy of the source tree plus a build.toml that records local
+# absolute paths, rewritten on every build. Rebuildable from template.yaml.
+.aws-sam/
