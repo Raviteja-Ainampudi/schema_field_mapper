@@ -13,9 +13,10 @@
 #   SAM               path to the sam binary (default: sam)
 #   STACK             stack name (default: from samconfig.toml)
 #   BUDGET_EMAIL      enables the monthly budget alert
+#   MONTHLY_BUDGET    budget amount in USD (default: template default of 20)
 #   ACCESS_TOKEN      require X-Access-Token on /api/run (makes the UI read-only)
 #   ARTIFACT_BUCKET   existing bucket to mirror run artifacts into
-#   CONCURRENCY       reserved concurrency (default: template default of 5)
+#   CONCURRENCY       reserved concurrency; ignored on accounts that cannot reserve
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -48,6 +49,10 @@ echo "  template : valid"
 
 OVERRIDES=()
 [ -n "${BUDGET_EMAIL:-}" ] && OVERRIDES+=("BudgetEmail=$BUDGET_EMAIL")
+[ -n "${MONTHLY_BUDGET:-}" ] && OVERRIDES+=("MonthlyBudgetUsd=$MONTHLY_BUDGET")
+if [ -n "${MONTHLY_BUDGET:-}" ] && [ -z "${BUDGET_EMAIL:-}" ]; then
+  echo "  WARNING: MONTHLY_BUDGET is set but BUDGET_EMAIL is not, so no budget is created." >&2
+fi
 [ -n "${ACCESS_TOKEN:-}" ] && OVERRIDES+=("AccessToken=$ACCESS_TOKEN")
 [ -n "${ARTIFACT_BUCKET:-}" ] && OVERRIDES+=("ArtifactBucket=$ARTIFACT_BUCKET")
 

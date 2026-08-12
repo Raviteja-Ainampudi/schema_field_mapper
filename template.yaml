@@ -40,7 +40,8 @@ Parameters:
   BudgetEmail:
     Type: String
     Default: ""
-    Description: Email for the 80%-of-budget alert. Empty skips creating the budget.
+    Description: >
+      Email for the budget alerts. Empty skips creating the budget entirely.
 
   ArtifactBucket:
     Type: String
@@ -148,6 +149,18 @@ Resources:
           Amount: !Ref MonthlyBudgetUsd
           Unit: USD
       NotificationsWithSubscribers:
+        # Three notifications rather than one because Cost Explorer data lags by
+        # hours: by the time 80% of actual spend is visible, most of the budget is
+        # already gone. The 50% alert buys reaction time and the forecast alert can
+        # fire before the money is spent at all.
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 50
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref BudgetEmail
         - Notification:
             NotificationType: ACTUAL
             ComparisonOperator: GREATER_THAN

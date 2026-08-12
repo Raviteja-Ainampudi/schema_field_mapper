@@ -3,7 +3,7 @@
 One command, once the prerequisites are in place:
 
 ```bash
-BUDGET_EMAIL=you@example.com bash scripts/deploy.sh
+BUDGET_EMAIL=you@example.com MONTHLY_BUDGET=50 bash scripts/deploy.sh
 ```
 
 It prints a URL that serves both the interface and the API. For what gets created and why,
@@ -41,6 +41,12 @@ Five resources, four of them free at rest: the function, its function URL, an EC
 SAM manages for you, a log group with retention set, and optionally a monthly budget alert.
 There is no API Gateway (a function URL is enough and cheaper), no load balancer, no database,
 and nothing that costs money while idle.
+
+SAM also creates a bootstrap stack of its own, `aws-sam-cli-managed-default`, holding an S3
+bucket that the template body is staged in. That is why `samconfig.toml` sets both
+`resolve_image_repos` and `resolve_s3`: the image goes to ECR, but the rendered template still
+travels through S3, and a deploy configured with only the first fails at the last step with
+`S3 Bucket not specified`. The bucket holds kilobytes and outlives `sam delete`.
 
 ## Why Lambda and not a container service
 
@@ -142,16 +148,27 @@ reviewers, and these are the guards that make it reasonable:
 
 | Guard | Where | Default |
 | --- | --- | --- |
-| Reserved concurrency | `ReservedConcurrency` | 5 simultaneous runs, hard ceiling |
+| Reserved concurrency | `ReservedConcurrency` | Not reserved; see the caveat below |
 | Per-run token ceiling | `MaxTokensPerRun` | 120,000 tokens, checked before each call |
-| Budget alert | `BudgetEmail` | Email at 80% actual and 100% forecast |
+| Budget alert | `BudgetEmail`, `MonthlyBudgetUsd` | Email at 50% and 80% of actual, and at 100% of forecast |
 | Log retention | `LogRetentionDays` | 14 days, so logs cannot accumulate cost forever |
 | Free offline replay | Cassettes in the image | A visitor can watch a full run without spending anything |
 
-A live run of the bundled schemas costs about **$0.04**. Lambda and ECR for a demo of this size
-round to cents per month. The realistic worst case is someone repeatedly starting live runs:
-five concurrent runs at four cents each is not alarming, but the budget alert is the thing that
-tells you if it becomes a pattern.
+Reserved concurrency is the guard that most accounts cannot actually use. AWS requires 100
+unreserved executions to remain available at all times, so reserving *any* amount needs an
+account limit of at least 100 plus that amount, and a new account starts at 10 in total. The
+template therefore reserves nothing by default and `deploy.sh` checks the account limit before
+passing `CONCURRENCY` through, because a rejected reservation fails the deploy at the last step.
+On a small account the account-wide limit is itself the ceiling, which is stricter than anything
+you would have reserved.
+
+A live run of the bundled schemas costs about **$0.04** and takes roughly 35 seconds; Lambda,
+ECR, and the log group for a demo of this size round to cents per month. Be honest about the
+worst case, though: an account limit of 10 concurrent runs works out to something like $40 an
+hour if a stranger hammered the URL continuously. The budget alert is a detector rather than a
+brake — Cost Explorer data lags by hours, which is why the forecast notification matters more
+than the actual ones. The things that actually stop spend are sharing the link narrowly, setting
+`ACCESS_TOKEN`, and `sam delete` when you are done.
 
 To lock it down instead, set `ACCESS_TOKEN=...` when deploying. Be aware of the consequence:
 `X-Access-Token` is enforced on `POST /api/run`, and the browser UI does not send it, so the
@@ -164,7 +181,12 @@ deployed page becomes read-only and only `curl` can start runs.
 | Tail logs | `aws logs tail /aws/lambda/schema-field-mapper-app --follow` |
 | Redeploy after a change | `bash scripts/deploy.sh` |
 | Read the URL again | `aws cloudformation describe-stacks --stack-name schema-field-mapper --query "Stacks[0].Outputs"` |
+| Check the budget | `aws budgets describe-budgets --account-id "$(aws sts get-caller-identity --query Account --output text)"` |
 | Delete everything | `sam delete --stack-name schema-field-mapper` |
+
+`sam delete` removes the stack and the ECR repository it manages, which is what stops cost. It
+leaves the `aws-sam-cli-managed-default` bootstrap bucket behind; that is shared by every SAM
+project on the account and holds kilobytes, so leaving it is the right default.
 
 Run history (`GET /api/runs`) is a bounded in-memory map inside one execution environment. With
 concurrency above 1, two visitors may be served by different environments and see different
@@ -183,3 +205,5 @@ bucket if you want run artifacts to outlive the container.
 | A run stops partway with `BudgetExceeded` | The per-run token ceiling was hit; raise `MaxTokensPerRun` |
 | `CassetteMissing` on a custom schema | Expected: offline replay only reproduces recorded runs. Untick offline for a live run |
 | 502 from the URL | The app failed to start; check the log group for the traceback |
+| `S3 Bucket not specified` during deploy | `resolve_s3` is missing from `samconfig.toml`; an image-only stack still stages its template in S3 |
+| Deploy rolls back on `ReservedConcurrentExecutions` | The account concurrency limit is under 100 plus the reservation; deploy without `CONCURRENCY` |
