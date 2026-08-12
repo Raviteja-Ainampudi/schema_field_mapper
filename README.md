@@ -33,13 +33,17 @@ The assignment forbids passing both schemas to an LLM in one prompt and taking t
 the finished mapping. The work is therefore decomposed into six stages, four of which use no
 LLM at all:
 
-```
-[0] normalize   no LLM   flatten nested paths to dot notation, expand abbreviations
-[1] route       LLM x3   one call per source table: its column names + collection names
-[2] shortlist   no LLM   top-6 destination paths per field, inside its matched collection
-[3] adjudicate  LLM xN   one call per ~8 fields, each carrying only its own 6 candidates
-[4] validate    no LLM   contract, hallucinated-path guard, collisions, coverage
-[5] assemble    no LLM   the deliverable + run report + prompt trace
+```mermaid
+flowchart TD
+    s0["<b>0 · normalize</b> — no LLM<br/>flatten nested paths to dot notation, expand abbreviations"]
+    s1["<b>1 · route</b> — LLM ×3<br/>one call per source table: its column names + collection names"]
+    s2["<b>2 · shortlist</b> — no LLM<br/>top 6 destination paths per field, inside its matched collection"]
+    s3["<b>3 · adjudicate</b> — LLM ×N<br/>one call per 8 fields, each carrying only its own 6 candidates"]
+    s3c["<b>3c · reflect</b> — LLM, weak only<br/>a critic re-examines the least confident decisions"]
+    s4["<b>4 · validate</b> — no LLM<br/>contract, hallucinated-path guard, collisions, coverage"]
+    s5["<b>5 · assemble</b> — no LLM<br/>the deliverable + run report + prompt trace"]
+
+    s0 --> s1 --> s2 --> s3 --> s3c --> s4 --> s5
 ```
 
 The AI design, in one list: **retrieval before generation** (the model only ever picks from a
@@ -50,6 +54,41 @@ weakest decisions, **constrained JSON decoding** followed by verification agains
 schema, and a **blended confidence** score that mixes the model's self-report with the
 retrieval margin. No embeddings or vector store: at this schema size the lexical and structural
 signals retrieved better, so a vector database would add a dependency for no measurable recall.
+
+## How the pieces fit
+
+```mermaid
+flowchart LR
+    reviewer["Reviewer<br/>browser"]
+    operator["Operator<br/>terminal"]
+
+    subgraph app["This repository"]
+        spa["Single-page UI<br/>api/static"]
+        api["FastAPI<br/>api/main.py"]
+        cli["CLI<br/>schema_mapper.cli"]
+        core["Pipeline core<br/>src/schema_mapper"]
+        spa <-->|"JSON + SSE"| api
+        api --> core
+        cli --> core
+    end
+
+    bedrock["Amazon Bedrock<br/>Converse API"]
+    cassettes["Recorded calls<br/>replay, no spend"]
+    artifacts["mapping.json<br/>run_report.json<br/>prompt_trace.json"]
+
+    reviewer --> spa
+    operator --> cli
+    core -->|"live"| bedrock
+    core -->|"offline"| cassettes
+    core --> artifacts
+```
+
+The UI is a client of the HTTP API, and the API runs the same pipeline the CLI runs, so a
+browser run and a terminal run cannot disagree. More diagrams — components, data model,
+deployment, the per-field decision lifecycle, confidence, cost control — are in
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/PIPELINE.md](docs/PIPELINE.md).
+
+## Machine-checked constraint proof
 
 This is **machine-checked, not asserted**. Every request is recorded with a manifest, and
 tests assert that no single prompt carried all 34 source fields or all 40 destination paths,
@@ -131,9 +170,11 @@ Reference: [docs/API.md](docs/API.md).
 | Document | Contents |
 | --- | --- |
 | [docs/QUICKSTART.md](docs/QUICKSTART.md) | Setup, first run, troubleshooting |
-| [docs/USAGE.md](docs/USAGE.md) | The interface, panel by panel |
+| [docs/USAGE.md](docs/USAGE.md) | The interface, panel by panel, with a user-journey diagram |
 | [docs/INPUT_FORMATS.md](docs/INPUT_FORMATS.md) | The four accepted formats, with examples |
-| [docs/API.md](docs/API.md) | HTTP endpoints, CLI flags, smoke scripts |
+| [docs/API.md](docs/API.md) | HTTP endpoints, CLI flags, smoke scripts, request lifecycle |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System context, components, data model, deployment |
+| [docs/PIPELINE.md](docs/PIPELINE.md) | The six stages, run sequence, decision states, cost control |
 | [project_plans/schema_field_mapper_plan.md](project_plans/schema_field_mapper_plan.md) | Design, cost model, deployment, acceptance criteria |
 
 ## Deliverables

@@ -117,6 +117,27 @@ class TestUnmappedFieldsAreDeclaredAndJustified:
             assert path in explanations
             assert "denormalized" in explanations[path].lower()
 
+    def test_unmapped_reason_is_the_models_own_words(self, run_report):
+        """A declined field must say *why*, not fall back to boilerplate.
+
+        The explanation used to be the generic sentence because the reason lived
+        only on the decision record, which the report did not serialize - so the
+        one field the pipeline deliberately refused to map was the one field with
+        no explanation anywhere.
+        """
+        reason = run_report["coverage"]["unmapped_source_explanations"]["emp_master.dob"]
+        assert "No candidate destination path was a genuine semantic match." not in reason
+        assert "birth" in reason.lower()
+
+    def test_every_decision_carries_its_reasoning(self, run_report):
+        """Including the unmapped ones, which have no field_mappings entry."""
+        missing = [
+            d["source_field"]
+            for d in run_report["decisions"]
+            if not str(d.get("reasoning") or "").strip()
+        ]
+        assert not missing, f"decisions with no reasoning: {missing}"
+
 
 class TestTransformsHaveSubstance:
     def test_required_type_transforms_are_present(self, by_table, oracle):

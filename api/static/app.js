@@ -190,7 +190,9 @@ function DecisionPanel({ decision, mapping, rows, table, collection }) {
             </dd>`}
           <dt>Reasoning</dt><dd>${mapping?.reasoning || decision?.reasoning || "-"}</dd>
           <dt>Notes</dt>
-          <dd>${mapping?.notes || html`<span class="note" style="margin:0">none needed</span>`}</dd>
+          <dd>${mapping?.notes ||
+          decision?.notes ||
+          html`<span class="note" style="margin:0">none needed</span>`}</dd>
           ${decision?.decided_by &&
           html`<dt>Decided by</dt><dd><span class="pill">${decision.decided_by}</span>
             ${decision.repaired ? html` <span class="badge warn">repaired</span>` : null}
@@ -1783,4 +1785,10 @@ function App() {
   </div>`;
 }
 
-render(html`<${App} />`, document.getElementById("app"));
+const mount = document.getElementById("app");
+// Preact appends into the container instead of replacing what is already there,
+// so the boot placeholder has to be removed by hand or it lingers under the app.
+// Clearing here rather than in index.html keeps the fallback visible for as long
+// as the module has not run, which is the case it exists for.
+mount.textContent = "";
+render(html`<${App} />`, mount);

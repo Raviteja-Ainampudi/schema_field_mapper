@@ -42,6 +42,15 @@ builtin = {"setTimeout", "setInterval"}
 for setter in sorted(set(re.findall(r"\b(set[A-Z]\w+)\(", text)) - declared - local - builtin):
     problems.append(f"setter called but never declared: {setter}")
 
+# The boot placeholder in index.html must be cleared on mount. Preact appends to
+# the container rather than replacing its contents, so forgetting this leaves
+# "Loading interface..." visible under a fully working app.
+html_text = open("api/static/index.html", encoding="utf-8").read()
+placeholder = "Loading interface" in html_text
+cleared = re.search(r"mount\.(textContent|innerHTML)\s*=|replaceChildren\(", text)
+if placeholder and not cleared:
+    problems.append("index.html has a boot placeholder that app.js never clears")
+
 # Every fetched path must answer.
 paths = sorted(set(re.findall(r'(?:getJSON|fetch)\(\s*"(/api/[^"?]+)', text)))
 posts = {"/api/run", "/api/parse", "/api/preview"}

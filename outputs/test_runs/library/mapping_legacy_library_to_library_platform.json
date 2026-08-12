@@ -1,0 +1,290 @@
+{
+  "mapping_version": "1.0",
+  "source": "legacy_library (MySQL)",
+  "destination": "library_platform (MongoDB)",
+  "generated_at": "2026-08-12T06:46:31Z",
+  "tables": [
+    {
+      "source_table": "brnch",
+      "destination_collection": "branches",
+      "confidence": 0.81,
+      "reasoning": "The table name 'brnch' and its column names suggest it represents a collection of branches, which matches the 'branches' collection.",
+      "field_mappings": [
+        {
+          "source_field": "brnch_id",
+          "destination_field": "_id",
+          "type_transform": "INT -> ObjectId",
+          "confidence": 0.85,
+          "reasoning": "The primary key of the source table must map to the MongoDB document identifier, following the pk-to-objectid convention.",
+          "notes": "MongoDB will generate a new ObjectId for _id; retain the original integer value in a legacy field (e.g., legacyBranchId) to resolve foreign keys during migration."
+        },
+        {
+          "source_field": "brnch_nm",
+          "destination_field": "name",
+          "type_transform": "VARCHAR -> String",
+          "confidence": 0.94,
+          "reasoning": "The branch name field maps directly to the name field in the destination collection.",
+          "notes": null
+        },
+        {
+          "source_field": "addr_l1",
+          "destination_field": "address.line1",
+          "type_transform": "VARCHAR -> String (nested path)",
+          "confidence": 0.73,
+          "reasoning": "The source field addr_l1 explicitly represents \"Street address line 1\" which is a perfect semantic and structural match for address.line1.",
+          "notes": null
+        },
+        {
+          "source_field": "city_nm",
+          "destination_field": "address.city",
+          "type_transform": "VARCHAR -> String (nested path)",
+          "confidence": 0.62,
+          "reasoning": "The source field city_nm clearly contains city name data which semantically and structurally matches the address.city destination field perfectly.",
+          "notes": "None required"
+        },
+        {
+          "source_field": "st_cd",
+          "destination_field": "address.state",
+          "type_transform": "CHAR(2) -> String (nested path)",
+          "confidence": 0.59,
+          "reasoning": "US state code (st_cd) is a perfect semantic and structural match for address.state, representing the state component of a US address.",
+          "notes": "None required - CHAR(2) format is standard for US state codes and compatible with String type."
+        },
+        {
+          "source_field": "zip_cd",
+          "destination_field": "address.postalCode",
+          "type_transform": "VARCHAR -> String (nested path)",
+          "confidence": 0.92,
+          "reasoning": "Postal code maps directly to the address.postalCode field.",
+          "notes": null
+        },
+        {
+          "source_field": "ctry_cd",
+          "destination_field": "address.country",
+          "type_transform": "CHAR(2) -> String (nested path)",
+          "confidence": 0.88,
+          "reasoning": "ISO 3166-1 alpha-2 country code maps directly to the address.country field following the iso-3166 convention.",
+          "notes": "Validate the value against the ISO 3166-1 alpha-2 code list; no value transform required."
+        },
+        {
+          "source_field": "is_open",
+          "destination_field": "isOpen",
+          "type_transform": "TINYINT(1) -> Boolean",
+          "confidence": 0.96,
+          "reasoning": "The TINYINT(1) boolean flag indicating open/closed status maps to the isOpen Boolean field.",
+          "notes": "Convert TINYINT(1) values: 1 -> true, 0 -> false."
+        }
+      ],
+      "unmapped_source_fields": [],
+      "unmapped_destination_fields": [
+        "managerId"
+      ]
+    },
+    {
+      "source_table": "bk_master",
+      "destination_collection": "books",
+      "confidence": 0.85,
+      "reasoning": "The column names suggest that the table contains information about books, such as title, author, publication year, and availability.",
+      "field_mappings": [
+        {
+          "source_field": "bk_id",
+          "destination_field": "_id",
+          "type_transform": "INT -> ObjectId",
+          "confidence": 0.85,
+          "reasoning": "The primary key of the source table maps to MongoDB's _id field, following the [pk-to-objectid] convention.",
+          "notes": "MongoDB generates ObjectId values; retain the original integer bk_id in a legacy field (e.g., legacyBookId) to enable foreign key resolution during migration."
+        },
+        {
+          "source_field": "isbn_cd",
+          "destination_field": "isbn",
+          "type_transform": "VARCHAR -> String",
+          "confidence": 0.94,
+          "reasoning": "The ISBN-13 code field maps directly to the isbn string identifier, which is the unique human-readable identifier for books.",
+          "notes": null
+        },
+        {
+          "source_field": "ttl",
+          "destination_field": "title",
+          "type_transform": "VARCHAR -> String",
+          "confidence": 0.85,
+          "reasoning": "The book title column maps directly to the title field in the destination collection.",
+          "notes": null
+        },
+        {
+          "source_field": "auth_nm",
+          "destination_field": "author.name",
+          "type_transform": "VARCHAR -> String (nested path)",
+          "confidence": 0.93,
+          "reasoning": "The primary author full name column maps to the author.name nested field.",
+          "notes": null
+        },
+        {
+          "source_field": "pub_yr",
+          "destination_field": "publishedYear",
+          "type_transform": "SMALLINT -> Number",
+          "confidence": 0.9,
+          "reasoning": "The 4-digit publication year maps directly to the publishedYear numeric field.",
+          "notes": null
+        },
+        {
+          "source_field": "cat_cd",
+          "destination_field": "category",
+          "type_transform": "CHAR(1) code -> String enum",
+          "confidence": 0.69,
+          "reasoning": "The source field cat_cd with values F/N/R directly corresponds to the category destination field which stores fiction/nonfiction/reference, making this a clear semantic match.",
+          "notes": "Transform required: F -> fiction, N -> nonfiction, R -> reference (lowercase expansion of codes)"
+        },
+        {
+          "source_field": "copies_tot",
+          "destination_field": "inventory.totalCopies",
+          "type_transform": "INT -> Number (nested path)",
+          "confidence": 0.75,
+          "reasoning": "The total copies owned column maps to the inventory.totalCopies nested numeric field.",
+          "notes": null
+        },
+        {
+          "source_field": "copies_avl",
+          "destination_field": "inventory.availableCopies",
+          "type_transform": "INT -> Number (nested path)",
+          "confidence": 0.68,
+          "reasoning": "The source field explicitly describes \"copies currently on the shelf\" which directly corresponds to available copies in the inventory, making this mapping semantically perfect.",
+          "notes": null
+        },
+        {
+          "source_field": "is_ref_only",
+          "destination_field": "inventory.referenceOnly",
+          "type_transform": "TINYINT(1) -> Boolean (nested path)",
+          "confidence": 0.92,
+          "reasoning": "The TINYINT(1) boolean flag indicating reference-only status maps directly to the Boolean field describing whether a title cannot be borrowed.",
+          "notes": "Convert TINYINT(1) to Boolean: 1 -> true, 0 -> false."
+        },
+        {
+          "source_field": "price_amt",
+          "destination_field": "pricing.amount",
+          "type_transform": "DECIMAL(8,2) -> Decimal128 (nested path)",
+          "confidence": 0.9,
+          "reasoning": "The DECIMAL(8,2) acquisition price maps directly to the Decimal128 field for acquisition price.",
+          "notes": "Convert DECIMAL(8,2) to Decimal128; precision is preserved."
+        },
+        {
+          "source_field": "cur_cd",
+          "destination_field": "pricing.currency",
+          "type_transform": "CHAR(3) -> String (nested path)",
+          "confidence": 0.85,
+          "reasoning": "The CHAR(3) ISO 4217 currency code maps directly to the String field for currency, with validation against the ISO 4217 standard.",
+          "notes": "Validate against ISO 4217 currency code list; no value transform required."
+        },
+        {
+          "source_field": "added_dt",
+          "destination_field": "addedAt",
+          "type_transform": "DATETIME -> ISODate",
+          "confidence": 0.93,
+          "reasoning": "The DATETIME field recording when the title was added to the catalog maps to the ISODate field for the same purpose.",
+          "notes": "Convert MySQL DATETIME to ISODate; assume source timezone is UTC."
+        },
+        {
+          "source_field": "brnch_id",
+          "destination_field": "branchId",
+          "type_transform": "INT -> ObjectId",
+          "confidence": 0.82,
+          "reasoning": "The INT foreign key to the branches table maps to an ObjectId reference field pointing to branches._id.",
+          "notes": "Apply ID remap table from legacy integer brnch_id values to generated ObjectIds in branches collection after branches are loaded."
+        }
+      ],
+      "unmapped_source_fields": [],
+      "unmapped_destination_fields": [
+        "tags"
+      ]
+    },
+    {
+      "source_table": "mbr_info",
+      "destination_collection": "members",
+      "confidence": 0.9,
+      "reasoning": "The column names suggest that the table contains information about members, such as their identification, contact details, and membership status.",
+      "field_mappings": [
+        {
+          "source_field": "mbr_id",
+          "destination_field": "_id",
+          "type_transform": "INT -> ObjectId",
+          "confidence": 0.85,
+          "reasoning": "The primary key mbr_id should map to the MongoDB _id field following the pk-to-objectid convention.",
+          "notes": "Generate new ObjectId for _id; store original mbr_id integer in a legacy field (e.g., legacyMbrId) to resolve foreign key references during migration."
+        },
+        {
+          "source_field": "mbr_cd",
+          "destination_field": "memberCode",
+          "type_transform": "VARCHAR -> String",
+          "confidence": 0.95,
+          "reasoning": "The human-readable membership code maps directly to the memberCode field, which is explicitly described as a unique human-readable membership code.",
+          "notes": null
+        },
+        {
+          "source_field": "f_nm",
+          "destination_field": "name.first",
+          "type_transform": "VARCHAR -> String (nested path)",
+          "confidence": 0.95,
+          "reasoning": "The first name field maps directly to the name.first path.",
+          "notes": null
+        },
+        {
+          "source_field": "l_nm",
+          "destination_field": "name.last",
+          "type_transform": "VARCHAR -> String (nested path)",
+          "confidence": 0.95,
+          "reasoning": "The last name field maps directly to the name.last path.",
+          "notes": null
+        },
+        {
+          "source_field": "eml",
+          "destination_field": "contact.email",
+          "type_transform": "VARCHAR -> String (nested path)",
+          "confidence": 0.77,
+          "reasoning": "The email address field maps directly to the contact.email path.",
+          "notes": null
+        },
+        {
+          "source_field": "ph_no",
+          "destination_field": "contact.phone",
+          "type_transform": "VARCHAR -> String (nested path)",
+          "confidence": 0.92,
+          "reasoning": "The phone number field maps directly to the contact.phone path.",
+          "notes": null
+        },
+        {
+          "source_field": "join_dt",
+          "destination_field": "membership.joinedAt",
+          "type_transform": "DATE -> ISODate (nested path)",
+          "confidence": 0.85,
+          "reasoning": "The membership start date maps to the joinedAt field within the membership subdocument.",
+          "notes": "Convert MySQL DATE to MongoDB ISODate; assume UTC timezone for the source date value."
+        },
+        {
+          "source_field": "mbr_stat",
+          "destination_field": "membership.status",
+          "type_transform": "CHAR(1) code -> String enum (nested path)",
+          "confidence": 0.94,
+          "reasoning": "The single-character status code must be transformed to a readable enum string using the documented legend (A=active, S=suspended, X=expired).",
+          "notes": "Lookup transform: A -> 'active', S -> 'suspended', X -> 'expired'."
+        },
+        {
+          "source_field": "fine_bal",
+          "destination_field": "membership.fineBalance",
+          "type_transform": "DECIMAL(7,2) -> Decimal128 (nested path)",
+          "confidence": 0.93,
+          "reasoning": "The source field explicitly documents outstanding fines owed, and the destination field has identical semantics and appropriate Decimal128 type for financial precision.",
+          "notes": "DECIMAL(7,2) is exact but Number is a double; use Decimal128 or minor units for exact currency arithmetic."
+        },
+        {
+          "source_field": "home_brnch",
+          "destination_field": "membership.homeBranchId",
+          "type_transform": "INT -> ObjectId (nested path)",
+          "confidence": 0.85,
+          "reasoning": "This foreign key to the branches table maps to the ObjectId reference field following the [fk-to-ref] convention, requiring an ID remap from legacy integer keys to generated ObjectIds during migration.",
+          "notes": "Apply ID remap table to convert legacy integer brnch_id values to generated ObjectIds after branches collection is loaded."
+        }
+      ],
+      "unmapped_source_fields": [],
+      "unmapped_destination_fields": []
+    }
+  ]
+}

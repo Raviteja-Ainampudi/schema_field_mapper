@@ -1,0 +1,1064 @@
+[
+  {
+    "stage": "route",
+    "model_id": "us.amazon.nova-lite-v1:0",
+    "manifest": {
+      "stage": "route",
+      "source_tables": [
+        "brnch"
+      ],
+      "source_fields": [
+        "brnch.brnch_id",
+        "brnch.brnch_nm",
+        "brnch.addr_l1",
+        "brnch.city_nm",
+        "brnch.st_cd",
+        "brnch.zip_cd",
+        "brnch.ctry_cd",
+        "brnch.is_open"
+      ],
+      "destination_collections": [
+        "books",
+        "members",
+        "branches"
+      ],
+      "destination_paths": [],
+      "source_fingerprint": "bea3b809af7d1906",
+      "destination_fingerprint": "ba249c0a5426abe6",
+      "detail_level": "names",
+      "source_field_count": 8,
+      "destination_path_count": 0,
+      "source_table_count": 1
+    },
+    "system": "You are a data architect matching a legacy relational table to its equivalent collection in a document database. You see column names only, never types or sample data. Answer with the single best collection.",
+    "user": "Legacy table: brnch\nIts column names: brnch_id, brnch_nm, addr_l1, city_nm, st_cd, zip_cd, ctry_cd, is_open\n\nCandidate destination collections: books, members, branches\n\nWhich collection represents the same entity as this table? Reply through the tool with the collection name, a confidence between 0 and 1, and exactly one sentence of reasoning.",
+    "response_text": "",
+    "response_data": {
+      "confidence": 0.95,
+      "reasoning": "The table name 'brnch' and its column names suggest it represents a collection of branches, which matches the 'branches' collection.",
+      "destination_collection": "branches"
+    },
+    "input_tokens": 596,
+    "output_tokens": 57,
+    "latency_ms": 0,
+    "cache_hit": true,
+    "source": "cache",
+    "prompt_chars": 555
+  },
+  {
+    "stage": "route",
+    "model_id": "us.amazon.nova-lite-v1:0",
+    "manifest": {
+      "stage": "route",
+      "source_tables": [
+        "bk_master"
+      ],
+      "source_fields": [
+        "bk_master.bk_id",
+        "bk_master.isbn_cd",
+        "bk_master.ttl",
+        "bk_master.auth_nm",
+        "bk_master.pub_yr",
+        "bk_master.cat_cd",
+        "bk_master.copies_tot",
+        "bk_master.copies_avl",
+        "bk_master.is_ref_only",
+        "bk_master.price_amt",
+        "bk_master.cur_cd",
+        "bk_master.added_dt",
+        "bk_master.brnch_id"
+      ],
+      "destination_collections": [
+        "books",
+        "members",
+        "branches"
+      ],
+      "destination_paths": [],
+      "source_fingerprint": "bea3b809af7d1906",
+      "destination_fingerprint": "ba249c0a5426abe6",
+      "detail_level": "names",
+      "source_field_count": 13,
+      "destination_path_count": 0,
+      "source_table_count": 1
+    },
+    "system": "You are a data architect matching a legacy relational table to its equivalent collection in a document database. You see column names only, never types or sample data. Answer with the single best collection.",
+    "user": "Legacy table: bk_master\nIts column names: bk_id, isbn_cd, ttl, auth_nm, pub_yr, cat_cd, copies_tot, copies_avl, is_ref_only, price_amt, cur_cd, added_dt, brnch_id\n\nCandidate destination collections: books, members, branches\n\nWhich collection represents the same entity as this table? Reply through the tool with the collection name, a confidence between 0 and 1, and exactly one sentence of reasoning.",
+    "response_text": "",
+    "response_data": {
+      "confidence": 0.95,
+      "reasoning": "The column names suggest that the table contains information about books, such as title, author, publication year, and availability.",
+      "destination_collection": "books"
+    },
+    "input_tokens": 618,
+    "output_tokens": 52,
+    "latency_ms": 0,
+    "cache_hit": true,
+    "source": "cache",
+    "prompt_chars": 610
+  },
+  {
+    "stage": "route",
+    "model_id": "us.amazon.nova-lite-v1:0",
+    "manifest": {
+      "stage": "route",
+      "source_tables": [
+        "mbr_info"
+      ],
+      "source_fields": [
+        "mbr_info.mbr_id",
+        "mbr_info.mbr_cd",
+        "mbr_info.f_nm",
+        "mbr_info.l_nm",
+        "mbr_info.eml",
+        "mbr_info.ph_no",
+        "mbr_info.join_dt",
+        "mbr_info.mbr_stat",
+        "mbr_info.fine_bal",
+        "mbr_info.home_brnch"
+      ],
+      "destination_collections": [
+        "books",
+        "members",
+        "branches"
+      ],
+      "destination_paths": [],
+      "source_fingerprint": "bea3b809af7d1906",
+      "destination_fingerprint": "ba249c0a5426abe6",
+      "detail_level": "names",
+      "source_field_count": 10,
+      "destination_path_count": 0,
+      "source_table_count": 1
+    },
+    "system": "You are a data architect matching a legacy relational table to its equivalent collection in a document database. You see column names only, never types or sample data. Answer with the single best collection.",
+    "user": "Legacy table: mbr_info\nIts column names: mbr_id, mbr_cd, f_nm, l_nm, eml, ph_no, join_dt, mbr_stat, fine_bal, home_brnch\n\nCandidate destination collections: books, members, branches\n\nWhich collection represents the same entity as this table? Reply through the tool with the collection name, a confidence between 0 and 1, and exactly one sentence of reasoning.",
+    "response_text": "",
+    "response_data": {
+      "confidence": 0.95,
+      "reasoning": "The column names suggest that the table contains information about members, such as their identification, contact details, and membership status.",
+      "destination_collection": "members"
+    },
+    "input_tokens": 603,
+    "output_tokens": 52,
+    "latency_ms": 0,
+    "cache_hit": true,
+    "source": "cache",
+    "prompt_chars": 568
+  },
+  {
+    "stage": "adjudicate",
+    "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "manifest": {
+      "stage": "adjudicate",
+      "source_tables": [
+        "brnch"
+      ],
+      "source_fields": [
+        "brnch.brnch_id",
+        "brnch.brnch_nm",
+        "brnch.addr_l1",
+        "brnch.city_nm",
+        "brnch.st_cd",
+        "brnch.zip_cd",
+        "brnch.ctry_cd",
+        "brnch.is_open"
+      ],
+      "destination_collections": [
+        "branches"
+      ],
+      "destination_paths": [
+        "_id",
+        "managerId",
+        "address.postalCode",
+        "name",
+        "address.city",
+        "address.line1",
+        "address.country",
+        "address.postalCode",
+        "address.state",
+        "address.line1",
+        "address.city",
+        "address.state",
+        "address.country",
+        "address.postalCode",
+        "name",
+        "name",
+        "address.city",
+        "address.country",
+        "address.line1",
+        "address.state",
+        "address.postalCode",
+        "address.postalCode",
+        "address.state",
+        "address.city",
+        "address.country",
+        "address.line1",
+        "name",
+        "address.postalCode",
+        "address.city",
+        "address.line1",
+        "address.country",
+        "address.state",
+        "_id",
+        "address.country",
+        "address.postalCode",
+        "address.city",
+        "address.state",
+        "address.line1",
+        "name",
+        "isOpen",
+        "address.country",
+        "address.postalCode",
+        "address.line1",
+        "address.state"
+      ],
+      "source_fingerprint": "bea3b809af7d1906",
+      "destination_fingerprint": "ba249c0a5426abe6",
+      "detail_level": "typed",
+      "source_field_count": 8,
+      "destination_path_count": 9,
+      "source_table_count": 1
+    },
+    "system": "You map columns from a legacy MySQL table to field paths in a MongoDB collection.\n\nRules:\n1. For each source field, choose the single best destination path from the candidate list given for that field, or null if none is a genuine semantic match.\n2. Never invent a path. Only paths listed as candidates for that field are valid.\n3. Prefer null over a weak guess. A wrong mapping is more expensive than an acknowledged gap.\n4. reasoning must be exactly one plain-English sentence explaining the match.\n5. notes must describe any value-transform logic a migration would have to write (code lookups, boolean conversion, ID remapping, precision loss), or be null when the value moves across unchanged.\n6. confidence is your own certainty from 0 to 1, judged on semantics rather than on how similar the names look.",
+    "user": "Source table `brnch` maps to destination collection `branches`.\n\nRelevant conventions:\n  [iso-3166] ISO 3166-1 alpha-2 country codes are two uppercase letters (US, GB, JP). A CHAR(2) country column maps to a String unchanged.\n  [iso-4217] ISO 4217 currency codes are exactly three uppercase letters (USD, GBP, JPY). A CHAR(3) currency column maps to a String with no value transform; validate against the ISO list.\n  [pk-to-objectid] A relational INT primary key maps to MongoDB _id, but ObjectId values are generated by MongoDB rather than carried over. Retain the original integer in a legacy field so foreign keys can be resolved during migration.\n  [datetime-timezone] MySQL DATETIME has no timezone. MongoDB ISODate is always UTC, so the migration must state the assumed source timezone; assuming UTC without checking silently shifts every timestamp.\n\nMap these 8 source fields:\n  1. brnch_id (INT, PK, NOT NULL)\n    candidate destination paths:\n      - _id (ObjectId)\n      - managerId (ObjectId, references members._id, ref -> members._id, no legacy counterpart)\n      - address.postalCode (String)\n  2. brnch_nm (VARCHAR(120), NOT NULL, // Branch name)\n    candidate destination paths:\n      - name (String)\n      - address.city (String)\n      - address.line1 (String)\n      - address.country (String, ISO 3166-1 alpha-2)\n      - address.postalCode (String)\n      - address.state (String)\n  3. addr_l1 (VARCHAR(180), // Street address line 1)\n    candidate destination paths:\n      - address.line1 (String)\n      - address.city (String)\n      - address.state (String)\n      - address.country (String, ISO 3166-1 alpha-2)\n      - address.postalCode (String)\n      - name (String)\n  4. city_nm (VARCHAR(80))\n    candidate destination paths:\n      - name (String)\n      - address.city (String)\n      - address.country (String, ISO 3166-1 alpha-2)\n      - address.line1 (String)\n      - address.state (String)\n      - address.postalCode (String)\n  5. st_cd (CHAR(2), // US state code)\n    candidate destination paths:\n      - address.postalCode (String)\n      - address.state (String)\n      - address.city (String)\n      - address.country (String, ISO 3166-1 alpha-2)\n      - address.line1 (String)\n      - name (String)\n  6. zip_cd (VARCHAR(10), // Postal code)\n    candidate destination paths:\n      - address.postalCode (String)\n      - address.city (String)\n      - address.line1 (String)\n      - address.country (String, ISO 3166-1 alpha-2)\n      - address.state (String)\n      - _id (ObjectId)\n  7. ctry_cd (CHAR(2), // ISO 3166-1 alpha-2 country code)\n    candidate destination paths:\n      - address.country (String, ISO 3166-1 alpha-2)\n      - address.postalCode (String)\n      - address.city (String)\n      - address.state (String)\n      - address.line1 (String)\n      - name (String)\n  8. is_open (TINYINT(1), NOT NULL, // 1 = currently open to the public, 0 = closed)\n    candidate destination paths:\n      - isOpen (Boolean)\n      - address.country (String, ISO 3166-1 alpha-2)\n      - address.postalCode (String)\n      - address.line1 (String)\n      - address.state (String)\n\nReturn one entry per source field through the tool, using the exact source field names given above.",
+    "response_text": "",
+    "response_data": {
+      "mappings": [
+        {
+          "source_field": "brnch_id",
+          "destination_field": "_id",
+          "confidence": 0.95,
+          "reasoning": "The primary key of the source table must map to the MongoDB document identifier, following the pk-to-objectid convention.",
+          "notes": "MongoDB will generate a new ObjectId for _id; retain the original integer value in a legacy field (e.g., legacyBranchId) to resolve foreign keys during migration."
+        },
+        {
+          "source_field": "brnch_nm",
+          "destination_field": "name",
+          "confidence": 0.98,
+          "reasoning": "The branch name field maps directly to the name field in the destination collection.",
+          "notes": null
+        },
+        {
+          "source_field": "addr_l1",
+          "destination_field": "address.line1",
+          "confidence": 0.99,
+          "reasoning": "Street address line 1 is the semantic match for the address.line1 field.",
+          "notes": null
+        },
+        {
+          "source_field": "city_nm",
+          "destination_field": "address.city",
+          "confidence": 0.99,
+          "reasoning": "City name maps directly to the address.city field.",
+          "notes": null
+        },
+        {
+          "source_field": "st_cd",
+          "destination_field": "address.state",
+          "confidence": 0.98,
+          "reasoning": "US state code is the semantic match for the address.state field.",
+          "notes": null
+        },
+        {
+          "source_field": "zip_cd",
+          "destination_field": "address.postalCode",
+          "confidence": 0.99,
+          "reasoning": "Postal code maps directly to the address.postalCode field.",
+          "notes": null
+        },
+        {
+          "source_field": "ctry_cd",
+          "destination_field": "address.country",
+          "confidence": 0.99,
+          "reasoning": "ISO 3166-1 alpha-2 country code maps directly to the address.country field following the iso-3166 convention.",
+          "notes": "Validate the value against the ISO 3166-1 alpha-2 code list; no value transform required."
+        },
+        {
+          "source_field": "is_open",
+          "destination_field": "isOpen",
+          "confidence": 0.99,
+          "reasoning": "The TINYINT(1) boolean flag indicating open/closed status maps to the isOpen Boolean field.",
+          "notes": "Convert TINYINT(1) values: 1 → true, 0 → false."
+        }
+      ]
+    },
+    "input_tokens": 1963,
+    "output_tokens": 694,
+    "latency_ms": 0,
+    "cache_hit": true,
+    "source": "cache",
+    "prompt_chars": 4004
+  },
+  {
+    "stage": "adjudicate",
+    "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "manifest": {
+      "stage": "adjudicate",
+      "source_tables": [
+        "bk_master"
+      ],
+      "source_fields": [
+        "bk_master.bk_id",
+        "bk_master.isbn_cd",
+        "bk_master.ttl",
+        "bk_master.auth_nm",
+        "bk_master.pub_yr",
+        "bk_master.cat_cd",
+        "bk_master.copies_tot",
+        "bk_master.copies_avl"
+      ],
+      "destination_collections": [
+        "books"
+      ],
+      "destination_paths": [
+        "_id",
+        "branchId",
+        "publishedYear",
+        "inventory.availableCopies",
+        "inventory.totalCopies",
+        "pricing.amount",
+        "isbn",
+        "title",
+        "inventory.referenceOnly",
+        "pricing.currency",
+        "author.name",
+        "branchId",
+        "title",
+        "category",
+        "author.name",
+        "isbn",
+        "pricing.currency",
+        "inventory.referenceOnly",
+        "author.name",
+        "title",
+        "category",
+        "pricing.currency",
+        "isbn",
+        "pricing.amount",
+        "publishedYear",
+        "pricing.amount",
+        "inventory.totalCopies",
+        "inventory.availableCopies",
+        "branchId",
+        "pricing.currency",
+        "category",
+        "inventory.referenceOnly",
+        "pricing.currency",
+        "author.name",
+        "branchId",
+        "title",
+        "inventory.totalCopies",
+        "inventory.availableCopies",
+        "pricing.amount",
+        "publishedYear",
+        "branchId",
+        "_id",
+        "inventory.totalCopies",
+        "inventory.availableCopies",
+        "publishedYear",
+        "pricing.amount",
+        "branchId",
+        "_id"
+      ],
+      "source_fingerprint": "bea3b809af7d1906",
+      "destination_fingerprint": "ba249c0a5426abe6",
+      "detail_level": "typed",
+      "source_field_count": 8,
+      "destination_path_count": 12,
+      "source_table_count": 1
+    },
+    "system": "You map columns from a legacy MySQL table to field paths in a MongoDB collection.\n\nRules:\n1. For each source field, choose the single best destination path from the candidate list given for that field, or null if none is a genuine semantic match.\n2. Never invent a path. Only paths listed as candidates for that field are valid.\n3. Prefer null over a weak guess. A wrong mapping is more expensive than an acknowledged gap.\n4. reasoning must be exactly one plain-English sentence explaining the match.\n5. notes must describe any value-transform logic a migration would have to write (code lookups, boolean conversion, ID remapping, precision loss), or be null when the value moves across unchanged.\n6. confidence is your own certainty from 0 to 1, judged on semantics rather than on how similar the names look.",
+    "user": "Source table `bk_master` maps to destination collection `books`.\n\nRelevant conventions:\n  [fk-to-ref] A relational foreign key maps to an ObjectId reference field. The migration needs an ID remap table from legacy integer keys to generated ObjectIds, applied after the referenced collection is loaded.\n  [pk-to-objectid] A relational INT primary key maps to MongoDB _id, but ObjectId values are generated by MongoDB rather than carried over. Retain the original integer in a legacy field so foreign keys can be resolved during migration.\n  [denormalization] Document stores often denormalize a joined label alongside its reference, for example department.code and department.name next to department.departmentId. Those copies have no counterpart column in the referencing table; they are populated by joining the referenced table during migration.\n  [naming-snake-to-camel] Legacy MySQL uses snake_case; the MongoDB target uses camelCase. A trailing _cd means code, _nm means name, _dt means date, _ts means timestamp, and an is_ prefix means a boolean flag.\n\nMap these 8 source fields:\n  1. bk_id (INT, PK, NOT NULL)\n    candidate destination paths:\n      - _id (ObjectId)\n      - branchId (ObjectId, references branches._id, ref -> branches._id)\n      - publishedYear (Number)\n      - inventory.availableCopies (Number)\n      - inventory.totalCopies (Number)\n      - pricing.amount (Decimal128, acquisition price)\n  2. isbn_cd (VARCHAR(20), UNIQUE, NOT NULL, // ISBN-13, unique per title)\n    candidate destination paths:\n      - isbn (String, unique human-readable identifier)\n      - title (String)\n      - inventory.referenceOnly (Boolean, true when the title cannot be borrowed)\n      - pricing.currency (String, ISO 4217)\n      - author.name (String, primary author full name)\n      - branchId (ObjectId, references branches._id, ref -> branches._id)\n  3. ttl (VARCHAR(250), NOT NULL, // Book title)\n    candidate destination paths:\n      - title (String)\n      - category (String, fiction / nonfiction / reference)\n      - author.name (String, primary author full name)\n      - isbn (String, unique human-readable identifier)\n      - pricing.currency (String, ISO 4217)\n      - inventory.referenceOnly (Boolean, true when the title cannot be borrowed)\n  4. auth_nm (VARCHAR(160), // Primary author full name)\n    candidate destination paths:\n      - author.name (String, primary author full name)\n      - title (String)\n      - category (String, fiction / nonfiction / reference)\n      - pricing.currency (String, ISO 4217)\n      - isbn (String, unique human-readable identifier)\n      - pricing.amount (Decimal128, acquisition price)\n  5. pub_yr (SMALLINT, // 4-digit year of publication)\n    candidate destination paths:\n      - publishedYear (Number)\n      - pricing.amount (Decimal128, acquisition price)\n      - inventory.totalCopies (Number)\n      - inventory.availableCopies (Number)\n      - branchId (ObjectId, references branches._id, ref -> branches._id)\n      - pricing.currency (String, ISO 4217)\n  6. cat_cd (CHAR(1), NOT NULL, // F=Fiction, N=NonFiction, R=Reference)\n    candidate destination paths:\n      - category (String, fiction / nonfiction / reference)\n      - inventory.referenceOnly (Boolean, true when the title cannot be borrowed)\n      - pricing.currency (String, ISO 4217)\n      - author.name (String, primary author full name)\n      - branchId (ObjectId, references branches._id, ref -> branches._id)\n      - title (String)\n  7. copies_tot (INT, NOT NULL, // Total copies owned)\n    candidate destination paths:\n      - inventory.totalCopies (Number)\n      - inventory.availableCopies (Number)\n      - pricing.amount (Decimal128, acquisition price)\n      - publishedYear (Number)\n      - branchId (ObjectId, references branches._id, ref -> branches._id)\n      - _id (ObjectId)\n  8. copies_avl (INT, NOT NULL, // Copies currently on the shelf)\n    candidate destination paths:\n      - inventory.totalCopies (Number)\n      - inventory.availableCopies (Number)\n      - publishedYear (Number)\n      - pricing.amount (Decimal128, acquisition price)\n      - branchId (ObjectId, references branches._id, ref -> branches._id)\n      - _id (ObjectId)\n\nReturn one entry per source field through the tool, using the exact source field names given above.",
+    "response_text": "",
+    "response_data": {
+      "mappings": [
+        {
+          "source_field": "bk_id",
+          "destination_field": "_id",
+          "confidence": 0.95,
+          "reasoning": "The primary key of the source table maps to MongoDB's _id field, following the [pk-to-objectid] convention.",
+          "notes": "MongoDB generates ObjectId values; retain the original integer bk_id in a legacy field (e.g., legacyBookId) to enable foreign key resolution during migration."
+        },
+        {
+          "source_field": "isbn_cd",
+          "destination_field": "isbn",
+          "confidence": 0.98,
+          "reasoning": "The ISBN-13 code field maps directly to the isbn string identifier, which is the unique human-readable identifier for books."
+        },
+        {
+          "source_field": "ttl",
+          "destination_field": "title",
+          "confidence": 0.99,
+          "reasoning": "The book title column maps directly to the title field in the destination collection."
+        },
+        {
+          "source_field": "auth_nm",
+          "destination_field": "author.name",
+          "confidence": 0.98,
+          "reasoning": "The primary author full name column maps to the author.name nested field."
+        },
+        {
+          "source_field": "pub_yr",
+          "destination_field": "publishedYear",
+          "confidence": 0.99,
+          "reasoning": "The 4-digit publication year maps directly to the publishedYear numeric field."
+        },
+        {
+          "source_field": "cat_cd",
+          "destination_field": "category",
+          "confidence": 0.95,
+          "reasoning": "The category code (F/N/R) maps to the category field, which stores the expanded string values (fiction/nonfiction/reference).",
+          "notes": "Transform the single-character code to its full string equivalent: F → 'fiction', N → 'nonfiction', R → 'reference'."
+        },
+        {
+          "source_field": "copies_tot",
+          "destination_field": "inventory.totalCopies",
+          "confidence": 0.99,
+          "reasoning": "The total copies owned column maps to the inventory.totalCopies nested numeric field."
+        },
+        {
+          "source_field": "copies_avl",
+          "destination_field": "inventory.availableCopies",
+          "confidence": 0.99,
+          "reasoning": "The available copies on shelf column maps to the inventory.availableCopies nested numeric field."
+        }
+      ]
+    },
+    "input_tokens": 2138,
+    "output_tokens": 656,
+    "latency_ms": 29717,
+    "cache_hit": false,
+    "source": "bedrock",
+    "prompt_chars": 5089
+  },
+  {
+    "stage": "adjudicate",
+    "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "manifest": {
+      "stage": "adjudicate",
+      "source_tables": [
+        "bk_master"
+      ],
+      "source_fields": [
+        "bk_master.is_ref_only",
+        "bk_master.price_amt",
+        "bk_master.cur_cd",
+        "bk_master.added_dt",
+        "bk_master.brnch_id"
+      ],
+      "destination_collections": [
+        "books"
+      ],
+      "destination_paths": [
+        "inventory.referenceOnly",
+        "branchId",
+        "category",
+        "_id",
+        "pricing.currency",
+        "isbn",
+        "pricing.amount",
+        "publishedYear",
+        "inventory.totalCopies",
+        "inventory.availableCopies",
+        "pricing.currency",
+        "pricing.currency",
+        "category",
+        "author.name",
+        "isbn",
+        "title",
+        "inventory.referenceOnly",
+        "addedAt",
+        "title",
+        "author.name",
+        "category",
+        "inventory.referenceOnly",
+        "pricing.currency",
+        "branchId",
+        "_id",
+        "inventory.availableCopies",
+        "inventory.totalCopies",
+        "pricing.amount",
+        "publishedYear"
+      ],
+      "source_fingerprint": "bea3b809af7d1906",
+      "destination_fingerprint": "ba249c0a5426abe6",
+      "detail_level": "typed",
+      "source_field_count": 5,
+      "destination_path_count": 13,
+      "source_table_count": 1
+    },
+    "system": "You map columns from a legacy MySQL table to field paths in a MongoDB collection.\n\nRules:\n1. For each source field, choose the single best destination path from the candidate list given for that field, or null if none is a genuine semantic match.\n2. Never invent a path. Only paths listed as candidates for that field are valid.\n3. Prefer null over a weak guess. A wrong mapping is more expensive than an acknowledged gap.\n4. reasoning must be exactly one plain-English sentence explaining the match.\n5. notes must describe any value-transform logic a migration would have to write (code lookups, boolean conversion, ID remapping, precision loss), or be null when the value moves across unchanged.\n6. confidence is your own certainty from 0 to 1, judged on semantics rather than on how similar the names look.",
+    "user": "Source table `bk_master` maps to destination collection `books`.\n\nRelevant conventions:\n  [iso-4217] ISO 4217 currency codes are exactly three uppercase letters (USD, GBP, JPY). A CHAR(3) currency column maps to a String with no value transform; validate against the ISO list.\n  [fk-to-ref] A relational foreign key maps to an ObjectId reference field. The migration needs an ID remap table from legacy integer keys to generated ObjectIds, applied after the referenced collection is loaded.\n  [datetime-timezone] MySQL DATETIME has no timezone. MongoDB ISODate is always UTC, so the migration must state the assumed source timezone; assuming UTC without checking silently shifts every timestamp.\n  [iso-3166] ISO 3166-1 alpha-2 country codes are two uppercase letters (US, GB, JP). A CHAR(2) country column maps to a String unchanged.\n\nMap these 5 source fields:\n  1. is_ref_only (TINYINT(1), NOT NULL, // 1 = reference only, cannot be borrowed)\n    candidate destination paths:\n      - inventory.referenceOnly (Boolean, true when the title cannot be borrowed)\n      - branchId (ObjectId, references branches._id, ref -> branches._id)\n      - category (String, fiction / nonfiction / reference)\n      - _id (ObjectId)\n      - pricing.currency (String, ISO 4217)\n      - isbn (String, unique human-readable identifier)\n  2. price_amt (DECIMAL(8,2), // Acquisition price)\n    candidate destination paths:\n      - pricing.amount (Decimal128, acquisition price)\n      - publishedYear (Number)\n      - inventory.totalCopies (Number)\n      - inventory.availableCopies (Number)\n      - pricing.currency (String, ISO 4217)\n  3. cur_cd (CHAR(3), // ISO 4217 currency of price_amt)\n    candidate destination paths:\n      - pricing.currency (String, ISO 4217)\n      - category (String, fiction / nonfiction / reference)\n      - author.name (String, primary author full name)\n      - isbn (String, unique human-readable identifier)\n      - title (String)\n      - inventory.referenceOnly (Boolean, true when the title cannot be borrowed)\n  4. added_dt (DATETIME, NOT NULL, // When the title was added to the catalog)\n    candidate destination paths:\n      - addedAt (ISODate)\n      - title (String)\n      - author.name (String, primary author full name)\n      - category (String, fiction / nonfiction / reference)\n      - inventory.referenceOnly (Boolean, true when the title cannot be borrowed)\n      - pricing.currency (String, ISO 4217)\n  5. brnch_id (INT, FK, -> brnch.brnch_id, // Owning branch)\n    candidate destination paths:\n      - branchId (ObjectId, references branches._id, ref -> branches._id)\n      - _id (ObjectId)\n      - inventory.availableCopies (Number)\n      - inventory.totalCopies (Number)\n      - pricing.amount (Decimal128, acquisition price)\n      - publishedYear (Number)\n\nReturn one entry per source field through the tool, using the exact source field names given above.",
+    "response_text": "",
+    "response_data": {
+      "mappings": [
+        {
+          "source_field": "is_ref_only",
+          "destination_field": "inventory.referenceOnly",
+          "confidence": 0.95,
+          "reasoning": "The TINYINT(1) boolean flag indicating reference-only status maps directly to the Boolean field describing whether a title cannot be borrowed.",
+          "notes": "Convert TINYINT(1) to Boolean: 1 → true, 0 → false."
+        },
+        {
+          "source_field": "price_amt",
+          "destination_field": "pricing.amount",
+          "confidence": 0.95,
+          "reasoning": "The DECIMAL(8,2) acquisition price maps directly to the Decimal128 field for acquisition price.",
+          "notes": "Convert DECIMAL(8,2) to Decimal128; precision is preserved."
+        },
+        {
+          "source_field": "cur_cd",
+          "destination_field": "pricing.currency",
+          "confidence": 0.98,
+          "reasoning": "The CHAR(3) ISO 4217 currency code maps directly to the String field for currency, with validation against the ISO 4217 standard.",
+          "notes": "Validate against ISO 4217 currency code list; no value transform required."
+        },
+        {
+          "source_field": "added_dt",
+          "destination_field": "addedAt",
+          "confidence": 0.95,
+          "reasoning": "The DATETIME field recording when the title was added to the catalog maps to the ISODate field for the same purpose.",
+          "notes": "Convert MySQL DATETIME to ISODate; assume source timezone is UTC."
+        },
+        {
+          "source_field": "brnch_id",
+          "destination_field": "branchId",
+          "confidence": 0.98,
+          "reasoning": "The INT foreign key to the branches table maps to an ObjectId reference field pointing to branches._id.",
+          "notes": "Apply ID remap table from legacy integer brnch_id values to generated ObjectIds in branches collection after branches are loaded."
+        }
+      ]
+    },
+    "input_tokens": 1787,
+    "output_tokens": 531,
+    "latency_ms": 3795,
+    "cache_hit": false,
+    "source": "bedrock",
+    "prompt_chars": 3697
+  },
+  {
+    "stage": "adjudicate",
+    "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "manifest": {
+      "stage": "adjudicate",
+      "source_tables": [
+        "mbr_info"
+      ],
+      "source_fields": [
+        "mbr_info.mbr_id",
+        "mbr_info.mbr_cd",
+        "mbr_info.f_nm",
+        "mbr_info.l_nm",
+        "mbr_info.eml",
+        "mbr_info.ph_no",
+        "mbr_info.join_dt",
+        "mbr_info.mbr_stat"
+      ],
+      "destination_collections": [
+        "members"
+      ],
+      "destination_paths": [
+        "_id",
+        "membership.homeBranchId",
+        "memberCode",
+        "membership.fineBalance",
+        "memberCode",
+        "membership.status",
+        "membership.homeBranchId",
+        "name.first",
+        "contact.email",
+        "name.last",
+        "name.first",
+        "name.last",
+        "contact.email",
+        "contact.phone",
+        "memberCode",
+        "membership.status",
+        "name.last",
+        "name.first",
+        "contact.email",
+        "contact.phone",
+        "memberCode",
+        "membership.status",
+        "contact.email",
+        "name.last",
+        "memberCode",
+        "contact.phone",
+        "membership.status",
+        "name.first",
+        "contact.phone",
+        "contact.email",
+        "name.last",
+        "name.first",
+        "memberCode",
+        "membership.status",
+        "membership.joinedAt",
+        "memberCode",
+        "membership.status",
+        "contact.phone",
+        "name.first",
+        "name.last",
+        "membership.status",
+        "name.first",
+        "name.last",
+        "memberCode",
+        "contact.email",
+        "contact.phone"
+      ],
+      "source_fingerprint": "bea3b809af7d1906",
+      "destination_fingerprint": "ba249c0a5426abe6",
+      "detail_level": "typed",
+      "source_field_count": 8,
+      "destination_path_count": 10,
+      "source_table_count": 1
+    },
+    "system": "You map columns from a legacy MySQL table to field paths in a MongoDB collection.\n\nRules:\n1. For each source field, choose the single best destination path from the candidate list given for that field, or null if none is a genuine semantic match.\n2. Never invent a path. Only paths listed as candidates for that field are valid.\n3. Prefer null over a weak guess. A wrong mapping is more expensive than an acknowledged gap.\n4. reasoning must be exactly one plain-English sentence explaining the match.\n5. notes must describe any value-transform logic a migration would have to write (code lookups, boolean conversion, ID remapping, precision loss), or be null when the value moves across unchanged.\n6. confidence is your own certainty from 0 to 1, judged on semantics rather than on how similar the names look.",
+    "user": "Source table `mbr_info` maps to destination collection `members`.\n\nRelevant conventions:\n  [denormalization] Document stores often denormalize a joined label alongside its reference, for example department.code and department.name next to department.departmentId. Those copies have no counterpart column in the referencing table; they are populated by joining the referenced table during migration.\n  [char-code-enum] Single-character CHAR(1) status codes require a lookup transform to readable enum strings, and the legend is usually documented in the column comment.\n  [datetime-timezone] MySQL DATETIME has no timezone. MongoDB ISODate is always UTC, so the migration must state the assumed source timezone; assuming UTC without checking silently shifts every timestamp.\n  [pk-to-objectid] A relational INT primary key maps to MongoDB _id, but ObjectId values are generated by MongoDB rather than carried over. Retain the original integer in a legacy field so foreign keys can be resolved during migration.\n\nMap these 8 source fields:\n  1. mbr_id (INT, PK, NOT NULL)\n    candidate destination paths:\n      - _id (ObjectId)\n      - membership.homeBranchId (ObjectId, references branches._id, ref -> branches._id)\n      - memberCode (String, unique human-readable membership code)\n      - membership.fineBalance (Decimal128, outstanding fines owed)\n  2. mbr_cd (VARCHAR(20), UNIQUE, NOT NULL, // Human-readable membership code)\n    candidate destination paths:\n      - memberCode (String, unique human-readable membership code)\n      - membership.status (String, active / suspended / expired)\n      - membership.homeBranchId (ObjectId, references branches._id, ref -> branches._id)\n      - name.first (String)\n      - contact.email (String)\n      - name.last (String)\n  3. f_nm (VARCHAR(60), NOT NULL, // First name)\n    candidate destination paths:\n      - name.first (String)\n      - name.last (String)\n      - contact.email (String)\n      - contact.phone (String)\n      - memberCode (String, unique human-readable membership code)\n      - membership.status (String, active / suspended / expired)\n  4. l_nm (VARCHAR(60), NOT NULL, // Last name)\n    candidate destination paths:\n      - name.last (String)\n      - name.first (String)\n      - contact.email (String)\n      - contact.phone (String)\n      - memberCode (String, unique human-readable membership code)\n      - membership.status (String, active / suspended / expired)\n  5. eml (VARCHAR(140), // Email address)\n    candidate destination paths:\n      - contact.email (String)\n      - name.last (String)\n      - memberCode (String, unique human-readable membership code)\n      - contact.phone (String)\n      - membership.status (String, active / suspended / expired)\n      - name.first (String)\n  6. ph_no (VARCHAR(30), // Phone number)\n    candidate destination paths:\n      - contact.phone (String)\n      - contact.email (String)\n      - name.last (String)\n      - name.first (String)\n      - memberCode (String, unique human-readable membership code)\n      - membership.status (String, active / suspended / expired)\n  7. join_dt (DATE, NOT NULL, // Date the membership started)\n    candidate destination paths:\n      - membership.joinedAt (ISODate)\n      - memberCode (String, unique human-readable membership code)\n      - membership.status (String, active / suspended / expired)\n      - contact.phone (String)\n      - name.first (String)\n      - name.last (String)\n  8. mbr_stat (CHAR(1), NOT NULL, // A=Active, S=Suspended, X=Expired)\n    candidate destination paths:\n      - membership.status (String, active / suspended / expired)\n      - name.first (String)\n      - name.last (String)\n      - memberCode (String, unique human-readable membership code)\n      - contact.email (String)\n      - contact.phone (String)\n\nReturn one entry per source field through the tool, using the exact source field names given above.",
+    "response_text": "",
+    "response_data": {
+      "mappings": [
+        {
+          "source_field": "mbr_id",
+          "destination_field": "membership.legacyMemberId",
+          "confidence": 0.95,
+          "reasoning": "The integer primary key should be retained in a legacy field to enable foreign key resolution during migration, while MongoDB generates a new ObjectId for _id.",
+          "notes": "Store original INT value in a legacy field; MongoDB will generate new ObjectId for _id. This enables resolution of foreign key references during migration."
+        },
+        {
+          "source_field": "mbr_cd",
+          "destination_field": "memberCode",
+          "confidence": 0.99,
+          "reasoning": "The human-readable membership code maps directly to the memberCode field, which is explicitly described as a unique human-readable membership code.",
+          "notes": null
+        },
+        {
+          "source_field": "f_nm",
+          "destination_field": "name.first",
+          "confidence": 0.99,
+          "reasoning": "The first name field maps directly to the name.first path.",
+          "notes": null
+        },
+        {
+          "source_field": "l_nm",
+          "destination_field": "name.last",
+          "confidence": 0.99,
+          "reasoning": "The last name field maps directly to the name.last path.",
+          "notes": null
+        },
+        {
+          "source_field": "eml",
+          "destination_field": "contact.email",
+          "confidence": 0.99,
+          "reasoning": "The email address field maps directly to the contact.email path.",
+          "notes": null
+        },
+        {
+          "source_field": "ph_no",
+          "destination_field": "contact.phone",
+          "confidence": 0.99,
+          "reasoning": "The phone number field maps directly to the contact.phone path.",
+          "notes": null
+        },
+        {
+          "source_field": "join_dt",
+          "destination_field": "membership.joinedAt",
+          "confidence": 0.95,
+          "reasoning": "The membership start date maps to the joinedAt field within the membership subdocument.",
+          "notes": "Convert MySQL DATE to MongoDB ISODate; assume UTC timezone for the source date value."
+        },
+        {
+          "source_field": "mbr_stat",
+          "destination_field": "membership.status",
+          "confidence": 0.99,
+          "reasoning": "The single-character status code must be transformed to a readable enum string using the documented legend (A=active, S=suspended, X=expired).",
+          "notes": "Lookup transform: A → 'active', S → 'suspended', X → 'expired'."
+        }
+      ]
+    },
+    "input_tokens": 1999,
+    "output_tokens": 689,
+    "latency_ms": 0,
+    "cache_hit": true,
+    "source": "cache",
+    "prompt_chars": 4693
+  },
+  {
+    "stage": "adjudicate",
+    "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "manifest": {
+      "stage": "adjudicate",
+      "source_tables": [
+        "mbr_info"
+      ],
+      "source_fields": [
+        "mbr_info.fine_bal",
+        "mbr_info.home_brnch"
+      ],
+      "destination_collections": [
+        "members"
+      ],
+      "destination_paths": [
+        "membership.fineBalance",
+        "name.last",
+        "membership.joinedAt",
+        "membership.homeBranchId",
+        "membership.fineBalance",
+        "_id"
+      ],
+      "source_fingerprint": "bea3b809af7d1906",
+      "destination_fingerprint": "ba249c0a5426abe6",
+      "detail_level": "typed",
+      "source_field_count": 2,
+      "destination_path_count": 5,
+      "source_table_count": 1
+    },
+    "system": "You map columns from a legacy MySQL table to field paths in a MongoDB collection.\n\nRules:\n1. For each source field, choose the single best destination path from the candidate list given for that field, or null if none is a genuine semantic match.\n2. Never invent a path. Only paths listed as candidates for that field are valid.\n3. Prefer null over a weak guess. A wrong mapping is more expensive than an acknowledged gap.\n4. reasoning must be exactly one plain-English sentence explaining the match.\n5. notes must describe any value-transform logic a migration would have to write (code lookups, boolean conversion, ID remapping, precision loss), or be null when the value moves across unchanged.\n6. confidence is your own certainty from 0 to 1, judged on semantics rather than on how similar the names look.",
+    "user": "Source table `mbr_info` maps to destination collection `members`.\n\nRelevant conventions:\n  [fk-to-ref] A relational foreign key maps to an ObjectId reference field. The migration needs an ID remap table from legacy integer keys to generated ObjectIds, applied after the referenced collection is loaded.\n  [pk-to-objectid] A relational INT primary key maps to MongoDB _id, but ObjectId values are generated by MongoDB rather than carried over. Retain the original integer in a legacy field so foreign keys can be resolved during migration.\n\nMap these 2 source fields:\n  1. fine_bal (DECIMAL(7,2), NOT NULL, // Outstanding fines owed)\n    candidate destination paths:\n      - membership.fineBalance (Decimal128, outstanding fines owed)\n      - name.last (String)\n      - membership.joinedAt (ISODate)\n  2. home_brnch (INT, FK, -> brnch.brnch_id, // Home branch)\n    candidate destination paths:\n      - membership.homeBranchId (ObjectId, references branches._id, ref -> branches._id)\n      - membership.fineBalance (Decimal128, outstanding fines owed)\n      - _id (ObjectId)\n\nReturn one entry per source field through the tool, using the exact source field names given above.",
+    "response_text": "",
+    "response_data": {
+      "mappings": [
+        {
+          "source_field": "fine_bal",
+          "destination_field": "membership.fineBalance",
+          "confidence": 0.99,
+          "reasoning": "The source field explicitly documents outstanding fines owed, and the destination field has identical semantics and appropriate Decimal128 type for financial precision.",
+          "notes": null
+        },
+        {
+          "source_field": "home_brnch",
+          "destination_field": "membership.homeBranchId",
+          "confidence": 0.95,
+          "reasoning": "This foreign key to the branches table maps to the ObjectId reference field following the [fk-to-ref] convention, requiring an ID remap from legacy integer keys to generated ObjectIds during migration.",
+          "notes": "Apply ID remap table to convert legacy integer brnch_id values to generated ObjectIds after branches collection is loaded."
+        }
+      ]
+    },
+    "input_tokens": 1304,
+    "output_tokens": 245,
+    "latency_ms": 0,
+    "cache_hit": true,
+    "source": "cache",
+    "prompt_chars": 1984
+  },
+  {
+    "stage": "reflect",
+    "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "manifest": {
+      "stage": "reflect",
+      "source_tables": [
+        "brnch"
+      ],
+      "source_fields": [
+        "brnch.addr_l1"
+      ],
+      "destination_collections": [
+        "branches"
+      ],
+      "destination_paths": [
+        "address.line1",
+        "address.city",
+        "address.state",
+        "address.country",
+        "address.postalCode",
+        "name"
+      ],
+      "source_fingerprint": "bea3b809af7d1906",
+      "destination_fingerprint": "ba249c0a5426abe6",
+      "detail_level": "typed",
+      "source_field_count": 1,
+      "destination_path_count": 6,
+      "source_table_count": 1
+    },
+    "system": "You are reviewing one uncertain schema-mapping decision made by another model. Confirm it or replace it with a better choice from the same candidate list. Be willing to answer null if no candidate is a genuine match.",
+    "user": "Source field: addr_l1 (VARCHAR(180), // Street address line 1)\n\nCandidate destination paths:\n      - address.line1 (String)\n      - address.city (String)\n      - address.state (String)\n      - address.country (String, ISO 3166-1 alpha-2)\n      - address.postalCode (String)\n      - name (String)\n\nOriginal decision: address.line1\nOriginal confidence: 0.99\nOriginal reasoning: Street address line 1 is the semantic match for the address.line1 field.\n\nReview this decision. Reply with the destination path you would keep or choose instead (or null), your confidence, one sentence of reasoning, any required value transform in notes, and whether you changed the decision.",
+    "response_text": "",
+    "response_data": {
+      "destination_field": "address.line1",
+      "confidence": 0.99,
+      "reasoning": "The source field addr_l1 explicitly represents \"Street address line 1\" which is a perfect semantic and structural match for address.line1.",
+      "notes": null,
+      "changed": false
+    },
+    "input_tokens": 956,
+    "output_tokens": 137,
+    "latency_ms": 0,
+    "cache_hit": true,
+    "source": "cache",
+    "prompt_chars": 886
+  },
+  {
+    "stage": "reflect",
+    "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "manifest": {
+      "stage": "reflect",
+      "source_tables": [
+        "brnch"
+      ],
+      "source_fields": [
+        "brnch.city_nm"
+      ],
+      "destination_collections": [
+        "branches"
+      ],
+      "destination_paths": [
+        "name",
+        "address.city",
+        "address.country",
+        "address.line1",
+        "address.state",
+        "address.postalCode"
+      ],
+      "source_fingerprint": "bea3b809af7d1906",
+      "destination_fingerprint": "ba249c0a5426abe6",
+      "detail_level": "typed",
+      "source_field_count": 1,
+      "destination_path_count": 6,
+      "source_table_count": 1
+    },
+    "system": "You are reviewing one uncertain schema-mapping decision made by another model. Confirm it or replace it with a better choice from the same candidate list. Be willing to answer null if no candidate is a genuine match.",
+    "user": "Source field: city_nm (VARCHAR(80))\n\nCandidate destination paths:\n      - name (String)\n      - address.city (String)\n      - address.country (String, ISO 3166-1 alpha-2)\n      - address.line1 (String)\n      - address.state (String)\n      - address.postalCode (String)\n\nOriginal decision: address.city\nOriginal confidence: 0.99\nOriginal reasoning: City name maps directly to the address.city field.\n\nReview this decision. Reply with the destination path you would keep or choose instead (or null), your confidence, one sentence of reasoning, any required value transform in notes, and whether you changed the decision.",
+    "response_text": "",
+    "response_data": {
+      "destination_field": "address.city",
+      "confidence": 0.99,
+      "reasoning": "The source field city_nm clearly contains city name data which semantically and structurally matches the address.city destination field perfectly.",
+      "notes": "None required",
+      "changed": false
+    },
+    "input_tokens": 938,
+    "output_tokens": 133,
+    "latency_ms": 0,
+    "cache_hit": true,
+    "source": "cache",
+    "prompt_chars": 836
+  },
+  {
+    "stage": "reflect",
+    "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "manifest": {
+      "stage": "reflect",
+      "source_tables": [
+        "brnch"
+      ],
+      "source_fields": [
+        "brnch.st_cd"
+      ],
+      "destination_collections": [
+        "branches"
+      ],
+      "destination_paths": [
+        "address.postalCode",
+        "address.state",
+        "address.city",
+        "address.country",
+        "address.line1",
+        "name"
+      ],
+      "source_fingerprint": "bea3b809af7d1906",
+      "destination_fingerprint": "ba249c0a5426abe6",
+      "detail_level": "typed",
+      "source_field_count": 1,
+      "destination_path_count": 6,
+      "source_table_count": 1
+    },
+    "system": "You are reviewing one uncertain schema-mapping decision made by another model. Confirm it or replace it with a better choice from the same candidate list. Be willing to answer null if no candidate is a genuine match.",
+    "user": "Source field: st_cd (CHAR(2), // US state code)\n\nCandidate destination paths:\n      - address.postalCode (String)\n      - address.state (String)\n      - address.city (String)\n      - address.country (String, ISO 3166-1 alpha-2)\n      - address.line1 (String)\n      - name (String)\n\nOriginal decision: address.state\nOriginal confidence: 0.98\nOriginal reasoning: US state code is the semantic match for the address.state field.\n\nReview this decision. Reply with the destination path you would keep or choose instead (or null), your confidence, one sentence of reasoning, any required value transform in notes, and whether you changed the decision.",
+    "response_text": "",
+    "response_data": {
+      "destination_field": "address.state",
+      "confidence": 0.99,
+      "reasoning": "US state code (st_cd) is a perfect semantic and structural match for address.state, representing the state component of a US address.",
+      "notes": "None required - CHAR(2) format is standard for US state codes and compatible with String type.",
+      "changed": false
+    },
+    "input_tokens": 947,
+    "output_tokens": 153,
+    "latency_ms": 0,
+    "cache_hit": true,
+    "source": "cache",
+    "prompt_chars": 863
+  },
+  {
+    "stage": "reflect",
+    "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "manifest": {
+      "stage": "reflect",
+      "source_tables": [
+        "bk_master"
+      ],
+      "source_fields": [
+        "bk_master.cat_cd"
+      ],
+      "destination_collections": [
+        "books"
+      ],
+      "destination_paths": [
+        "category",
+        "inventory.referenceOnly",
+        "pricing.currency",
+        "author.name",
+        "branchId",
+        "title"
+      ],
+      "source_fingerprint": "bea3b809af7d1906",
+      "destination_fingerprint": "ba249c0a5426abe6",
+      "detail_level": "typed",
+      "source_field_count": 1,
+      "destination_path_count": 6,
+      "source_table_count": 1
+    },
+    "system": "You are reviewing one uncertain schema-mapping decision made by another model. Confirm it or replace it with a better choice from the same candidate list. Be willing to answer null if no candidate is a genuine match.",
+    "user": "Source field: cat_cd (CHAR(1), NOT NULL, // F=Fiction, N=NonFiction, R=Reference)\n\nCandidate destination paths:\n      - category (String, fiction / nonfiction / reference)\n      - inventory.referenceOnly (Boolean, true when the title cannot be borrowed)\n      - pricing.currency (String, ISO 4217)\n      - author.name (String, primary author full name)\n      - branchId (ObjectId, references branches._id, ref -> branches._id)\n      - title (String)\n\nOriginal decision: category\nOriginal confidence: 0.95\nOriginal reasoning: The category code (F/N/R) maps to the category field, which stores the expanded string values (fiction/nonfiction/reference).\n\nReview this decision. Reply with the destination path you would keep or choose instead (or null), your confidence, one sentence of reasoning, any required value transform in notes, and whether you changed the decision.",
+    "response_text": "",
+    "response_data": {
+      "destination_field": "category",
+      "confidence": 0.95,
+      "reasoning": "The source field cat_cd with values F/N/R directly corresponds to the category destination field which stores fiction/nonfiction/reference, making this a clear semantic match.",
+      "notes": "Transform required: F -> fiction, N -> nonfiction, R -> reference (lowercase expansion of codes)",
+      "changed": false
+    },
+    "input_tokens": 998,
+    "output_tokens": 160,
+    "latency_ms": 3614,
+    "cache_hit": false,
+    "source": "bedrock",
+    "prompt_chars": 1088
+  },
+  {
+    "stage": "reflect",
+    "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "manifest": {
+      "stage": "reflect",
+      "source_tables": [
+        "bk_master"
+      ],
+      "source_fields": [
+        "bk_master.copies_avl"
+      ],
+      "destination_collections": [
+        "books"
+      ],
+      "destination_paths": [
+        "inventory.totalCopies",
+        "inventory.availableCopies",
+        "publishedYear",
+        "pricing.amount",
+        "branchId",
+        "_id"
+      ],
+      "source_fingerprint": "bea3b809af7d1906",
+      "destination_fingerprint": "ba249c0a5426abe6",
+      "detail_level": "typed",
+      "source_field_count": 1,
+      "destination_path_count": 6,
+      "source_table_count": 1
+    },
+    "system": "You are reviewing one uncertain schema-mapping decision made by another model. Confirm it or replace it with a better choice from the same candidate list. Be willing to answer null if no candidate is a genuine match.",
+    "user": "Source field: copies_avl (INT, NOT NULL, // Copies currently on the shelf)\n\nCandidate destination paths:\n      - inventory.totalCopies (Number)\n      - inventory.availableCopies (Number)\n      - publishedYear (Number)\n      - pricing.amount (Decimal128, acquisition price)\n      - branchId (ObjectId, references branches._id, ref -> branches._id)\n      - _id (ObjectId)\n\nOriginal decision: inventory.availableCopies\nOriginal confidence: 0.99\nOriginal reasoning: The available copies on shelf column maps to the inventory.availableCopies nested numeric field.\n\nReview this decision. Reply with the destination path you would keep or choose instead (or null), your confidence, one sentence of reasoning, any required value transform in notes, and whether you changed the decision.",
+    "response_text": "",
+    "response_data": {
+      "destination_field": "inventory.availableCopies",
+      "confidence": 0.99,
+      "reasoning": "The source field explicitly describes \"copies currently on the shelf\" which directly corresponds to available copies in the inventory, making this mapping semantically perfect.",
+      "notes": null,
+      "changed": false
+    },
+    "input_tokens": 972,
+    "output_tokens": 138,
+    "latency_ms": 3297,
+    "cache_hit": false,
+    "source": "bedrock",
+    "prompt_chars": 996
+  },
+  {
+    "stage": "reflect",
+    "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "manifest": {
+      "stage": "reflect",
+      "source_tables": [
+        "mbr_info"
+      ],
+      "source_fields": [
+        "mbr_info.mbr_id"
+      ],
+      "destination_collections": [
+        "members"
+      ],
+      "destination_paths": [
+        "_id",
+        "membership.homeBranchId",
+        "memberCode",
+        "membership.fineBalance"
+      ],
+      "source_fingerprint": "bea3b809af7d1906",
+      "destination_fingerprint": "ba249c0a5426abe6",
+      "detail_level": "typed",
+      "source_field_count": 1,
+      "destination_path_count": 4,
+      "source_table_count": 1
+    },
+    "system": "You are reviewing one uncertain schema-mapping decision made by another model. Confirm it or replace it with a better choice from the same candidate list. Be willing to answer null if no candidate is a genuine match.",
+    "user": "Source field: mbr_id (INT, PK, NOT NULL)\n\nCandidate destination paths:\n      - _id (ObjectId)\n      - membership.homeBranchId (ObjectId, references branches._id, ref -> branches._id)\n      - memberCode (String, unique human-readable membership code)\n      - membership.fineBalance (Decimal128, outstanding fines owed)\n\nOriginal decision: membership.legacyMemberId\nOriginal confidence: 0.95\nOriginal reasoning: The integer primary key should be retained in a legacy field to enable foreign key resolution during migration, while MongoDB generates a new ObjectId for _id.\n\nReview this decision. Reply with the destination path you would keep or choose instead (or null), your confidence, one sentence of reasoning, any required value transform in notes, and whether you changed the decision.",
+    "response_text": "",
+    "response_data": {
+      "destination_field": "membership.legacyMemberId",
+      "confidence": 0.95,
+      "reasoning": "The original decision is correct because mbr_id as an integer primary key from a relational database should be preserved in a legacy field to maintain referential integrity during migration and enable lookups from other tables that reference this key.",
+      "notes": "Store as integer type; this field is essential for resolving foreign key relationships during the migration process from the relational schema.",
+      "changed": false
+    },
+    "input_tokens": 968,
+    "output_tokens": 179,
+    "latency_ms": 0,
+    "cache_hit": true,
+    "source": "cache",
+    "prompt_chars": 1007
+  },
+  {
+    "stage": "adjudicate",
+    "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "manifest": {
+      "stage": "adjudicate",
+      "source_tables": [
+        "mbr_info"
+      ],
+      "source_fields": [
+        "mbr_info.mbr_id"
+      ],
+      "destination_collections": [
+        "members"
+      ],
+      "destination_paths": [
+        "_id",
+        "membership.homeBranchId",
+        "memberCode",
+        "membership.fineBalance"
+      ],
+      "source_fingerprint": "bea3b809af7d1906",
+      "destination_fingerprint": "ba249c0a5426abe6",
+      "detail_level": "typed",
+      "source_field_count": 1,
+      "destination_path_count": 4,
+      "source_table_count": 1
+    },
+    "system": "You map columns from a legacy MySQL table to field paths in a MongoDB collection.\n\nRules:\n1. For each source field, choose the single best destination path from the candidate list given for that field, or null if none is a genuine semantic match.\n2. Never invent a path. Only paths listed as candidates for that field are valid.\n3. Prefer null over a weak guess. A wrong mapping is more expensive than an acknowledged gap.\n4. reasoning must be exactly one plain-English sentence explaining the match.\n5. notes must describe any value-transform logic a migration would have to write (code lookups, boolean conversion, ID remapping, precision loss), or be null when the value moves across unchanged.\n6. confidence is your own certainty from 0 to 1, judged on semantics rather than on how similar the names look.",
+    "user": "Source table `mbr_info` maps to destination collection `members`.\n\nRelevant conventions:\n  [pk-to-objectid] A relational INT primary key maps to MongoDB _id, but ObjectId values are generated by MongoDB rather than carried over. Retain the original integer in a legacy field so foreign keys can be resolved during migration.\n\nMap these 1 source fields:\n  1. mbr_id (INT, PK, NOT NULL)\n    candidate destination paths:\n      - _id (ObjectId)\n      - membership.homeBranchId (ObjectId, references branches._id, ref -> branches._id)\n      - memberCode (String, unique human-readable membership code)\n      - membership.fineBalance (Decimal128, outstanding fines owed)\n\nReturn one entry per source field through the tool, using the exact source field names given above.",
+    "response_text": "",
+    "response_data": {
+      "mappings": [
+        {
+          "source_field": "mbr_id",
+          "destination_field": "_id",
+          "confidence": 0.95,
+          "reasoning": "The primary key mbr_id should map to the MongoDB _id field following the pk-to-objectid convention.",
+          "notes": "Generate new ObjectId for _id; store original mbr_id integer in a legacy field (e.g., legacyMbrId) to resolve foreign key references during migration."
+        }
+      ]
+    },
+    "input_tokens": 1187,
+    "output_tokens": 147,
+    "latency_ms": 0,
+    "cache_hit": true,
+    "source": "cache",
+    "prompt_chars": 1576
+  }
+]

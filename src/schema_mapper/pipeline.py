@@ -101,6 +101,12 @@ class Decision:
             "destination_field": self.path,
             "confidence": self.confidence,
             "model_confidence": self.model_confidence,
+            # Carried even though mapped fields also expose it through the
+            # artifact: for a field that ends up unmapped there is no
+            # field_mappings entry, so this is the only place the explanation for
+            # *not* mapping it survives.
+            "reasoning": self.reasoning,
+            "notes": self.notes,
             "decided_by": self.decided_by,
             "repaired": self.repaired,
             "tie_broken": self.tie_broken,
@@ -1021,10 +1027,15 @@ class Pipeline:
                     (d for d in decisions if d.src.table == table.source_table and d.src.name == name),
                     None,
                 )
+                # Precedence matters. `forced_null` is the pipeline overruling a
+                # model answer and names the mechanism, so it wins. Otherwise the
+                # model declined on purpose and its own sentence says why far
+                # better than the generic fallback, which is a last resort.
+                reason = ""
+                if decision is not None:
+                    reason = decision.forced_null or decision.reasoning
                 unmapped_explanations[f"{table.source_table}.{name}"] = (
-                    decision.forced_null
-                    if decision and decision.forced_null
-                    else "No candidate destination path was a genuine semantic match."
+                    reason.strip() or "No candidate destination path was a genuine semantic match."
                 )
 
         return {

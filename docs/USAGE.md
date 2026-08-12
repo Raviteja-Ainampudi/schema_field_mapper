@@ -8,6 +8,34 @@ The bundled `legacy_hrm` and `people_platform` schemas load automatically and th
 artifact is displayed, so the page is useful before you run anything. The same content as
 this page is available in-app under the **Guide** tab.
 
+## The path through the interface
+
+```mermaid
+flowchart TD
+    open["Open the page"] --> shown["Committed artifact is already displayed<br/>bundled schemas loaded"]
+    shown --> own{"map your own schemas?"}
+
+    own -->|"no"| tick["Tick offline"]
+    tick --> run["Run pipeline"]
+
+    own -->|"yes"| input["Input data tab<br/>paste · drop · upload · sample"]
+    input --> parsed{"both sides parse?"}
+    parsed -->|"no"| fix["Read the error under the editor<br/>Run stays disabled"]
+    fix --> input
+    parsed -->|"yes"| paired{"pairing verdict"}
+    paired -->|"weak or unrelated"| warned["Warning names the forced tables"]
+    warned --> input
+    paired -->|"aligned"| untick["Untick offline<br/>new schemas have no recording"]
+    untick --> run
+
+    run --> watch["Wires animate in per batch"]
+    watch --> inspect["Click a field or wire<br/>Decision tab shows provenance"]
+    inspect --> judge{"looks right?"}
+    judge -->|"no"| review["Constraint proof · Coverage · Cost"]
+    judge -->|"yes"| export["Mapping JSON<br/>copy or download"]
+    review --> export
+```
+
 ## Layout
 
 | Region | What it is for |
@@ -89,6 +117,43 @@ tables onto `people_platform`, which is occasionally what you want and usually n
 meaningful result, load both halves of one pair**, because mapping a library source onto an
 HR destination correctly produces mostly unmapped fields.
 
+### If the two files are not a pair
+
+Both halves can parse perfectly and still not belong together. Nothing errors in that case,
+which is the problem: routing has to choose *some* collection and shortlisting has to offer
+*some* candidates, so pairing a library source with the HR destination produces
+`bk_master → employees` and a confident-looking mess.
+
+So there is a third check beside the two parse checks: a **pairing assessment**, computed
+deterministically with no model call, shown in the input panel and beside the run button.
+
+| Verdict | Meaning | What the UI does |
+| --- | --- | --- |
+| `aligned` | Every table has a clearly matching collection | Green note, no warning |
+| `weak` | Some tables match, at least one is being forced | Amber warning naming the forced tables |
+| `unrelated` | No table has a real counterpart | Red warning |
+
+It names the specific table that has nowhere to go — for the library-against-HR case,
+`1 of 3 source tables has no clearly matching collection, so the closest available is forced
+(bk_master → departments)`. It also lists the likely routing per table with an affinity
+score, which is a free preview of what Stage 1 will decide.
+
+Two deliberate design choices here:
+
+- **It warns, it never blocks.** The signal is name and comment vocabulary, and the margin
+  between a real pair (0.48–0.61 in calibration) and a crossed one (0.28–0.43) is real but
+  narrow. Blocking on a heuristic that tight would eventually refuse a legitimate schema.
+- **It does not flag pairings that are genuinely fine.** In the library-against-HR case
+  `brnch → locations` is *not* flagged, because both really are addresses and it scores 0.53
+  on its own merits. Warning about it would train you to ignore the warnings.
+
+The same assessment is written into `run_report.json` under `pairing`, so an artifact
+produced from a mismatched pair carries the caveat with it rather than looking merely
+low-confidence for no stated reason.
+
+Calibration lives in `scripts/eval_pairing.py`, which scores every source against every
+destination and fails if any true pair scores below any crossed pair.
+
 ### After loading: what to press, and how to tell it worked
 
 1. Confirm both validation lines are green and read the counts back. If a line is red,
@@ -139,6 +204,14 @@ its manifest.
 **Coverage & quality** — every source field is either mapped or explicitly declared
 unmapped; the same for destination paths. Also the confidence histogram, escalation rate,
 and any repairs, tie-breaks, or corrected notes.
+
+Unmapped is a result, not a failure: `emp_master.dob` has no counterpart in `people_platform`,
+so declaring it unmapped is the correct answer and the oracle in `tests/` expects exactly that.
+Every declined field states why, in the model's own words, under **Unmapped, with reasons**
+here and in the Reasoning row of its **Decision** tab. The artifact keeps
+`unmapped_source_fields` as a plain list of names because the assignment's contract asks for
+that shape; the sentences live in `run_report.json` under
+`coverage.unmapped_source_explanations`.
 
 **Cost** — per-call token counts and USD by stage and model, cost per mapped field, cache
 hits, and what the run would have cost on other models. An offline run reports the

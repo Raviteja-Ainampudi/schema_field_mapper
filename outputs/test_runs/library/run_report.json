@@ -1,0 +1,3155 @@
+{
+  "run_id": "50d936ae8f1c",
+  "generated_at": "2026-08-12T06:46:31Z",
+  "duration_ms": 41058,
+  "mode": "live",
+  "models": {
+    "router": "us.amazon.nova-lite-v1:0",
+    "mapper": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "cheap_mapper": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "cascade_enabled": true,
+    "reflection_enabled": true,
+    "labels": {
+      "router": "Nova Lite",
+      "mapper": "Claude Sonnet 4.5",
+      "cheap_mapper": "Claude Haiku 4.5"
+    }
+  },
+  "schemas": {
+    "source": {
+      "database": "legacy_library",
+      "tables": 3,
+      "fields": 31,
+      "fingerprint": "bea3b809af7d1906"
+    },
+    "destination": {
+      "database": "library_platform",
+      "collections": 3,
+      "leaf_paths": 33,
+      "fingerprint": "ba249c0a5426abe6"
+    }
+  },
+  "routing": {
+    "pairings": {
+      "brnch": "branches",
+      "bk_master": "books",
+      "mbr_info": "members"
+    },
+    "confidence": {
+      "brnch": 0.95,
+      "bk_master": 0.95,
+      "mbr_info": 0.95
+    },
+    "conflicts": []
+  },
+  "coverage": {
+    "source_fields_total": 31,
+    "source_fields_mapped": 31,
+    "source_fields_unmapped": 0,
+    "destination_paths_total": 33,
+    "destination_paths_targeted": 31,
+    "accounted_source_fields": 31,
+    "unmapped_source_explanations": {},
+    "unmapped_destination_explanations": {
+      "branches.managerId": "No column in brnch corresponds to this path.",
+      "books.tags": "No column in bk_master corresponds to this path."
+    }
+  },
+  "quality": {
+    "confidence_histogram": {
+      "high": 15,
+      "medium": 9,
+      "review": 7
+    },
+    "mean_confidence": 0.854,
+    "escalation_rate": 0.194,
+    "reflection_count": 6,
+    "repaired": 1,
+    "tie_broken": 0
+  },
+  "constraint": {
+    "total_llm_calls": 15,
+    "total_source_fields": 31,
+    "total_source_tables": 3,
+    "total_destination_paths": 33,
+    "max_source_tables_in_one_prompt": 1,
+    "max_typed_source_fields_in_one_prompt": 8,
+    "max_named_source_fields_in_one_prompt": 13,
+    "max_destination_paths_in_one_prompt": 13,
+    "max_mappings_from_one_call": 8,
+    "prompts_containing_both_full_schemas": 0,
+    "max_input_tokens_in_one_prompt": 2138,
+    "both_schemas_counterfactual_tokens": 1275,
+    "prompts": [
+      {
+        "stage": "route",
+        "model_id": "us.amazon.nova-lite-v1:0",
+        "detail_level": "names",
+        "source_field_count": 8,
+        "source_table_count": 1,
+        "destination_path_count": 0,
+        "input_tokens": 596,
+        "prompt_chars": 555
+      },
+      {
+        "stage": "route",
+        "model_id": "us.amazon.nova-lite-v1:0",
+        "detail_level": "names",
+        "source_field_count": 13,
+        "source_table_count": 1,
+        "destination_path_count": 0,
+        "input_tokens": 618,
+        "prompt_chars": 610
+      },
+      {
+        "stage": "route",
+        "model_id": "us.amazon.nova-lite-v1:0",
+        "detail_level": "names",
+        "source_field_count": 10,
+        "source_table_count": 1,
+        "destination_path_count": 0,
+        "input_tokens": 603,
+        "prompt_chars": 568
+      },
+      {
+        "stage": "adjudicate",
+        "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "detail_level": "typed",
+        "source_field_count": 8,
+        "source_table_count": 1,
+        "destination_path_count": 9,
+        "input_tokens": 1963,
+        "prompt_chars": 4004
+      },
+      {
+        "stage": "adjudicate",
+        "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "detail_level": "typed",
+        "source_field_count": 8,
+        "source_table_count": 1,
+        "destination_path_count": 12,
+        "input_tokens": 2138,
+        "prompt_chars": 5089
+      },
+      {
+        "stage": "adjudicate",
+        "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "detail_level": "typed",
+        "source_field_count": 5,
+        "source_table_count": 1,
+        "destination_path_count": 13,
+        "input_tokens": 1787,
+        "prompt_chars": 3697
+      },
+      {
+        "stage": "adjudicate",
+        "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "detail_level": "typed",
+        "source_field_count": 8,
+        "source_table_count": 1,
+        "destination_path_count": 10,
+        "input_tokens": 1999,
+        "prompt_chars": 4693
+      },
+      {
+        "stage": "adjudicate",
+        "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "detail_level": "typed",
+        "source_field_count": 2,
+        "source_table_count": 1,
+        "destination_path_count": 5,
+        "input_tokens": 1304,
+        "prompt_chars": 1984
+      },
+      {
+        "stage": "reflect",
+        "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "detail_level": "typed",
+        "source_field_count": 1,
+        "source_table_count": 1,
+        "destination_path_count": 6,
+        "input_tokens": 956,
+        "prompt_chars": 886
+      },
+      {
+        "stage": "reflect",
+        "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "detail_level": "typed",
+        "source_field_count": 1,
+        "source_table_count": 1,
+        "destination_path_count": 6,
+        "input_tokens": 938,
+        "prompt_chars": 836
+      },
+      {
+        "stage": "reflect",
+        "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "detail_level": "typed",
+        "source_field_count": 1,
+        "source_table_count": 1,
+        "destination_path_count": 6,
+        "input_tokens": 947,
+        "prompt_chars": 863
+      },
+      {
+        "stage": "reflect",
+        "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "detail_level": "typed",
+        "source_field_count": 1,
+        "source_table_count": 1,
+        "destination_path_count": 6,
+        "input_tokens": 998,
+        "prompt_chars": 1088
+      },
+      {
+        "stage": "reflect",
+        "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "detail_level": "typed",
+        "source_field_count": 1,
+        "source_table_count": 1,
+        "destination_path_count": 6,
+        "input_tokens": 972,
+        "prompt_chars": 996
+      },
+      {
+        "stage": "reflect",
+        "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "detail_level": "typed",
+        "source_field_count": 1,
+        "source_table_count": 1,
+        "destination_path_count": 4,
+        "input_tokens": 968,
+        "prompt_chars": 1007
+      },
+      {
+        "stage": "adjudicate",
+        "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "detail_level": "typed",
+        "source_field_count": 1,
+        "source_table_count": 1,
+        "destination_path_count": 4,
+        "input_tokens": 1187,
+        "prompt_chars": 1576
+      }
+    ]
+  },
+  "cost": {
+    "total_usd": 0.02024,
+    "total_input_tokens": 5895,
+    "total_output_tokens": 1485,
+    "total_tokens": 7380,
+    "billable_calls": 4,
+    "cache_hits": 11,
+    "token_ceiling": 120000,
+    "cost_per_mapped_field": 0.000653,
+    "by_stage": {
+      "route": {
+        "calls": 3,
+        "input_tokens": 1817,
+        "output_tokens": 161,
+        "usd": 0.0,
+        "models": [
+          "us.amazon.nova-lite-v1:0"
+        ]
+      },
+      "adjudicate": {
+        "calls": 6,
+        "input_tokens": 10378,
+        "output_tokens": 2962,
+        "usd": 0.00986,
+        "models": [
+          "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+        ]
+      },
+      "reflect": {
+        "calls": 6,
+        "input_tokens": 5779,
+        "output_tokens": 900,
+        "usd": 0.01038,
+        "models": [
+          "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+        ]
+      }
+    },
+    "by_model": {
+      "us.amazon.nova-lite-v1:0": {
+        "label": "Nova Lite",
+        "calls": 3,
+        "input_tokens": 1817,
+        "output_tokens": 161,
+        "usd": 0.0
+      },
+      "us.anthropic.claude-haiku-4-5-20251001-v1:0": {
+        "label": "Claude Haiku 4.5",
+        "calls": 5,
+        "input_tokens": 9191,
+        "output_tokens": 2815,
+        "usd": 0.00986
+      },
+      "us.anthropic.claude-sonnet-4-5-20250929-v1:0": {
+        "label": "Claude Sonnet 4.5",
+        "calls": 7,
+        "input_tokens": 6966,
+        "output_tokens": 1047,
+        "usd": 0.01038
+      }
+    },
+    "what_if_single_model": {
+      "us.amazon.nova-micro-v1:0": 0.000414,
+      "us.amazon.nova-lite-v1:0": 0.00071,
+      "us.amazon.nova-pro-v1:0": 0.009468,
+      "us.anthropic.claude-haiku-4-5-20251001-v1:0": 0.01332,
+      "us.anthropic.claude-sonnet-4-5-20250929-v1:0": 0.03996
+    },
+    "calls": [
+      {
+        "stage": "route",
+        "model_id": "us.amazon.nova-lite-v1:0",
+        "model": "Nova Lite",
+        "input_tokens": 596,
+        "output_tokens": 57,
+        "latency_ms": 0,
+        "cache_hit": true,
+        "usd": 0.0
+      },
+      {
+        "stage": "route",
+        "model_id": "us.amazon.nova-lite-v1:0",
+        "model": "Nova Lite",
+        "input_tokens": 618,
+        "output_tokens": 52,
+        "latency_ms": 0,
+        "cache_hit": true,
+        "usd": 0.0
+      },
+      {
+        "stage": "route",
+        "model_id": "us.amazon.nova-lite-v1:0",
+        "model": "Nova Lite",
+        "input_tokens": 603,
+        "output_tokens": 52,
+        "latency_ms": 0,
+        "cache_hit": true,
+        "usd": 0.0
+      },
+      {
+        "stage": "adjudicate",
+        "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "model": "Claude Haiku 4.5",
+        "input_tokens": 1963,
+        "output_tokens": 694,
+        "latency_ms": 0,
+        "cache_hit": true,
+        "usd": 0.0
+      },
+      {
+        "stage": "adjudicate",
+        "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "model": "Claude Haiku 4.5",
+        "input_tokens": 2138,
+        "output_tokens": 656,
+        "latency_ms": 29717,
+        "cache_hit": false,
+        "usd": 0.005418
+      },
+      {
+        "stage": "adjudicate",
+        "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "model": "Claude Haiku 4.5",
+        "input_tokens": 1787,
+        "output_tokens": 531,
+        "latency_ms": 3795,
+        "cache_hit": false,
+        "usd": 0.004442
+      },
+      {
+        "stage": "adjudicate",
+        "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "model": "Claude Haiku 4.5",
+        "input_tokens": 1999,
+        "output_tokens": 689,
+        "latency_ms": 0,
+        "cache_hit": true,
+        "usd": 0.0
+      },
+      {
+        "stage": "adjudicate",
+        "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+        "model": "Claude Haiku 4.5",
+        "input_tokens": 1304,
+        "output_tokens": 245,
+        "latency_ms": 0,
+        "cache_hit": true,
+        "usd": 0.0
+      },
+      {
+        "stage": "reflect",
+        "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "model": "Claude Sonnet 4.5",
+        "input_tokens": 956,
+        "output_tokens": 137,
+        "latency_ms": 0,
+        "cache_hit": true,
+        "usd": 0.0
+      },
+      {
+        "stage": "reflect",
+        "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "model": "Claude Sonnet 4.5",
+        "input_tokens": 938,
+        "output_tokens": 133,
+        "latency_ms": 0,
+        "cache_hit": true,
+        "usd": 0.0
+      },
+      {
+        "stage": "reflect",
+        "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "model": "Claude Sonnet 4.5",
+        "input_tokens": 947,
+        "output_tokens": 153,
+        "latency_ms": 0,
+        "cache_hit": true,
+        "usd": 0.0
+      },
+      {
+        "stage": "reflect",
+        "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "model": "Claude Sonnet 4.5",
+        "input_tokens": 998,
+        "output_tokens": 160,
+        "latency_ms": 3614,
+        "cache_hit": false,
+        "usd": 0.005394
+      },
+      {
+        "stage": "reflect",
+        "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "model": "Claude Sonnet 4.5",
+        "input_tokens": 972,
+        "output_tokens": 138,
+        "latency_ms": 3297,
+        "cache_hit": false,
+        "usd": 0.004986
+      },
+      {
+        "stage": "reflect",
+        "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "model": "Claude Sonnet 4.5",
+        "input_tokens": 968,
+        "output_tokens": 179,
+        "latency_ms": 0,
+        "cache_hit": true,
+        "usd": 0.0
+      },
+      {
+        "stage": "adjudicate",
+        "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        "model": "Claude Sonnet 4.5",
+        "input_tokens": 1187,
+        "output_tokens": 147,
+        "latency_ms": 0,
+        "cache_hit": true,
+        "usd": 0.0
+      }
+    ],
+    "billed": true
+  },
+  "stages": [
+    {
+      "stage": "0",
+      "duration_ms": 0,
+      "source_tables": 3,
+      "source_fields": 31,
+      "destination_collections": 3,
+      "destination_paths": 33
+    },
+    {
+      "stage": "1",
+      "duration_ms": 51,
+      "pairings": {
+        "brnch": "branches",
+        "bk_master": "books",
+        "mbr_info": "members"
+      },
+      "conflicts": []
+    },
+    {
+      "stage": "2",
+      "duration_ms": 55,
+      "fields": 31,
+      "candidates_offered": 173,
+      "average_candidates": 5.58
+    },
+    {
+      "stage": "3",
+      "duration_ms": 33872,
+      "fields": 31,
+      "batches": 5,
+      "escalated": 0,
+      "escalation_rate": 0.0
+    },
+    {
+      "stage": "3c",
+      "duration_ms": 7018,
+      "reviewed": 6,
+      "revised": 0
+    },
+    {
+      "stage": "4",
+      "duration_ms": 16,
+      "hallucinated": 1,
+      "collisions": 0,
+      "reasoning_repairs": 0,
+      "notes_corrections": 0,
+      "forced_nulls": 0
+    },
+    {
+      "stage": "5",
+      "duration_ms": 2,
+      "tables": 3,
+      "mapped_fields": 31
+    }
+  ],
+  "tools": {
+    "tool_calls": 36,
+    "by_tool": {
+      "column_names": 3,
+      "list_collections": 1,
+      "list_tables": 1,
+      "lookup_candidates": 31
+    }
+  },
+  "diagnostics": {
+    "ok": true,
+    "schema_violations": [],
+    "hallucinated_paths_caught": [
+      "mbr_info.mbr_id -> membership.legacyMemberId"
+    ],
+    "unresolved_paths": [],
+    "collisions": [],
+    "coverage_errors": [],
+    "reasoning_repairs": [],
+    "notes_corrections": [],
+    "forced_nulls": []
+  },
+  "decisions": [
+    {
+      "source_field": "brnch.brnch_id",
+      "destination_field": "_id",
+      "confidence": 0.85,
+      "model_confidence": 0.95,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "iso-3166",
+        "iso-4217",
+        "pk-to-objectid",
+        "datetime-timezone"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "_id",
+          "confidence": 0.95,
+          "reasoning": "The primary key of the source table must map to the MongoDB document identifier, following the pk-to-objectid convention."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "_id",
+          "lexical": 0.9025,
+          "fuzzy": 0.4444,
+          "type_compat": 0.75,
+          "key_role": 1.0,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.6863
+        },
+        {
+          "path": "managerId",
+          "lexical": 0.5944,
+          "fuzzy": 0.375,
+          "type_compat": 0.75,
+          "key_role": 0.35,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.4699
+        },
+        {
+          "path": "address.postalCode",
+          "lexical": 0.35,
+          "fuzzy": 0.25,
+          "type_compat": 0.3,
+          "key_role": 0.15,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.244
+        }
+      ]
+    },
+    {
+      "source_field": "brnch.brnch_nm",
+      "destination_field": "name",
+      "confidence": 0.94,
+      "model_confidence": 0.98,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "iso-3166",
+        "iso-4217",
+        "pk-to-objectid",
+        "datetime-timezone"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "name",
+          "confidence": 0.98,
+          "reasoning": "The branch name field maps directly to the name field in the destination collection."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "name",
+          "lexical": 0.9025,
+          "fuzzy": 0.3636,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.6,
+          "embedding": null,
+          "total": 0.7386
+        },
+        {
+          "path": "address.city",
+          "lexical": 0.0,
+          "fuzzy": 0.2222,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2827
+        },
+        {
+          "path": "address.line1",
+          "lexical": 0.0,
+          "fuzzy": 0.2105,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2813
+        },
+        {
+          "path": "address.country",
+          "lexical": 0.0,
+          "fuzzy": 0.1905,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2789
+        },
+        {
+          "path": "address.postalCode",
+          "lexical": 0.0,
+          "fuzzy": 0.1667,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.276
+        },
+        {
+          "path": "address.state",
+          "lexical": 0.0,
+          "fuzzy": 0.1053,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2686
+        }
+      ]
+    },
+    {
+      "source_field": "brnch.addr_l1",
+      "destination_field": "address.line1",
+      "confidence": 0.73,
+      "model_confidence": 0.99,
+      "decided_by": "reflection",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "iso-3166",
+        "iso-4217",
+        "pk-to-objectid",
+        "datetime-timezone"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "address.line1",
+          "confidence": 0.99,
+          "reasoning": "Street address line 1 is the semantic match for the address.line1 field."
+        },
+        {
+          "pass": "reflection",
+          "model": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+          "destination_field": "address.line1",
+          "confidence": 0.99,
+          "reasoning": "The source field addr_l1 explicitly represents \"Street address line 1\" which is a perfect semantic and structural match for address.line1."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "address.line1",
+          "lexical": 0.45,
+          "fuzzy": 0.6667,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.3,
+          "embedding": null,
+          "total": 0.555
+        },
+        {
+          "path": "address.city",
+          "lexical": 0.45,
+          "fuzzy": 0.4706,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.3,
+          "embedding": null,
+          "total": 0.5315
+        },
+        {
+          "path": "address.state",
+          "lexical": 0.45,
+          "fuzzy": 0.4444,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.3,
+          "embedding": null,
+          "total": 0.5283
+        },
+        {
+          "path": "address.country",
+          "lexical": 0.45,
+          "fuzzy": 0.4,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.3,
+          "embedding": null,
+          "total": 0.523
+        },
+        {
+          "path": "address.postalCode",
+          "lexical": 0.425,
+          "fuzzy": 0.4348,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.2,
+          "embedding": null,
+          "total": 0.5017
+        },
+        {
+          "path": "name",
+          "lexical": 0.0,
+          "fuzzy": 0.2,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.28
+        }
+      ]
+    },
+    {
+      "source_field": "brnch.city_nm",
+      "destination_field": "address.city",
+      "confidence": 0.62,
+      "model_confidence": 0.99,
+      "decided_by": "reflection",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "iso-3166",
+        "iso-4217",
+        "pk-to-objectid",
+        "datetime-timezone"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "address.city",
+          "confidence": 0.99,
+          "reasoning": "City name maps directly to the address.city field."
+        },
+        {
+          "pass": "reflection",
+          "model": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+          "destination_field": "address.city",
+          "confidence": 0.99,
+          "reasoning": "The source field city_nm clearly contains city name data which semantically and structurally matches the address.city destination field perfectly."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "name",
+          "lexical": 0.9025,
+          "fuzzy": 0.4,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.647
+        },
+        {
+          "path": "address.city",
+          "lexical": 0.5462,
+          "fuzzy": 0.8,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.5596
+        },
+        {
+          "path": "address.country",
+          "lexical": 0.0,
+          "fuzzy": 0.4615,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.3114
+        },
+        {
+          "path": "address.line1",
+          "lexical": 0.0,
+          "fuzzy": 0.3636,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2996
+        },
+        {
+          "path": "address.state",
+          "lexical": 0.0,
+          "fuzzy": 0.1818,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2778
+        },
+        {
+          "path": "address.postalCode",
+          "lexical": 0.0,
+          "fuzzy": 0.125,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.271
+        }
+      ]
+    },
+    {
+      "source_field": "brnch.st_cd",
+      "destination_field": "address.state",
+      "confidence": 0.59,
+      "model_confidence": 0.99,
+      "decided_by": "reflection",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "iso-3166",
+        "iso-4217",
+        "pk-to-objectid",
+        "datetime-timezone"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "address.state",
+          "confidence": 0.98,
+          "reasoning": "US state code is the semantic match for the address.state field."
+        },
+        {
+          "pass": "reflection",
+          "model": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+          "destination_field": "address.state",
+          "confidence": 0.99,
+          "reasoning": "US state code (st_cd) is a perfect semantic and structural match for address.state, representing the state component of a US address."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "address.postalCode",
+          "lexical": 0.5759,
+          "fuzzy": 0.5714,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.2,
+          "embedding": null,
+          "total": 0.5754
+        },
+        {
+          "path": "address.state",
+          "lexical": 0.0,
+          "fuzzy": 0.4444,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.3,
+          "embedding": null,
+          "total": 0.3573
+        },
+        {
+          "path": "address.city",
+          "lexical": 0.0,
+          "fuzzy": 0.2667,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.288
+        },
+        {
+          "path": "address.country",
+          "lexical": 0.0,
+          "fuzzy": 0.2222,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2827
+        },
+        {
+          "path": "address.line1",
+          "lexical": 0.0,
+          "fuzzy": 0.125,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.271
+        },
+        {
+          "path": "name",
+          "lexical": 0.0,
+          "fuzzy": 0.0,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.256
+        }
+      ]
+    },
+    {
+      "source_field": "brnch.zip_cd",
+      "destination_field": "address.postalCode",
+      "confidence": 0.92,
+      "model_confidence": 0.99,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "iso-3166",
+        "iso-4217",
+        "pk-to-objectid",
+        "datetime-timezone"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "address.postalCode",
+          "confidence": 0.99,
+          "reasoning": "Postal code maps directly to the address.postalCode field."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "address.postalCode",
+          "lexical": 0.6262,
+          "fuzzy": 0.4,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.6,
+          "embedding": null,
+          "total": 0.638
+        },
+        {
+          "path": "address.city",
+          "lexical": 0.0,
+          "fuzzy": 0.2222,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2827
+        },
+        {
+          "path": "address.line1",
+          "lexical": 0.0,
+          "fuzzy": 0.2,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.28
+        },
+        {
+          "path": "address.country",
+          "lexical": 0.0,
+          "fuzzy": 0.1667,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.276
+        },
+        {
+          "path": "address.state",
+          "lexical": 0.0,
+          "fuzzy": 0.1176,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2701
+        },
+        {
+          "path": "_id",
+          "lexical": 0.35,
+          "fuzzy": 0.5714,
+          "type_compat": 0.3,
+          "key_role": 0.0,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2616
+        }
+      ]
+    },
+    {
+      "source_field": "brnch.ctry_cd",
+      "destination_field": "address.country",
+      "confidence": 0.88,
+      "model_confidence": 0.99,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "iso-3166",
+        "iso-4217",
+        "pk-to-objectid",
+        "datetime-timezone"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "address.country",
+          "confidence": 0.99,
+          "reasoning": "ISO 3166-1 alpha-2 country code maps directly to the address.country field following the iso-3166 convention."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "address.country",
+          "lexical": 0.5462,
+          "fuzzy": 0.6154,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.9143,
+          "embedding": null,
+          "total": 0.6837
+        },
+        {
+          "path": "address.postalCode",
+          "lexical": 0.5759,
+          "fuzzy": 0.25,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.2,
+          "embedding": null,
+          "total": 0.5369
+        },
+        {
+          "path": "address.city",
+          "lexical": 0.0,
+          "fuzzy": 0.6,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.328
+        },
+        {
+          "path": "address.state",
+          "lexical": 0.0,
+          "fuzzy": 0.1818,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2778
+        },
+        {
+          "path": "address.line1",
+          "lexical": 0.0,
+          "fuzzy": 0.1111,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2693
+        },
+        {
+          "path": "name",
+          "lexical": 0.0,
+          "fuzzy": 0.0,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.256
+        }
+      ]
+    },
+    {
+      "source_field": "brnch.is_open",
+      "destination_field": "isOpen",
+      "confidence": 0.96,
+      "model_confidence": 0.99,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "iso-3166",
+        "iso-4217",
+        "pk-to-objectid",
+        "datetime-timezone"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "isOpen",
+          "confidence": 0.99,
+          "reasoning": "The TINYINT(1) boolean flag indicating open/closed status maps to the isOpen Boolean field."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "isOpen",
+          "lexical": 1.0,
+          "fuzzy": 1.0,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.6,
+          "embedding": null,
+          "total": 0.852
+        },
+        {
+          "path": "address.country",
+          "lexical": 0.0,
+          "fuzzy": 0.3077,
+          "type_compat": 0.3,
+          "key_role": 0.4,
+          "comment": 0.17,
+          "embedding": null,
+          "total": 0.1801
+        },
+        {
+          "path": "address.postalCode",
+          "lexical": 0.0,
+          "fuzzy": 0.375,
+          "type_compat": 0.3,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.161
+        },
+        {
+          "path": "address.line1",
+          "lexical": 0.0,
+          "fuzzy": 0.3636,
+          "type_compat": 0.3,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.1596
+        },
+        {
+          "path": "address.state",
+          "lexical": 0.0,
+          "fuzzy": 0.3636,
+          "type_compat": 0.3,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.1596
+        }
+      ]
+    },
+    {
+      "source_field": "bk_master.bk_id",
+      "destination_field": "_id",
+      "confidence": 0.85,
+      "model_confidence": 0.95,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "fk-to-ref",
+        "pk-to-objectid",
+        "denormalization",
+        "naming-snake-to-camel"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "_id",
+          "confidence": 0.95,
+          "reasoning": "The primary key of the source table maps to MongoDB's _id field, following the [pk-to-objectid] convention."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "_id",
+          "lexical": 0.9025,
+          "fuzzy": 0.6667,
+          "type_compat": 0.75,
+          "key_role": 1.0,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.7129
+        },
+        {
+          "path": "branchId",
+          "lexical": 0.5944,
+          "fuzzy": 0.5,
+          "type_compat": 0.75,
+          "key_role": 0.35,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.4849
+        },
+        {
+          "path": "publishedYear",
+          "lexical": 0.0,
+          "fuzzy": 0.3529,
+          "type_compat": 1.0,
+          "key_role": 0.15,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2634
+        },
+        {
+          "path": "inventory.availableCopies",
+          "lexical": 0.0,
+          "fuzzy": 0.2105,
+          "type_compat": 1.0,
+          "key_role": 0.15,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2463
+        },
+        {
+          "path": "inventory.totalCopies",
+          "lexical": 0.0,
+          "fuzzy": 0.1333,
+          "type_compat": 1.0,
+          "key_role": 0.15,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.237
+        },
+        {
+          "path": "pricing.amount",
+          "lexical": 0.0,
+          "fuzzy": 0.1176,
+          "type_compat": 1.0,
+          "key_role": 0.15,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2351
+        }
+      ]
+    },
+    {
+      "source_field": "bk_master.isbn_cd",
+      "destination_field": "isbn",
+      "confidence": 0.94,
+      "model_confidence": 0.98,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "fk-to-ref",
+        "pk-to-objectid",
+        "denormalization",
+        "naming-snake-to-camel"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "isbn",
+          "confidence": 0.98,
+          "reasoning": "The ISBN-13 code field maps directly to the isbn string identifier, which is the unique human-readable identifier for books."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "isbn",
+          "lexical": 0.85,
+          "fuzzy": 0.8,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.6,
+          "embedding": null,
+          "total": 0.771
+        },
+        {
+          "path": "title",
+          "lexical": 0.0,
+          "fuzzy": 0.1818,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.6,
+          "embedding": null,
+          "total": 0.3738
+        },
+        {
+          "path": "inventory.referenceOnly",
+          "lexical": 0.35,
+          "fuzzy": 0.2143,
+          "type_compat": 0.25,
+          "key_role": 0.4,
+          "comment": 0.17,
+          "embedding": null,
+          "total": 0.2919
+        },
+        {
+          "path": "pricing.currency",
+          "lexical": 0.0,
+          "fuzzy": 0.2857,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2903
+        },
+        {
+          "path": "author.name",
+          "lexical": 0.0,
+          "fuzzy": 0.2,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.28
+        },
+        {
+          "path": "branchId",
+          "lexical": 0.35,
+          "fuzzy": 0.5714,
+          "type_compat": 0.3,
+          "key_role": 0.1,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2756
+        }
+      ]
+    },
+    {
+      "source_field": "bk_master.ttl",
+      "destination_field": "title",
+      "confidence": 0.85,
+      "model_confidence": 0.99,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "fk-to-ref",
+        "pk-to-objectid",
+        "denormalization",
+        "naming-snake-to-camel"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "title",
+          "confidence": 0.99,
+          "reasoning": "The book title column maps directly to the title field in the destination collection."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "title",
+          "lexical": 0.0,
+          "fuzzy": 0.75,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.6,
+          "embedding": null,
+          "total": 0.442
+        },
+        {
+          "path": "category",
+          "lexical": 0.0,
+          "fuzzy": 0.1818,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2778
+        },
+        {
+          "path": "author.name",
+          "lexical": 0.0,
+          "fuzzy": 0.1538,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2745
+        },
+        {
+          "path": "isbn",
+          "lexical": 0.0,
+          "fuzzy": 0.0,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.256
+        },
+        {
+          "path": "pricing.currency",
+          "lexical": 0.0,
+          "fuzzy": 0.0,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.256
+        },
+        {
+          "path": "inventory.referenceOnly",
+          "lexical": 0.0,
+          "fuzzy": 0.16,
+          "type_compat": 0.25,
+          "key_role": 0.4,
+          "comment": 0.3929,
+          "embedding": null,
+          "total": 0.1881
+        }
+      ]
+    },
+    {
+      "source_field": "bk_master.auth_nm",
+      "destination_field": "author.name",
+      "confidence": 0.93,
+      "model_confidence": 0.98,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "fk-to-ref",
+        "pk-to-objectid",
+        "denormalization",
+        "naming-snake-to-camel"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "author.name",
+          "confidence": 0.98,
+          "reasoning": "The primary author full name column maps to the author.name nested field."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "author.name",
+          "lexical": 0.5462,
+          "fuzzy": 0.75,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 1.0,
+          "embedding": null,
+          "total": 0.7136
+        },
+        {
+          "path": "title",
+          "lexical": 0.35,
+          "fuzzy": 0.1818,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.4108
+        },
+        {
+          "path": "category",
+          "lexical": 0.0,
+          "fuzzy": 0.2857,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2903
+        },
+        {
+          "path": "pricing.currency",
+          "lexical": 0.0,
+          "fuzzy": 0.2857,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2903
+        },
+        {
+          "path": "isbn",
+          "lexical": 0.0,
+          "fuzzy": 0.2,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.28
+        },
+        {
+          "path": "pricing.amount",
+          "lexical": 0.0,
+          "fuzzy": 0.5,
+          "type_compat": 0.2,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.156
+        }
+      ]
+    },
+    {
+      "source_field": "bk_master.pub_yr",
+      "destination_field": "publishedYear",
+      "confidence": 0.9,
+      "model_confidence": 0.99,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "fk-to-ref",
+        "pk-to-objectid",
+        "denormalization",
+        "naming-snake-to-camel"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "publishedYear",
+          "confidence": 0.99,
+          "reasoning": "The 4-digit publication year maps directly to the publishedYear numeric field."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "publishedYear",
+          "lexical": 0.45,
+          "fuzzy": 0.5556,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.3,
+          "embedding": null,
+          "total": 0.5417
+        },
+        {
+          "path": "pricing.amount",
+          "lexical": 0.0,
+          "fuzzy": 0.2222,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2827
+        },
+        {
+          "path": "inventory.totalCopies",
+          "lexical": 0.0,
+          "fuzzy": 0.125,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.271
+        },
+        {
+          "path": "inventory.availableCopies",
+          "lexical": 0.0,
+          "fuzzy": 0.1,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.268
+        },
+        {
+          "path": "branchId",
+          "lexical": 0.0,
+          "fuzzy": 0.3077,
+          "type_compat": 0.75,
+          "key_role": 0.1,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2009
+        },
+        {
+          "path": "pricing.currency",
+          "lexical": 0.0,
+          "fuzzy": 0.3077,
+          "type_compat": 0.3,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.1529
+        }
+      ]
+    },
+    {
+      "source_field": "bk_master.cat_cd",
+      "destination_field": "category",
+      "confidence": 0.69,
+      "model_confidence": 0.95,
+      "decided_by": "reflection",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "fk-to-ref",
+        "pk-to-objectid",
+        "denormalization",
+        "naming-snake-to-camel"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "category",
+          "confidence": 0.95,
+          "reasoning": "The category code (F/N/R) maps to the category field, which stores the expanded string values (fiction/nonfiction/reference)."
+        },
+        {
+          "pass": "reflection",
+          "model": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+          "destination_field": "category",
+          "confidence": 0.95,
+          "reasoning": "The source field cat_cd with values F/N/R directly corresponds to the category destination field which stores fiction/nonfiction/reference, making this a clear semantic match."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "category",
+          "lexical": 0.0,
+          "fuzzy": 0.4615,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.5524,
+          "embedding": null,
+          "total": 0.3998
+        },
+        {
+          "path": "inventory.referenceOnly",
+          "lexical": 0.35,
+          "fuzzy": 0.1111,
+          "type_compat": 0.65,
+          "key_role": 0.4,
+          "comment": 0.2,
+          "embedding": null,
+          "total": 0.3643
+        },
+        {
+          "path": "pricing.currency",
+          "lexical": 0.0,
+          "fuzzy": 0.3077,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2929
+        },
+        {
+          "path": "author.name",
+          "lexical": 0.0,
+          "fuzzy": 0.2667,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.288
+        },
+        {
+          "path": "branchId",
+          "lexical": 0.35,
+          "fuzzy": 0.3077,
+          "type_compat": 0.3,
+          "key_role": 0.1,
+          "comment": 0.2708,
+          "embedding": null,
+          "total": 0.2873
+        },
+        {
+          "path": "title",
+          "lexical": 0.0,
+          "fuzzy": 0.2,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.28
+        }
+      ]
+    },
+    {
+      "source_field": "bk_master.copies_tot",
+      "destination_field": "inventory.totalCopies",
+      "confidence": 0.75,
+      "model_confidence": 0.99,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "fk-to-ref",
+        "pk-to-objectid",
+        "denormalization",
+        "naming-snake-to-camel"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "inventory.totalCopies",
+          "confidence": 0.99,
+          "reasoning": "The total copies owned column maps to the inventory.totalCopies nested numeric field."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "inventory.totalCopies",
+          "lexical": 0.425,
+          "fuzzy": 0.6,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.4,
+          "embedding": null,
+          "total": 0.5535
+        },
+        {
+          "path": "inventory.availableCopies",
+          "lexical": 0.425,
+          "fuzzy": 0.5,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.2,
+          "embedding": null,
+          "total": 0.5095
+        },
+        {
+          "path": "pricing.amount",
+          "lexical": 0.0,
+          "fuzzy": 0.2727,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2887
+        },
+        {
+          "path": "publishedYear",
+          "lexical": 0.0,
+          "fuzzy": 0.2727,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2887
+        },
+        {
+          "path": "branchId",
+          "lexical": 0.0,
+          "fuzzy": 0.2353,
+          "type_compat": 0.75,
+          "key_role": 0.1,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.1922
+        },
+        {
+          "path": "_id",
+          "lexical": 0.0,
+          "fuzzy": 0.1818,
+          "type_compat": 0.75,
+          "key_role": 0.0,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.1718
+        }
+      ]
+    },
+    {
+      "source_field": "bk_master.copies_avl",
+      "destination_field": "inventory.availableCopies",
+      "confidence": 0.68,
+      "model_confidence": 0.99,
+      "decided_by": "reflection",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "fk-to-ref",
+        "pk-to-objectid",
+        "denormalization",
+        "naming-snake-to-camel"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "inventory.availableCopies",
+          "confidence": 0.99,
+          "reasoning": "The available copies on shelf column maps to the inventory.availableCopies nested numeric field."
+        },
+        {
+          "pass": "reflection",
+          "model": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+          "destination_field": "inventory.availableCopies",
+          "confidence": 0.99,
+          "reasoning": "The source field explicitly describes \"copies currently on the shelf\" which directly corresponds to available copies in the inventory, making this mapping semantically perfect."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "inventory.totalCopies",
+          "lexical": 0.425,
+          "fuzzy": 0.6,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.2,
+          "embedding": null,
+          "total": 0.5215
+        },
+        {
+          "path": "inventory.availableCopies",
+          "lexical": 0.425,
+          "fuzzy": 0.5,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.2,
+          "embedding": null,
+          "total": 0.5095
+        },
+        {
+          "path": "publishedYear",
+          "lexical": 0.0,
+          "fuzzy": 0.3636,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2996
+        },
+        {
+          "path": "pricing.amount",
+          "lexical": 0.0,
+          "fuzzy": 0.1818,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2778
+        },
+        {
+          "path": "branchId",
+          "lexical": 0.0,
+          "fuzzy": 0.2353,
+          "type_compat": 0.75,
+          "key_role": 0.1,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.1922
+        },
+        {
+          "path": "_id",
+          "lexical": 0.0,
+          "fuzzy": 0.1818,
+          "type_compat": 0.75,
+          "key_role": 0.0,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.1718
+        }
+      ]
+    },
+    {
+      "source_field": "bk_master.is_ref_only",
+      "destination_field": "inventory.referenceOnly",
+      "confidence": 0.92,
+      "model_confidence": 0.95,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "iso-4217",
+        "fk-to-ref",
+        "datetime-timezone",
+        "iso-3166"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "inventory.referenceOnly",
+          "confidence": 0.95,
+          "reasoning": "The TINYINT(1) boolean flag indicating reference-only status maps directly to the Boolean field describing whether a title cannot be borrowed."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "inventory.referenceOnly",
+          "lexical": 0.9262,
+          "fuzzy": 0.6364,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.45,
+          "embedding": null,
+          "total": 0.7563
+        },
+        {
+          "path": "branchId",
+          "lexical": 0.35,
+          "fuzzy": 0.1176,
+          "type_compat": 0.15,
+          "key_role": 0.1,
+          "comment": 0.2708,
+          "embedding": null,
+          "total": 0.2345
+        },
+        {
+          "path": "category",
+          "lexical": 0.0,
+          "fuzzy": 0.2353,
+          "type_compat": 0.3,
+          "key_role": 0.4,
+          "comment": 0.2708,
+          "embedding": null,
+          "total": 0.1876
+        },
+        {
+          "path": "_id",
+          "lexical": 0.35,
+          "fuzzy": 0.1818,
+          "type_compat": 0.15,
+          "key_role": 0.0,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.1848
+        },
+        {
+          "path": "pricing.currency",
+          "lexical": 0.0,
+          "fuzzy": 0.4706,
+          "type_compat": 0.3,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.1725
+        },
+        {
+          "path": "isbn",
+          "lexical": 0.0,
+          "fuzzy": 0.4615,
+          "type_compat": 0.3,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.1714
+        }
+      ]
+    },
+    {
+      "source_field": "bk_master.price_amt",
+      "destination_field": "pricing.amount",
+      "confidence": 0.9,
+      "model_confidence": 0.95,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "iso-4217",
+        "fk-to-ref",
+        "datetime-timezone",
+        "iso-3166"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "pricing.amount",
+          "confidence": 0.95,
+          "reasoning": "The DECIMAL(8,2) acquisition price maps directly to the Decimal128 field for acquisition price."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "pricing.amount",
+          "lexical": 0.45,
+          "fuzzy": 0.6667,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 1.0,
+          "embedding": null,
+          "total": 0.667
+        },
+        {
+          "path": "publishedYear",
+          "lexical": 0.0,
+          "fuzzy": 0.381,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.3017
+        },
+        {
+          "path": "inventory.totalCopies",
+          "lexical": 0.0,
+          "fuzzy": 0.3158,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2939
+        },
+        {
+          "path": "inventory.availableCopies",
+          "lexical": 0.0,
+          "fuzzy": 0.2609,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2873
+        },
+        {
+          "path": "pricing.currency",
+          "lexical": 0.0,
+          "fuzzy": 0.4348,
+          "type_compat": 0.25,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.1582
+        }
+      ]
+    },
+    {
+      "source_field": "bk_master.cur_cd",
+      "destination_field": "pricing.currency",
+      "confidence": 0.85,
+      "model_confidence": 0.98,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "iso-4217",
+        "fk-to-ref",
+        "datetime-timezone",
+        "iso-3166"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "pricing.currency",
+          "confidence": 0.98,
+          "reasoning": "The CHAR(3) ISO 4217 currency code maps directly to the String field for currency, with validation against the ISO 4217 standard."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "pricing.currency",
+          "lexical": 0.0,
+          "fuzzy": 0.6154,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.82,
+          "embedding": null,
+          "total": 0.461
+        },
+        {
+          "path": "category",
+          "lexical": 0.0,
+          "fuzzy": 0.3077,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2929
+        },
+        {
+          "path": "author.name",
+          "lexical": 0.0,
+          "fuzzy": 0.2667,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.288
+        },
+        {
+          "path": "isbn",
+          "lexical": 0.0,
+          "fuzzy": 0.0,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.256
+        },
+        {
+          "path": "title",
+          "lexical": 0.0,
+          "fuzzy": 0.0,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.256
+        },
+        {
+          "path": "inventory.referenceOnly",
+          "lexical": 0.35,
+          "fuzzy": 0.1111,
+          "type_compat": 0.25,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2523
+        }
+      ]
+    },
+    {
+      "source_field": "bk_master.added_dt",
+      "destination_field": "addedAt",
+      "confidence": 0.93,
+      "model_confidence": 0.95,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "iso-4217",
+        "fk-to-ref",
+        "datetime-timezone",
+        "iso-3166"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "addedAt",
+          "confidence": 0.95,
+          "reasoning": "The DATETIME field recording when the title was added to the catalog maps to the ISODate field for the same purpose."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "addedAt",
+          "lexical": 0.85,
+          "fuzzy": 0.8571,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.6,
+          "embedding": null,
+          "total": 0.7779
+        },
+        {
+          "path": "title",
+          "lexical": 0.0,
+          "fuzzy": 0.1667,
+          "type_compat": 0.4,
+          "key_role": 0.4,
+          "comment": 0.6,
+          "embedding": null,
+          "total": 0.252
+        },
+        {
+          "path": "author.name",
+          "lexical": 0.0,
+          "fuzzy": 0.3636,
+          "type_compat": 0.4,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.1796
+        },
+        {
+          "path": "category",
+          "lexical": 0.0,
+          "fuzzy": 0.2667,
+          "type_compat": 0.4,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.168
+        },
+        {
+          "path": "inventory.referenceOnly",
+          "lexical": 0.0,
+          "fuzzy": 0.1379,
+          "type_compat": 0.15,
+          "key_role": 0.4,
+          "comment": 0.3467,
+          "embedding": null,
+          "total": 0.158
+        },
+        {
+          "path": "pricing.currency",
+          "lexical": 0.0,
+          "fuzzy": 0.1333,
+          "type_compat": 0.4,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.152
+        }
+      ]
+    },
+    {
+      "source_field": "bk_master.brnch_id",
+      "destination_field": "branchId",
+      "confidence": 0.82,
+      "model_confidence": 0.98,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "iso-4217",
+        "fk-to-ref",
+        "datetime-timezone",
+        "iso-3166"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "branchId",
+          "confidence": 0.98,
+          "reasoning": "The INT foreign key to the branches table maps to an ObjectId reference field pointing to branches._id."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "branchId",
+          "lexical": 0.5944,
+          "fuzzy": 0.9333,
+          "type_compat": 0.75,
+          "key_role": 1.0,
+          "comment": 0.3,
+          "embedding": null,
+          "total": 0.6759
+        },
+        {
+          "path": "_id",
+          "lexical": 0.9025,
+          "fuzzy": 0.4444,
+          "type_compat": 0.75,
+          "key_role": 0.2,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.5743
+        },
+        {
+          "path": "inventory.availableCopies",
+          "lexical": 0.0,
+          "fuzzy": 0.2727,
+          "type_compat": 1.0,
+          "key_role": 0.1,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2467
+        },
+        {
+          "path": "inventory.totalCopies",
+          "lexical": 0.0,
+          "fuzzy": 0.2222,
+          "type_compat": 1.0,
+          "key_role": 0.1,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2407
+        },
+        {
+          "path": "pricing.amount",
+          "lexical": 0.0,
+          "fuzzy": 0.2,
+          "type_compat": 1.0,
+          "key_role": 0.1,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.238
+        },
+        {
+          "path": "publishedYear",
+          "lexical": 0.0,
+          "fuzzy": 0.2,
+          "type_compat": 1.0,
+          "key_role": 0.1,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.238
+        }
+      ]
+    },
+    {
+      "source_field": "mbr_info.mbr_id",
+      "destination_field": "_id",
+      "confidence": 0.85,
+      "model_confidence": 0.95,
+      "decided_by": "reflection",
+      "repaired": true,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "denormalization",
+        "char-code-enum",
+        "datetime-timezone",
+        "pk-to-objectid"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "membership.legacyMemberId",
+          "confidence": 0.95,
+          "reasoning": "The integer primary key should be retained in a legacy field to enable foreign key resolution during migration, while MongoDB generates a new ObjectId for _id."
+        },
+        {
+          "pass": "reflection",
+          "model": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+          "destination_field": "membership.legacyMemberId",
+          "confidence": 0.95,
+          "reasoning": "The original decision is correct because mbr_id as an integer primary key from a relational database should be preserved in a legacy field to maintain referential integrity during migration and enable lookups from other tables that reference this key."
+        },
+        {
+          "pass": "path_retry",
+          "path": "_id",
+          "confidence": 0.95,
+          "reasoning": "The primary key mbr_id should map to the MongoDB _id field following the pk-to-objectid convention.",
+          "notes": "Generate new ObjectId for _id; store original mbr_id integer in a legacy field (e.g., legacyMbrId) to resolve foreign key references during migration.",
+          "model": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+          "snippets": [
+            "pk-to-objectid"
+          ]
+        }
+      ],
+      "candidates": [
+        {
+          "path": "_id",
+          "lexical": 0.9025,
+          "fuzzy": 0.5714,
+          "type_compat": 0.75,
+          "key_role": 1.0,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.7015
+        },
+        {
+          "path": "membership.homeBranchId",
+          "lexical": 0.5649,
+          "fuzzy": 0.5882,
+          "type_compat": 0.75,
+          "key_role": 0.35,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.4842
+        },
+        {
+          "path": "memberCode",
+          "lexical": 0.35,
+          "fuzzy": 0.5333,
+          "type_compat": 0.3,
+          "key_role": 0.15,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.278
+        },
+        {
+          "path": "membership.fineBalance",
+          "lexical": 0.0,
+          "fuzzy": 0.3077,
+          "type_compat": 1.0,
+          "key_role": 0.15,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2579
+        }
+      ]
+    },
+    {
+      "source_field": "mbr_info.mbr_cd",
+      "destination_field": "memberCode",
+      "confidence": 0.95,
+      "model_confidence": 0.99,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "denormalization",
+        "char-code-enum",
+        "datetime-timezone",
+        "pk-to-objectid"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "memberCode",
+          "confidence": 0.99,
+          "reasoning": "The human-readable membership code maps directly to the memberCode field, which is explicitly described as a unique human-readable membership code."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "memberCode",
+          "lexical": 0.5944,
+          "fuzzy": 0.6667,
+          "type_compat": 1.0,
+          "key_role": 0.85,
+          "comment": 0.94,
+          "embedding": null,
+          "total": 0.7753
+        },
+        {
+          "path": "membership.status",
+          "lexical": 0.0,
+          "fuzzy": 0.2857,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.3,
+          "embedding": null,
+          "total": 0.3383
+        },
+        {
+          "path": "membership.homeBranchId",
+          "lexical": 0.35,
+          "fuzzy": 0.5882,
+          "type_compat": 0.3,
+          "key_role": 0.1,
+          "comment": 0.15,
+          "embedding": null,
+          "total": 0.3016
+        },
+        {
+          "path": "name.first",
+          "lexical": 0.0,
+          "fuzzy": 0.2857,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2903
+        },
+        {
+          "path": "contact.email",
+          "lexical": 0.0,
+          "fuzzy": 0.2,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.28
+        },
+        {
+          "path": "name.last",
+          "lexical": 0.0,
+          "fuzzy": 0.1538,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2745
+        }
+      ]
+    },
+    {
+      "source_field": "mbr_info.f_nm",
+      "destination_field": "name.first",
+      "confidence": 0.95,
+      "model_confidence": 0.99,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "denormalization",
+        "char-code-enum",
+        "datetime-timezone",
+        "pk-to-objectid"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "name.first",
+          "confidence": 0.99,
+          "reasoning": "The first name field maps directly to the name.first path."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "name.first",
+          "lexical": 1.0,
+          "fuzzy": 0.25,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.6,
+          "embedding": null,
+          "total": 0.762
+        },
+        {
+          "path": "name.last",
+          "lexical": 0.5462,
+          "fuzzy": 0.3636,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.3,
+          "embedding": null,
+          "total": 0.5552
+        },
+        {
+          "path": "contact.email",
+          "lexical": 0.0,
+          "fuzzy": 0.2667,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.288
+        },
+        {
+          "path": "contact.phone",
+          "lexical": 0.0,
+          "fuzzy": 0.25,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.286
+        },
+        {
+          "path": "memberCode",
+          "lexical": 0.0,
+          "fuzzy": 0.1538,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2745
+        },
+        {
+          "path": "membership.status",
+          "lexical": 0.0,
+          "fuzzy": 0.1053,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2686
+        }
+      ]
+    },
+    {
+      "source_field": "mbr_info.l_nm",
+      "destination_field": "name.last",
+      "confidence": 0.95,
+      "model_confidence": 0.99,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "denormalization",
+        "char-code-enum",
+        "datetime-timezone",
+        "pk-to-objectid"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "name.last",
+          "confidence": 0.99,
+          "reasoning": "The last name field maps directly to the name.last path."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "name.last",
+          "lexical": 1.0,
+          "fuzzy": 0.2857,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.6,
+          "embedding": null,
+          "total": 0.7663
+        },
+        {
+          "path": "name.first",
+          "lexical": 0.5462,
+          "fuzzy": 0.3333,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.3,
+          "embedding": null,
+          "total": 0.5516
+        },
+        {
+          "path": "contact.email",
+          "lexical": 0.0,
+          "fuzzy": 0.25,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.286
+        },
+        {
+          "path": "contact.phone",
+          "lexical": 0.0,
+          "fuzzy": 0.25,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.286
+        },
+        {
+          "path": "memberCode",
+          "lexical": 0.0,
+          "fuzzy": 0.1538,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2745
+        },
+        {
+          "path": "membership.status",
+          "lexical": 0.0,
+          "fuzzy": 0.1053,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2686
+        }
+      ]
+    },
+    {
+      "source_field": "mbr_info.eml",
+      "destination_field": "contact.email",
+      "confidence": 0.77,
+      "model_confidence": 0.99,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "denormalization",
+        "char-code-enum",
+        "datetime-timezone",
+        "pk-to-objectid"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "contact.email",
+          "confidence": 0.99,
+          "reasoning": "The email address field maps directly to the contact.email path."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "contact.email",
+          "lexical": 0.0,
+          "fuzzy": 0.75,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.3,
+          "embedding": null,
+          "total": 0.394
+        },
+        {
+          "path": "name.last",
+          "lexical": 0.0,
+          "fuzzy": 0.3636,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2996
+        },
+        {
+          "path": "memberCode",
+          "lexical": 0.0,
+          "fuzzy": 0.3077,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2929
+        },
+        {
+          "path": "contact.phone",
+          "lexical": 0.0,
+          "fuzzy": 0.25,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.286
+        },
+        {
+          "path": "membership.status",
+          "lexical": 0.0,
+          "fuzzy": 0.2105,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2813
+        },
+        {
+          "path": "name.first",
+          "lexical": 0.0,
+          "fuzzy": 0.1667,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.276
+        }
+      ]
+    },
+    {
+      "source_field": "mbr_info.ph_no",
+      "destination_field": "contact.phone",
+      "confidence": 0.92,
+      "model_confidence": 0.99,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "denormalization",
+        "char-code-enum",
+        "datetime-timezone",
+        "pk-to-objectid"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "contact.phone",
+          "confidence": 0.99,
+          "reasoning": "The phone number field maps directly to the contact.phone path."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "contact.phone",
+          "lexical": 0.6425,
+          "fuzzy": 0.6667,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.3,
+          "embedding": null,
+          "total": 0.6281
+        },
+        {
+          "path": "contact.email",
+          "lexical": 0.35,
+          "fuzzy": 0.125,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.404
+        },
+        {
+          "path": "name.last",
+          "lexical": 0.0,
+          "fuzzy": 0.1667,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.276
+        },
+        {
+          "path": "name.first",
+          "lexical": 0.0,
+          "fuzzy": 0.1538,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2745
+        },
+        {
+          "path": "memberCode",
+          "lexical": 0.0,
+          "fuzzy": 0.1429,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2731
+        },
+        {
+          "path": "membership.status",
+          "lexical": 0.0,
+          "fuzzy": 0.1,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.268
+        }
+      ]
+    },
+    {
+      "source_field": "mbr_info.join_dt",
+      "destination_field": "membership.joinedAt",
+      "confidence": 0.85,
+      "model_confidence": 0.95,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "denormalization",
+        "char-code-enum",
+        "datetime-timezone",
+        "pk-to-objectid"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "membership.joinedAt",
+          "confidence": 0.95,
+          "reasoning": "The membership start date maps to the joinedAt field within the membership subdocument."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "membership.joinedAt",
+          "lexical": 0.0,
+          "fuzzy": 0.8571,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.3,
+          "embedding": null,
+          "total": 0.4069
+        },
+        {
+          "path": "memberCode",
+          "lexical": 0.0,
+          "fuzzy": 0.25,
+          "type_compat": 0.4,
+          "key_role": 0.4,
+          "comment": 0.2762,
+          "embedding": null,
+          "total": 0.2102
+        },
+        {
+          "path": "membership.status",
+          "lexical": 0.0,
+          "fuzzy": 0.1818,
+          "type_compat": 0.4,
+          "key_role": 0.4,
+          "comment": 0.3,
+          "embedding": null,
+          "total": 0.2058
+        },
+        {
+          "path": "contact.phone",
+          "lexical": 0.0,
+          "fuzzy": 0.3636,
+          "type_compat": 0.4,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.1796
+        },
+        {
+          "path": "name.first",
+          "lexical": 0.0,
+          "fuzzy": 0.3636,
+          "type_compat": 0.4,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.1796
+        },
+        {
+          "path": "name.last",
+          "lexical": 0.0,
+          "fuzzy": 0.2857,
+          "type_compat": 0.4,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.1703
+        }
+      ]
+    },
+    {
+      "source_field": "mbr_info.mbr_stat",
+      "destination_field": "membership.status",
+      "confidence": 0.94,
+      "model_confidence": 0.99,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "denormalization",
+        "char-code-enum",
+        "datetime-timezone",
+        "pk-to-objectid"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "membership.status",
+          "confidence": 0.99,
+          "reasoning": "The single-character status code must be transformed to a readable enum string using the documented legend (A=active, S=suspended, X=expired)."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "membership.status",
+          "lexical": 0.6425,
+          "fuzzy": 0.6154,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.88,
+          "embedding": null,
+          "total": 0.7148
+        },
+        {
+          "path": "name.first",
+          "lexical": 0.0,
+          "fuzzy": 0.5,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.316
+        },
+        {
+          "path": "name.last",
+          "lexical": 0.0,
+          "fuzzy": 0.4,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.304
+        },
+        {
+          "path": "memberCode",
+          "lexical": 0.0,
+          "fuzzy": 0.3529,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2984
+        },
+        {
+          "path": "contact.email",
+          "lexical": 0.0,
+          "fuzzy": 0.3333,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.296
+        },
+        {
+          "path": "contact.phone",
+          "lexical": 0.0,
+          "fuzzy": 0.3158,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.2939
+        }
+      ]
+    },
+    {
+      "source_field": "mbr_info.fine_bal",
+      "destination_field": "membership.fineBalance",
+      "confidence": 0.93,
+      "model_confidence": 0.99,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "fk-to-ref",
+        "pk-to-objectid"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "membership.fineBalance",
+          "confidence": 0.99,
+          "reasoning": "The source field explicitly documents outstanding fines owed, and the destination field has identical semantics and appropriate Decimal128 type for financial precision."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "membership.fineBalance",
+          "lexical": 0.425,
+          "fuzzy": 0.7778,
+          "type_compat": 1.0,
+          "key_role": 0.4,
+          "comment": 1.0,
+          "embedding": null,
+          "total": 0.6708
+        },
+        {
+          "path": "name.last",
+          "lexical": 0.0,
+          "fuzzy": 0.4,
+          "type_compat": 0.25,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.154
+        },
+        {
+          "path": "membership.joinedAt",
+          "lexical": 0.0,
+          "fuzzy": 0.5333,
+          "type_compat": 0.15,
+          "key_role": 0.4,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.15
+        }
+      ]
+    },
+    {
+      "source_field": "mbr_info.home_brnch",
+      "destination_field": "membership.homeBranchId",
+      "confidence": 0.85,
+      "model_confidence": 0.95,
+      "decided_by": "cheap",
+      "repaired": false,
+      "tie_broken": false,
+      "forced_null": null,
+      "knowledge_snippets": [
+        "fk-to-ref",
+        "pk-to-objectid"
+      ],
+      "passes": [
+        {
+          "pass": "cheap",
+          "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+          "destination_field": "membership.homeBranchId",
+          "confidence": 0.95,
+          "reasoning": "This foreign key to the branches table maps to the ObjectId reference field following the [fk-to-ref] convention, requiring an ID remap from legacy integer keys to generated ObjectIds during migration."
+        }
+      ],
+      "candidates": [
+        {
+          "path": "membership.homeBranchId",
+          "lexical": 0.41,
+          "fuzzy": 0.8571,
+          "type_compat": 0.75,
+          "key_role": 1.0,
+          "comment": 0.6,
+          "embedding": null,
+          "total": 0.6447
+        },
+        {
+          "path": "membership.fineBalance",
+          "lexical": 0.0,
+          "fuzzy": 0.4,
+          "type_compat": 1.0,
+          "key_role": 0.1,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.262
+        },
+        {
+          "path": "_id",
+          "lexical": 0.0,
+          "fuzzy": 0.0,
+          "type_compat": 0.75,
+          "key_role": 0.2,
+          "comment": 0.0,
+          "embedding": null,
+          "total": 0.178
+        }
+      ]
+    }
+  ]
+}

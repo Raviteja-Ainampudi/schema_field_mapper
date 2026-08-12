@@ -2,7 +2,7 @@
   "mapping_version": "1.0",
   "source": "legacy_hrm (MySQL)",
   "destination": "people_platform (MongoDB)",
-  "generated_at": "2026-08-12T05:22:48Z",
+  "generated_at": "2026-08-12T07:30:07Z",
   "tables": [
     {
       "source_table": "emp_master",

@@ -4,6 +4,73 @@ Everything the interface does goes through this HTTP API, and the API runs the s
 `Pipeline` class the CLI runs — there is no separate "web" mapping path that could drift
 from the committed artifact.
 
+## Shape of the API
+
+```mermaid
+flowchart LR
+    subgraph free["Free · no model call"]
+        health["GET /api/health"]
+        models["GET /api/models"]
+        schemas["GET /api/schemas"]
+        sample["GET /api/samples/{name}"]
+        parse["POST /api/parse<br/>validate + pairing"]
+        cands["GET /api/candidates<br/>Stage 2 shortlist"]
+        contract["GET /api/contract"]
+        preview["POST /api/preview<br/>run transforms on a row"]
+    end
+
+    subgraph paid["Costs money unless offline"]
+        run["POST /api/run<br/>SSE stream"]
+    end
+
+    subgraph history["Results"]
+        runs["GET /api/runs"]
+        one["GET /api/runs/{id}"]
+        download["GET /api/runs/{id}/mapping.json"]
+        latest["GET /api/latest_artifact"]
+    end
+
+    parse --> run
+    run --> runs
+    runs --> one --> download
+```
+
+The split matters when testing: everything except `POST /api/run` is free and unauthenticated,
+so you can validate schemas, inspect shortlists, and execute transforms as often as you like
+without spending anything.
+
+## A run over HTTP
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant A as FastAPI
+    participant P as Pipeline thread
+    participant M as Bedrock or cassettes
+
+    C->>A: POST /api/parse
+    A-->>C: per-side result + pairing verdict
+    Note over C: fix errors before spending anything
+    C->>A: POST /api/run
+    A->>A: check X-Access-Token if configured
+    A->>P: spawn worker, return 200 and keep the body open
+    P-->>C: event hello
+    loop each stage
+        P->>M: invoke
+        M-->>P: response or CassetteMissing
+        P-->>C: stage_start, route, mapping, escalate, reflect
+    end
+    alt run succeeded
+        P-->>C: event result, mapping + report + decisions
+    else run failed
+        P-->>C: event error with kind
+    end
+    P-->>C: event run_end
+    C->>A: GET /api/runs/{id}/mapping.json
+    A-->>C: the artifact
+```
+
 ## Interactive reference
 
 With the server running (`bash scripts/dev.sh api`):
@@ -68,6 +135,32 @@ curl -X POST localhost:8000/api/parse -H 'content-type: application/json' -d '{
 On bad input, that side reports `"ok": false` with an actionable `error`, for example
 `Invalid JSON at line 1, column 23: Expecting value`. See
 [INPUT_FORMATS.md](INPUT_FORMATS.md) for what is accepted.
+
+When both sides resolve — pasted or bundled — the response also carries a **`pairing`**
+block answering a different question: do these two schemas belong together? Both halves can
+parse perfectly and still be a mismatch, and a mismatched run does not fail, it just maps
+books onto departments.
+
+```json
+{
+  "pairing": {
+    "score": 0.418,
+    "verdict": "weak",
+    "headline": "These schemas only partly overlap.",
+    "detail": "1 of 3 source tables has no clearly matching collection, so the closest available is forced (bk_master → departments). ...",
+    "placed_fields": 20,
+    "total_fields": 31,
+    "pairings": [
+      { "table": "brnch", "collection": "locations", "affinity": 0.534, "fields": 8, "placed_fields": 6 }
+    ]
+  }
+}
+```
+
+`verdict` is one of `aligned`, `weak`, or `unrelated`, and `pairings` is a free preview of
+the routing Stage 1 will most likely choose. It is deterministic and model-free, so it is
+safe to call on every keystroke. Thresholds are calibrated by `scripts/eval_pairing.py`;
+because the margin is narrow this is a warning, never a block.
 
 ### `GET /api/candidates` — the deterministic shortlist
 
@@ -181,6 +274,16 @@ Wrappers, which handle `PYTHONPATH` and the venv for you:
 
 ```bash
 bash scripts/dev.sh offline | run | record | test | eval | bedrock | api | serve | check | lint
+```
+
+Two evaluation scripts run offline and free, and both fail loudly rather than printing a
+number you have to interpret:
+
+```bash
+python scripts/eval_retrieval.py            # Stage 2 shortlist recall against the oracle
+python scripts/eval_pairing.py              # mismatched-pair thresholds, all combinations
+python scripts/eval_pairing.py --tables     # per-table affinity, for tuning
+python scripts/show_mapping.py <artifact>   # read a mapping document as a table
 ```
 
 ## Smoke scripts
