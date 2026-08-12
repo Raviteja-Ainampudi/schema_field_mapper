@@ -42,6 +42,7 @@ from schema_mapper.bedrock import (
 )
 from schema_mapper.candidates import shortlist_field
 from schema_mapper.config import (
+    ASSET_ROOT,
     CASSETTE_DIR,
     DATA_DIR,
     DEFAULT_DESTINATION_SCHEMA,
@@ -713,18 +714,32 @@ def download_mapping(run_id: str) -> JSONResponse:
 
 @app.get("/api/latest_artifact")
 def latest_artifact() -> dict[str, Any]:
-    """The committed mapping, so the UI has something real to show before a run."""
-    for candidate in sorted(output_dir().glob("mapping_*_to_*.json")):
-        report_path = candidate.parent / "run_report.json"
-        return {
-            "mapping": json.loads(candidate.read_text(encoding="utf-8")),
-            "report": (
-                json.loads(report_path.read_text(encoding="utf-8"))
-                if report_path.is_file()
-                else None
-            ),
-            "source": candidate.name,
-        }
+    """The committed mapping, so the UI has something real to show before a run.
+
+    Two directories, in this order, because they are the same path only when
+    running from a checkout. A local run writes to ``output_dir()``, so that wins
+    and the page reflects the newest artifact. Under Lambda ``output_dir()`` is
+    ``/tmp`` and is empty on every cold start, so the read-only copy baked into
+    the image is what a first visitor sees - without this fallback the deployed
+    page opens on an empty graph.
+    """
+    searched = [output_dir()]
+    bundled = ASSET_ROOT / "outputs"
+    if bundled.resolve() != output_dir().resolve():
+        searched.append(bundled)
+
+    for directory in searched:
+        for candidate in sorted(directory.glob("mapping_*_to_*.json")):
+            report_path = candidate.parent / "run_report.json"
+            return {
+                "mapping": json.loads(candidate.read_text(encoding="utf-8")),
+                "report": (
+                    json.loads(report_path.read_text(encoding="utf-8"))
+                    if report_path.is_file()
+                    else None
+                ),
+                "source": candidate.name,
+            }
     return {"mapping": None, "report": None, "source": None}
 
 

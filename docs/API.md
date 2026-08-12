@@ -8,11 +8,11 @@ from the committed artifact.
 
 ```mermaid
 flowchart LR
-    subgraph free["Free · no model call"]
+    subgraph free["Free - no model call"]
         health["GET /api/health"]
         models["GET /api/models"]
         schemas["GET /api/schemas"]
-        sample["GET /api/samples/{name}"]
+        sample["GET /api/samples/:name"]
         parse["POST /api/parse<br/>validate + pairing"]
         cands["GET /api/candidates<br/>Stage 2 shortlist"]
         contract["GET /api/contract"]
@@ -25,8 +25,8 @@ flowchart LR
 
     subgraph history["Results"]
         runs["GET /api/runs"]
-        one["GET /api/runs/{id}"]
-        download["GET /api/runs/{id}/mapping.json"]
+        one["GET /api/runs/:id"]
+        download["GET /api/runs/:id/mapping.json"]
         latest["GET /api/latest_artifact"]
     end
 
@@ -67,7 +67,7 @@ sequenceDiagram
         P-->>C: event error with kind
     end
     P-->>C: event run_end
-    C->>A: GET /api/runs/{id}/mapping.json
+    C->>A: GET /api/runs/:id/mapping.json
     A-->>C: the artifact
 ```
 

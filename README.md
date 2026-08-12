@@ -35,13 +35,13 @@ LLM at all:
 
 ```mermaid
 flowchart TD
-    s0["<b>0 · normalize</b> — no LLM<br/>flatten nested paths to dot notation, expand abbreviations"]
-    s1["<b>1 · route</b> — LLM ×3<br/>one call per source table: its column names + collection names"]
-    s2["<b>2 · shortlist</b> — no LLM<br/>top 6 destination paths per field, inside its matched collection"]
-    s3["<b>3 · adjudicate</b> — LLM ×N<br/>one call per 8 fields, each carrying only its own 6 candidates"]
-    s3c["<b>3c · reflect</b> — LLM, weak only<br/>a critic re-examines the least confident decisions"]
-    s4["<b>4 · validate</b> — no LLM<br/>contract, hallucinated-path guard, collisions, coverage"]
-    s5["<b>5 · assemble</b> — no LLM<br/>the deliverable + run report + prompt trace"]
+    s0["<b>0 - normalize</b> - no LLM<br/>flatten nested paths to dot notation, expand abbreviations"]
+    s1["<b>1 - route</b> - LLM x3<br/>one call per source table: its column names + collection names"]
+    s2["<b>2 - shortlist</b> - no LLM<br/>top 6 destination paths per field, inside its matched collection"]
+    s3["<b>3 - adjudicate</b> - LLM xN<br/>one call per 8 fields, each carrying only its own 6 candidates"]
+    s3c["<b>3c - reflect</b> - LLM, weak only<br/>a critic re-examines the least confident decisions"]
+    s4["<b>4 - validate</b> - no LLM<br/>contract, hallucinated-path guard, collisions, coverage"]
+    s5["<b>5 - assemble</b> - no LLM<br/>the deliverable + run report + prompt trace"]
 
     s0 --> s1 --> s2 --> s3 --> s3c --> s4 --> s5
 ```

@@ -9,13 +9,13 @@ component structure see [ARCHITECTURE.md](ARCHITECTURE.md).
 flowchart TD
     input["Source schema + destination schema<br/>4 accepted formats"]
 
-    s0["Stage 0 · Normalize<br/><b>no model</b>"]
-    s1["Stage 1 · Route<br/><b>1 call per table</b>"]
-    s2["Stage 2 · Shortlist<br/><b>no model</b>"]
-    s3["Stage 3 · Adjudicate<br/><b>1 call per batch of 8</b>"]
-    s3c["Stage 3c · Reflect<br/><b>1 call per weak field</b>"]
-    s4["Stage 4 · Validate<br/><b>no model</b>"]
-    s5["Stage 5 · Assemble<br/><b>no model</b>"]
+    s0["Stage 0 - Normalize<br/><b>no model</b>"]
+    s1["Stage 1 - Route<br/><b>1 call per table</b>"]
+    s2["Stage 2 - Shortlist<br/><b>no model</b>"]
+    s3["Stage 3 - Adjudicate<br/><b>1 call per batch of 8</b>"]
+    s3c["Stage 3c - Reflect<br/><b>1 call per weak field</b>"]
+    s4["Stage 4 - Validate<br/><b>no model</b>"]
+    s5["Stage 5 - Assemble<br/><b>no model</b>"]
 
     out1["mapping.json<br/>the deliverable"]
     out2["run_report.json<br/>coverage, cost, proof"]
@@ -138,9 +138,9 @@ flowchart LR
     cap -->|"yes"| clamp["cap at 0.85"]
     cap -->|"no"| band
     clamp --> band["band it"]
-    band --> high["≥ 0.90 high"]
-    band --> med["0.80–0.89 medium"]
-    band --> low["< 0.80 review"]
+    band --> high[">= 0.90 high"]
+    band --> med["0.80-0.89 medium"]
+    band --> low["under 0.80 review"]
 ```
 
 A model's self-reported confidence is nearly useless alone — it reports 0.99 for almost
@@ -195,7 +195,7 @@ pair cost **$0.065** cold and **$0.02** when re-run with cache hits.
 flowchart LR
     edit["Edit code"] --> tests["dev.sh test<br/>281 tests, offline"]
     tests --> offline["dev.sh offline<br/>replay a full run"]
-    offline --> checks["check_ui · check_docs<br/>smoke_input · smoke_api"]
+    offline --> checks["check_ui, check_docs<br/>smoke_input, smoke_api"]
     checks --> live{"prompts changed?"}
     live -->|"yes"| record["dev.sh record<br/>re-record cassettes"]
     live -->|"no"| commit["Commit"]

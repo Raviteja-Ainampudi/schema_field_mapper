@@ -18,7 +18,7 @@ flowchart TD
     own -->|"no"| tick["Tick offline"]
     tick --> run["Run pipeline"]
 
-    own -->|"yes"| input["Input data tab<br/>paste · drop · upload · sample"]
+    own -->|"yes"| input["Input data tab<br/>paste / drop / upload / sample"]
     input --> parsed{"both sides parse?"}
     parsed -->|"no"| fix["Read the error under the editor<br/>Run stays disabled"]
     fix --> input
@@ -31,7 +31,7 @@ flowchart TD
     run --> watch["Wires animate in per batch"]
     watch --> inspect["Click a field or wire<br/>Decision tab shows provenance"]
     inspect --> judge{"looks right?"}
-    judge -->|"no"| review["Constraint proof · Coverage · Cost"]
+    judge -->|"no"| review["Constraint proof, Coverage, Cost"]
     judge -->|"yes"| export["Mapping JSON<br/>copy or download"]
     review --> export
 ```

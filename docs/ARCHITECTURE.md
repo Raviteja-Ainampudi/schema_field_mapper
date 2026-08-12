@@ -33,7 +33,7 @@ flowchart LR
 
     bedrock["Amazon Bedrock<br/>Converse API"]
     cassettes["Cassettes<br/>tests/fixtures"]
-    artifacts["Artifacts<br/>mapping · report · trace"]
+    artifacts["Artifacts<br/>mapping, report, trace"]
     s3["S3 bucket<br/>optional"]
 
     reviewer --> spa

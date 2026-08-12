@@ -35,8 +35,9 @@ echo "=== mermaid diagrams are well formed"
 # A broken diagram renders as an error box on GitHub, which is worse than no
 # diagram. No renderer is available here (system node is too old for mermaid-cli),
 # so this catches the mistakes that actually break rendering: unclosed fences,
-# unknown diagram types, unbalanced subgraph/end, and unquoted brackets or
-# parentheses inside node labels.
+# unknown diagram types, unbalanced subgraph/end, unquoted brackets or
+# parentheses inside node labels, and characters that crash GitHub's older
+# Mermaid build ("Cannot read properties of undefined (reading 'render')").
 python3 - <<'PY'
 import pathlib
 import re
@@ -50,6 +51,16 @@ KNOWN = (
 # A node label: id[...] id(...) id{...}. Mermaid needs quotes when the text
 # itself contains brackets, parentheses or a pipe.
 LABEL = re.compile(r"[A-Za-z_][\w-]*(\[|\(|\{)([^\]\)\}\n]*)")
+# GitHub's Mermaid often crashes on these even inside quoted labels.
+GITHUB_UNSAFE = {
+    "·": "middle dot",
+    "—": "em dash",
+    "–": "en dash",
+    "×": "multiply sign",
+    "≥": "greater-or-equal",
+    "≤": "less-or-equal",
+}
+QUOTED = re.compile(r'"([^"]*)"')
 problems = []
 count = 0
 
@@ -86,6 +97,32 @@ for doc in sorted(pathlib.Path("docs").rglob("*.md")) + [pathlib.Path("README.md
                 if opens != closes:
                     problems.append(f"{where}: {opens} block openers vs {closes} end")
 
+            for offset, text in enumerate(body):
+                line_where = f"{where}+{offset}"
+                for ch, name in GITHUB_UNSAFE.items():
+                    if ch in text:
+                        problems.append(
+                            f"{line_where}: replace {name} {ch!r} (breaks GitHub Mermaid)"
+                        )
+                # Path params like {id} inside quotes crash GitHub even when
+                # quoted. Diamond nodes use {...} as shape syntax, not quotes.
+                for quoted in QUOTED.findall(text):
+                    if "{" in quoted or "}" in quoted:
+                        problems.append(
+                            f"{line_where}: remove braces from quoted label "
+                            f"-> {quoted[:44]!r}"
+                        )
+                # Path params like /api/runs/{id} outside diamond-node syntax.
+                # Diamond nodes are id{label}; a brace not preceded by an
+                # identifier character is almost always a path template.
+                for match in re.finditer(r".\{([A-Za-z_][\w]*)\}", text):
+                    prev = match.group(0)[0]
+                    if prev.isalnum() or prev in "_\"'":
+                        continue
+                    problems.append(
+                        f"{line_where}: replace path-template braces "
+                        f"{{{match.group(1)}}} with :{match.group(1)}"
+                    )
             # Label quoting only applies to flowchart node syntax; class, state
             # and sequence diagrams use different grammars.
             if header.startswith(("flowchart", "graph")):
