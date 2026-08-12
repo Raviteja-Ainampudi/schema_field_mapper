@@ -89,6 +89,11 @@ PYEOF
   api)
     "$PY" -m uvicorn api.main:app --reload --port "${PORT:-8000}"
     ;;
+  serve)
+    # No reload: file watching over /mnt/c is slow, and this is what the
+    # container runs too, so local behaviour matches the deployed behaviour.
+    "$PY" -m uvicorn api.main:app --host "${HOST:-127.0.0.1}" --port "${PORT:-8000}"
+    ;;
   *)
     echo "unknown command: $cmd" >&2
     sed -n '2,20p' "$0" >&2

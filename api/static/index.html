@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Schema Field Mapper &mdash; legacy_hrm to people_platform</title>
+    <meta
+      name="description"
+      content="Maps every field of a legacy MySQL HR schema to a MongoDB people platform schema, with per-decision provenance, cost accounting, and a machine-checked constraint proof."
+    />
+    <link rel="stylesheet" href="/static/app.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230a0e13'/><path d='M8 9h5M19 9h5M8 16h5M19 16h5M8 23h5M19 23h5' stroke='%23a78bfa' stroke-width='2.5' stroke-linecap='round'/><path d='M13 9c5 0 1 7 6 7M13 23c5 0 1-7 6-7' stroke='%2338bdf8' stroke-width='2' fill='none'/></svg>"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Replaced on mount. Kept meaningful so a failed module load is obvious
+           rather than showing a blank page. -->
+      <noscript>
+        <p style="padding: 24px">
+          This interface needs JavaScript. The pipeline itself runs headless:
+          <code>python -m schema_mapper.cli --offline</code>
+        </p>
+      </noscript>
+      <p style="padding: 24px; color: #5d7186; font: 14px system-ui">Loading interface&hellip;</p>
+    </div>
+    <script type="module" src="/static/app.js"></script>
+  </body>
+</html>
