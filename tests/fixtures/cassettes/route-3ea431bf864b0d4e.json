@@ -1,0 +1,73 @@
+{
+  "request": {
+    "stage": "route",
+    "model_id": "us.amazon.nova-lite-v1:0",
+    "system": "You are a data architect matching a legacy relational table to its equivalent collection in a document database. You see column names only, never types or sample data. Answer with the single best collection.",
+    "user": "Legacy table: locations\nIts column names: loc_id, loc_cd, loc_nm, city, state_prov, country_cd, postal_cd, tz_cd\n\nCandidate destination collections: employees, departments, locations\n\nWhich collection represents the same entity as this table? Reply through the tool with the collection name, a confidence between 0 and 1, and exactly one sentence of reasoning.",
+    "tool_name": "pair_table",
+    "tool_schema": {
+      "type": "object",
+      "properties": {
+        "destination_collection": {
+          "type": "string",
+          "description": "Exactly one of the offered collection names."
+        },
+        "confidence": {
+          "type": "number",
+          "description": "0 to 1, how certain this pairing is."
+        },
+        "reasoning": {
+          "type": "string",
+          "description": "One plain-English sentence explaining the pairing."
+        }
+      },
+      "required": [
+        "destination_collection",
+        "confidence",
+        "reasoning"
+      ]
+    },
+    "max_tokens": 400,
+    "temperature": 0.0,
+    "manifest": {
+      "stage": "route",
+      "source_tables": [
+        "locations"
+      ],
+      "source_fields": [
+        "locations.loc_id",
+        "locations.loc_cd",
+        "locations.loc_nm",
+        "locations.city",
+        "locations.state_prov",
+        "locations.country_cd",
+        "locations.postal_cd",
+        "locations.tz_cd"
+      ],
+      "destination_collections": [
+        "employees",
+        "departments",
+        "locations"
+      ],
+      "destination_paths": [],
+      "source_fingerprint": "f64f573ee80a450f",
+      "destination_fingerprint": "6e2a499d66d8a9b8",
+      "source_field_count": 8,
+      "destination_path_count": 0,
+      "source_table_count": 1
+    }
+  },
+  "response": {
+    "text": "",
+    "data": {
+      "confidence": 0.95,
+      "reasoning": "The table 'locations' has column names that match the entity 'locations', such as 'loc_id', 'city', and 'country_cd', which are typical for a collection that stores location data.",
+      "destination_collection": "locations"
+    },
+    "input_tokens": 588,
+    "output_tokens": 74,
+    "model_id": "us.amazon.nova-lite-v1:0",
+    "latency_ms": 818,
+    "stop_reason": "tool_use"
+  }
+}

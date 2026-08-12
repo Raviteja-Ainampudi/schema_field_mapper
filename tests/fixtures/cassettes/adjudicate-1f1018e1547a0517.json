@@ -1,0 +1,131 @@
+{
+  "request": {
+    "stage": "adjudicate",
+    "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "system": "You map columns from a legacy MySQL table to field paths in a MongoDB collection.\n\nRules:\n1. For each source field, choose the single best destination path from the candidate list given for that field, or null if none is a genuine semantic match.\n2. Never invent a path. Only paths listed as candidates for that field are valid.\n3. Prefer null over a weak guess. A wrong mapping is more expensive than an acknowledged gap.\n4. reasoning must be exactly one plain-English sentence explaining the match.\n5. notes must describe any value-transform logic a migration would have to write (code lookups, boolean conversion, ID remapping, precision loss), or be null when the value moves across unchanged.\n6. confidence is your own certainty from 0 to 1, judged on semantics rather than on how similar the names look.",
+    "user": "Source table `emp_master` maps to destination collection `employees`.\n\nRelevant conventions:\n  [audit-timestamps] Legacy created_ts and updated_ts audit columns conventionally move into a meta sub-document as createdAt and updatedAt.\n  [char-code-enum] Single-character CHAR(1) status codes require a lookup transform to readable enum strings, and the legend is usually documented in the column comment.\n  [datetime-timezone] MySQL DATETIME has no timezone. MongoDB ISODate is always UTC, so the migration must state the assumed source timezone; assuming UTC without checking silently shifts every timestamp.\n  [naming-snake-to-camel] Legacy MySQL uses snake_case; the MongoDB target uses camelCase. A trailing _cd means code, _nm means name, _dt means date, _ts means timestamp, and an is_ prefix means a boolean flag.\n\nMap these 3 source fields:\n  1. rec_stat (CHAR(1), // A=Active, I=Inactive, T=Terminated)\n    candidate destination paths:\n      - employment.status (String, active / inactive / terminated)\n      - fullName.firstName (String)\n      - contact.email (String)\n      - contact.phone (String)\n      - compensation.currency (String, ISO 4217)\n      - fullName.lastName (String)\n  2. created_ts (DATETIME, // record creation timestamp)\n    candidate destination paths:\n      - meta.createdAt (ISODate)\n      - meta.updatedAt (ISODate)\n      - employment.endDate (ISODate, null if currently employed)\n      - employment.startDate (ISODate)\n      - employment.status (String, active / inactive / terminated)\n      - contact.email (String)\n  3. updated_ts (DATETIME, // last update timestamp)\n    candidate destination paths:\n      - meta.updatedAt (ISODate)\n      - meta.createdAt (ISODate)\n      - employment.endDate (ISODate, null if currently employed)\n      - employment.startDate (ISODate)\n      - fullName.lastName (String)\n      - department.name (String)\n\nReturn one entry per source field through the tool, using the exact source field names given above.",
+    "tool_name": "emit_mappings",
+    "tool_schema": {
+      "type": "object",
+      "properties": {
+        "mappings": {
+          "type": "array",
+          "description": "One entry per source field, in the order given.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source_field": {
+                "type": "string"
+              },
+              "destination_field": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "A candidate path for this field, or null for no match."
+              },
+              "confidence": {
+                "type": "number"
+              },
+              "reasoning": {
+                "type": "string",
+                "description": "Exactly one plain-English sentence."
+              },
+              "notes": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Value-transform logic required, or null."
+              }
+            },
+            "required": [
+              "source_field",
+              "destination_field",
+              "confidence",
+              "reasoning",
+              "notes"
+            ]
+          }
+        }
+      },
+      "required": [
+        "mappings"
+      ]
+    },
+    "max_tokens": 1200,
+    "temperature": 0.0,
+    "manifest": {
+      "stage": "adjudicate",
+      "source_tables": [
+        "emp_master"
+      ],
+      "source_fields": [
+        "emp_master.rec_stat",
+        "emp_master.created_ts",
+        "emp_master.updated_ts"
+      ],
+      "destination_collections": [
+        "employees"
+      ],
+      "destination_paths": [
+        "employment.status",
+        "fullName.firstName",
+        "contact.email",
+        "contact.phone",
+        "compensation.currency",
+        "fullName.lastName",
+        "meta.createdAt",
+        "meta.updatedAt",
+        "employment.endDate",
+        "employment.startDate",
+        "employment.status",
+        "contact.email",
+        "meta.updatedAt",
+        "meta.createdAt",
+        "employment.endDate",
+        "employment.startDate",
+        "fullName.lastName",
+        "department.name"
+      ],
+      "source_fingerprint": "f64f573ee80a450f",
+      "destination_fingerprint": "6e2a499d66d8a9b8",
+      "source_field_count": 3,
+      "destination_path_count": 11,
+      "source_table_count": 1
+    }
+  },
+  "response": {
+    "text": "",
+    "data": {
+      "mappings": [
+        {
+          "source_field": "rec_stat",
+          "destination_field": "employment.status",
+          "confidence": 0.95,
+          "reasoning": "The CHAR(1) status code field with A/I/T values maps directly to the employment status enum that accepts active/inactive/terminated strings.",
+          "notes": "Lookup transform required: A→'active', I→'inactive', T→'terminated'"
+        },
+        {
+          "source_field": "created_ts",
+          "destination_field": "meta.createdAt",
+          "confidence": 0.98,
+          "reasoning": "The audit convention explicitly maps created_ts to meta.createdAt as an ISODate.",
+          "notes": "Convert MySQL DATETIME to ISODate; assume UTC timezone for source timestamps"
+        },
+        {
+          "source_field": "updated_ts",
+          "destination_field": "meta.updatedAt",
+          "confidence": 0.98,
+          "reasoning": "The audit convention explicitly maps updated_ts to meta.updatedAt as an ISODate.",
+          "notes": "Convert MySQL DATETIME to ISODate; assume UTC timezone for source timestamps"
+        }
+      ]
+    },
+    "input_tokens": 1515,
+    "output_tokens": 320,
+    "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "latency_ms": 2630,
+    "stop_reason": "tool_use"
+  }
+}

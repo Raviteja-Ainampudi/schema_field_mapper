@@ -1,0 +1,925 @@
+[
+  {
+    "stage": "route",
+    "model_id": "us.amazon.nova-lite-v1:0",
+    "manifest": {
+      "stage": "route",
+      "source_tables": [
+        "emp_master"
+      ],
+      "source_fields": [
+        "emp_master.emp_id",
+        "emp_master.emp_cd",
+        "emp_master.f_name",
+        "emp_master.l_name",
+        "emp_master.dob",
+        "emp_master.hire_dt",
+        "emp_master.term_dt",
+        "emp_master.dept_id",
+        "emp_master.mgr_emp_id",
+        "emp_master.job_lvl_cd",
+        "emp_master.base_sal",
+        "emp_master.sal_currency",
+        "emp_master.work_email",
+        "emp_master.work_phone",
+        "emp_master.office_loc_id",
+        "emp_master.is_remote",
+        "emp_master.rec_stat",
+        "emp_master.created_ts",
+        "emp_master.updated_ts"
+      ],
+      "destination_collections": [
+        "employees",
+        "departments",
+        "locations"
+      ],
+      "destination_paths": [],
+      "source_fingerprint": "f64f573ee80a450f",
+      "destination_fingerprint": "6e2a499d66d8a9b8",
+      "detail_level": "names",
+      "source_field_count": 19,
+      "destination_path_count": 0,
+      "source_table_count": 1
+    },
+    "system": "You are a data architect matching a legacy relational table to its equivalent collection in a document database. You see column names only, never types or sample data. Answer with the single best collection.",
+    "user": "Legacy table: emp_master\nIts column names: emp_id, emp_cd, f_name, l_name, dob, hire_dt, term_dt, dept_id, mgr_emp_id, job_lvl_cd, base_sal, sal_currency, work_email, work_phone, office_loc_id, is_remote, rec_stat, created_ts, updated_ts\n\nCandidate destination collections: employees, departments, locations\n\nWhich collection represents the same entity as this table? Reply through the tool with the collection name, a confidence between 0 and 1, and exactly one sentence of reasoning.",
+    "response_text": "",
+    "response_data": {
+      "confidence": 0.95,
+      "reasoning": "The column names suggest that this table contains detailed information about individual employees, which matches the 'employees' collection.",
+      "destination_collection": "employees"
+    },
+    "input_tokens": 644,
+    "output_tokens": 52,
+    "latency_ms": 24381,
+    "cache_hit": false,
+    "source": "cassette",
+    "prompt_chars": 694
+  },
+  {
+    "stage": "route",
+    "model_id": "us.amazon.nova-lite-v1:0",
+    "manifest": {
+      "stage": "route",
+      "source_tables": [
+        "dept_info"
+      ],
+      "source_fields": [
+        "dept_info.dept_id",
+        "dept_info.dept_cd",
+        "dept_info.dept_nm",
+        "dept_info.parent_dept_id",
+        "dept_info.dept_head_id",
+        "dept_info.cost_ctr_cd",
+        "dept_info.dept_stat"
+      ],
+      "destination_collections": [
+        "employees",
+        "departments",
+        "locations"
+      ],
+      "destination_paths": [],
+      "source_fingerprint": "f64f573ee80a450f",
+      "destination_fingerprint": "6e2a499d66d8a9b8",
+      "detail_level": "names",
+      "source_field_count": 7,
+      "destination_path_count": 0,
+      "source_table_count": 1
+    },
+    "system": "You are a data architect matching a legacy relational table to its equivalent collection in a document database. You see column names only, never types or sample data. Answer with the single best collection.",
+    "user": "Legacy table: dept_info\nIts column names: dept_id, dept_cd, dept_nm, parent_dept_id, dept_head_id, cost_ctr_cd, dept_stat\n\nCandidate destination collections: employees, departments, locations\n\nWhich collection represents the same entity as this table? Reply through the tool with the collection name, a confidence between 0 and 1, and exactly one sentence of reasoning.",
+    "response_text": "",
+    "response_data": {
+      "confidence": 0.95,
+      "reasoning": "The column names suggest that the table contains information about departments, such as their ID, code, name, parent department, head, cost center code, and status.",
+      "destination_collection": "departments"
+    },
+    "input_tokens": 593,
+    "output_tokens": 62,
+    "latency_ms": 678,
+    "cache_hit": false,
+    "source": "cassette",
+    "prompt_chars": 578
+  },
+  {
+    "stage": "route",
+    "model_id": "us.amazon.nova-lite-v1:0",
+    "manifest": {
+      "stage": "route",
+      "source_tables": [
+        "locations"
+      ],
+      "source_fields": [
+        "locations.loc_id",
+        "locations.loc_cd",
+        "locations.loc_nm",
+        "locations.city",
+        "locations.state_prov",
+        "locations.country_cd",
+        "locations.postal_cd",
+        "locations.tz_cd"
+      ],
+      "destination_collections": [
+        "employees",
+        "departments",
+        "locations"
+      ],
+      "destination_paths": [],
+      "source_fingerprint": "f64f573ee80a450f",
+      "destination_fingerprint": "6e2a499d66d8a9b8",
+      "detail_level": "names",
+      "source_field_count": 8,
+      "destination_path_count": 0,
+      "source_table_count": 1
+    },
+    "system": "You are a data architect matching a legacy relational table to its equivalent collection in a document database. You see column names only, never types or sample data. Answer with the single best collection.",
+    "user": "Legacy table: locations\nIts column names: loc_id, loc_cd, loc_nm, city, state_prov, country_cd, postal_cd, tz_cd\n\nCandidate destination collections: employees, departments, locations\n\nWhich collection represents the same entity as this table? Reply through the tool with the collection name, a confidence between 0 and 1, and exactly one sentence of reasoning.",
+    "response_text": "",
+    "response_data": {
+      "confidence": 0.95,
+      "reasoning": "The table 'locations' has column names that match the entity 'locations', such as 'loc_id', 'city', and 'country_cd', which are typical for a collection that stores location data.",
+      "destination_collection": "locations"
+    },
+    "input_tokens": 588,
+    "output_tokens": 74,
+    "latency_ms": 818,
+    "cache_hit": false,
+    "source": "cassette",
+    "prompt_chars": 569
+  },
+  {
+    "stage": "adjudicate",
+    "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "manifest": {
+      "stage": "adjudicate",
+      "source_tables": [
+        "emp_master"
+      ],
+      "source_fields": [
+        "emp_master.emp_id",
+        "emp_master.emp_cd",
+        "emp_master.f_name",
+        "emp_master.l_name",
+        "emp_master.dob",
+        "emp_master.hire_dt",
+        "emp_master.term_dt",
+        "emp_master.dept_id"
+      ],
+      "destination_collections": [
+        "employees"
+      ],
+      "destination_paths": [
+        "_id",
+        "department.departmentId",
+        "employment.managerId",
+        "location.locationId",
+        "employeeCode",
+        "department.code",
+        "employeeCode",
+        "department.code",
+        "location.code",
+        "contact.email",
+        "compensation.currency",
+        "employment.status",
+        "fullName.firstName",
+        "department.name",
+        "location.name",
+        "fullName.lastName",
+        "contact.phone",
+        "contact.email",
+        "fullName.lastName",
+        "department.name",
+        "location.name",
+        "fullName.firstName",
+        "contact.phone",
+        "location.timezone",
+        "employment.endDate",
+        "employment.startDate",
+        "meta.createdAt",
+        "meta.updatedAt",
+        "employment.jobLevel",
+        "department.code",
+        "employment.startDate",
+        "employment.endDate",
+        "meta.createdAt",
+        "employment.status",
+        "employment.isRemote",
+        "meta.updatedAt",
+        "employment.endDate",
+        "employment.startDate",
+        "employment.status",
+        "meta.createdAt",
+        "meta.updatedAt",
+        "employment.isRemote",
+        "department.departmentId",
+        "_id",
+        "location.locationId",
+        "employment.managerId",
+        "department.code",
+        "department.name"
+      ],
+      "source_fingerprint": "f64f573ee80a450f",
+      "destination_fingerprint": "6e2a499d66d8a9b8",
+      "detail_level": "typed",
+      "source_field_count": 8,
+      "destination_path_count": 22,
+      "source_table_count": 1
+    },
+    "system": "You map columns from a legacy MySQL table to field paths in a MongoDB collection.\n\nRules:\n1. For each source field, choose the single best destination path from the candidate list given for that field, or null if none is a genuine semantic match.\n2. Never invent a path. Only paths listed as candidates for that field are valid.\n3. Prefer null over a weak guess. A wrong mapping is more expensive than an acknowledged gap.\n4. reasoning must be exactly one plain-English sentence explaining the match.\n5. notes must describe any value-transform logic a migration would have to write (code lookups, boolean conversion, ID remapping, precision loss), or be null when the value moves across unchanged.\n6. confidence is your own certainty from 0 to 1, judged on semantics rather than on how similar the names look.",
+    "user": "Source table `emp_master` maps to destination collection `employees`.\n\nRelevant conventions:\n  [denormalization] Document stores often denormalize a joined label alongside its reference, for example department.code and department.name next to department.departmentId. Those copies have no counterpart column in the referencing table; they are populated by joining the referenced table during migration.\n  [pk-to-objectid] A relational INT primary key maps to MongoDB _id, but ObjectId values are generated by MongoDB rather than carried over. Retain the original integer in a legacy field so foreign keys can be resolved during migration.\n  [datetime-timezone] MySQL DATETIME has no timezone. MongoDB ISODate is always UTC, so the migration must state the assumed source timezone; assuming UTC without checking silently shifts every timestamp.\n  [fk-to-ref] A relational foreign key maps to an ObjectId reference field. The migration needs an ID remap table from legacy integer keys to generated ObjectIds, applied after the referenced collection is loaded.\n\nMap these 8 source fields:\n  1. emp_id (INT, PK, NOT NULL)\n    candidate destination paths:\n      - _id (ObjectId)\n      - department.departmentId (ObjectId, references departments._id)\n      - employment.managerId (ObjectId, references employees._id)\n      - location.locationId (ObjectId, references locations._id)\n      - employeeCode (String, unique human-readable ID)\n      - department.code (String)\n  2. emp_cd (VARCHAR(20), UNIQUE, NOT NULL, // human-readable employee code)\n    candidate destination paths:\n      - employeeCode (String, unique human-readable ID)\n      - department.code (String)\n      - location.code (String)\n      - contact.email (String)\n      - compensation.currency (String, ISO 4217)\n      - employment.status (String, active / inactive / terminated)\n  3. f_name (VARCHAR(50), NOT NULL)\n    candidate destination paths:\n      - fullName.firstName (String)\n      - department.name (String)\n      - location.name (String)\n      - fullName.lastName (String)\n      - contact.phone (String)\n      - contact.email (String)\n  4. l_name (VARCHAR(50), NOT NULL)\n    candidate destination paths:\n      - fullName.lastName (String)\n      - department.name (String)\n      - location.name (String)\n      - fullName.firstName (String)\n      - contact.phone (String)\n      - location.timezone (String, IANA timezone)\n  5. dob (DATE)\n    candidate destination paths:\n      - employment.endDate (ISODate, null if currently employed)\n      - employment.startDate (ISODate)\n      - meta.createdAt (ISODate)\n      - meta.updatedAt (ISODate)\n      - employment.jobLevel (String, e.g. L1, IC3, M1)\n      - department.code (String)\n  6. hire_dt (DATETIME)\n    candidate destination paths:\n      - employment.startDate (ISODate)\n      - employment.endDate (ISODate, null if currently employed)\n      - meta.createdAt (ISODate)\n      - employment.status (String, active / inactive / terminated)\n      - employment.isRemote (Boolean)\n      - meta.updatedAt (ISODate)\n  7. term_dt (DATETIME, // null if still active)\n    candidate destination paths:\n      - employment.endDate (ISODate, null if currently employed)\n      - employment.startDate (ISODate)\n      - employment.status (String, active / inactive / terminated)\n      - meta.createdAt (ISODate)\n      - meta.updatedAt (ISODate)\n      - employment.isRemote (Boolean)\n  8. dept_id (INT, FK, -> dept_info.dept_id)\n    candidate destination paths:\n      - department.departmentId (ObjectId, references departments._id)\n      - _id (ObjectId)\n      - location.locationId (ObjectId, references locations._id)\n      - employment.managerId (ObjectId, references employees._id)\n      - department.code (String)\n      - department.name (String)\n\nReturn one entry per source field through the tool, using the exact source field names given above.",
+    "response_text": "",
+    "response_data": {
+      "mappings": [
+        {
+          "source_field": "emp_id",
+          "destination_field": "_id",
+          "confidence": 0.95,
+          "reasoning": "The primary key of the source table maps to the document identifier in MongoDB, with the original integer retained in a legacy field for foreign key resolution.",
+          "notes": "Generate new ObjectId for _id; retain original emp_id integer in legacyId field for FK remapping during migration."
+        },
+        {
+          "source_field": "emp_cd",
+          "destination_field": "employeeCode",
+          "confidence": 0.98,
+          "reasoning": "The unique human-readable employee code in the source table directly corresponds to the employeeCode field designed for this purpose.",
+          "notes": null
+        },
+        {
+          "source_field": "f_name",
+          "destination_field": "fullName.firstName",
+          "confidence": 0.99,
+          "reasoning": "The first name column maps directly to the firstName component of the fullName nested object.",
+          "notes": null
+        },
+        {
+          "source_field": "l_name",
+          "destination_field": "fullName.lastName",
+          "confidence": 0.99,
+          "reasoning": "The last name column maps directly to the lastName component of the fullName nested object.",
+          "notes": null
+        },
+        {
+          "source_field": "dob",
+          "destination_field": null,
+          "confidence": 0.0,
+          "reasoning": "Date of birth has no semantically matching destination field among the candidates provided.",
+          "notes": null
+        },
+        {
+          "source_field": "hire_dt",
+          "destination_field": "employment.startDate",
+          "confidence": 0.98,
+          "reasoning": "The hire date represents the employment start date and maps directly to the employment.startDate field.",
+          "notes": "Convert MySQL DATETIME to MongoDB ISODate; assume UTC timezone if source timezone is not documented."
+        },
+        {
+          "source_field": "term_dt",
+          "destination_field": "employment.endDate",
+          "confidence": 0.97,
+          "reasoning": "The termination date represents the employment end date and maps to employment.endDate, which is null for currently active employees.",
+          "notes": "Convert MySQL DATETIME to MongoDB ISODate; assume UTC timezone if source timezone is not documented; retain null values for active employees."
+        },
+        {
+          "source_field": "dept_id",
+          "destination_field": "department.departmentId",
+          "confidence": 0.96,
+          "reasoning": "The foreign key to the department table maps to the departmentId reference field within the denormalized department object.",
+          "notes": "Remap integer dept_id to generated ObjectId using ID mapping table after departments collection is loaded; denormalize department.code and department.name from departments collection."
+        }
+      ]
+    },
+    "input_tokens": 2018,
+    "output_tokens": 730,
+    "latency_ms": 5333,
+    "cache_hit": false,
+    "source": "cassette",
+    "prompt_chars": 4669
+  },
+  {
+    "stage": "adjudicate",
+    "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "manifest": {
+      "stage": "adjudicate",
+      "source_tables": [
+        "emp_master"
+      ],
+      "source_fields": [
+        "emp_master.dob"
+      ],
+      "destination_collections": [
+        "employees"
+      ],
+      "destination_paths": [
+        "employment.endDate",
+        "employment.startDate",
+        "meta.createdAt",
+        "meta.updatedAt",
+        "employment.jobLevel",
+        "department.code"
+      ],
+      "source_fingerprint": "f64f573ee80a450f",
+      "destination_fingerprint": "6e2a499d66d8a9b8",
+      "detail_level": "typed",
+      "source_field_count": 1,
+      "destination_path_count": 6,
+      "source_table_count": 1
+    },
+    "system": "You map columns from a legacy MySQL table to field paths in a MongoDB collection.\n\nRules:\n1. For each source field, choose the single best destination path from the candidate list given for that field, or null if none is a genuine semantic match.\n2. Never invent a path. Only paths listed as candidates for that field are valid.\n3. Prefer null over a weak guess. A wrong mapping is more expensive than an acknowledged gap.\n4. reasoning must be exactly one plain-English sentence explaining the match.\n5. notes must describe any value-transform logic a migration would have to write (code lookups, boolean conversion, ID remapping, precision loss), or be null when the value moves across unchanged.\n6. confidence is your own certainty from 0 to 1, judged on semantics rather than on how similar the names look.",
+    "user": "Source table `emp_master` maps to destination collection `employees`.\n\nRelevant conventions:\n  [datetime-timezone] MySQL DATETIME has no timezone. MongoDB ISODate is always UTC, so the migration must state the assumed source timezone; assuming UTC without checking silently shifts every timestamp.\n  [naming-snake-to-camel] Legacy MySQL uses snake_case; the MongoDB target uses camelCase. A trailing _cd means code, _nm means name, _dt means date, _ts means timestamp, and an is_ prefix means a boolean flag.\n\nMap these 1 source fields:\n  1. dob (DATE)\n    candidate destination paths:\n      - employment.endDate (ISODate, null if currently employed)\n      - employment.startDate (ISODate)\n      - meta.createdAt (ISODate)\n      - meta.updatedAt (ISODate)\n      - employment.jobLevel (String, e.g. L1, IC3, M1)\n      - department.code (String)\n\nReturn one entry per source field through the tool, using the exact source field names given above.",
+    "response_text": "",
+    "response_data": {
+      "mappings": [
+        {
+          "source_field": "dob",
+          "destination_field": null,
+          "confidence": 0.95,
+          "reasoning": "The source field dob (date of birth) represents an employee's birth date, but none of the candidate paths relate to personal birth information—they cover employment dates, metadata timestamps, job level, and department code.",
+          "notes": null
+        }
+      ]
+    },
+    "input_tokens": 1245,
+    "output_tokens": 128,
+    "latency_ms": 3156,
+    "cache_hit": false,
+    "source": "cassette",
+    "prompt_chars": 1755
+  },
+  {
+    "stage": "adjudicate",
+    "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "manifest": {
+      "stage": "adjudicate",
+      "source_tables": [
+        "emp_master"
+      ],
+      "source_fields": [
+        "emp_master.mgr_emp_id",
+        "emp_master.job_lvl_cd",
+        "emp_master.base_sal",
+        "emp_master.sal_currency",
+        "emp_master.work_email",
+        "emp_master.work_phone",
+        "emp_master.office_loc_id",
+        "emp_master.is_remote"
+      ],
+      "destination_collections": [
+        "employees"
+      ],
+      "destination_paths": [
+        "employment.managerId",
+        "_id",
+        "department.departmentId",
+        "location.locationId",
+        "employeeCode",
+        "department.code",
+        "employment.jobLevel",
+        "department.code",
+        "location.code",
+        "employeeCode",
+        "contact.email",
+        "contact.phone",
+        "compensation.baseSalary",
+        "compensation.currency",
+        "contact.email",
+        "employment.jobLevel",
+        "fullName.lastName",
+        "compensation.currency",
+        "compensation.baseSalary",
+        "employment.jobLevel",
+        "location.country",
+        "department.code",
+        "employment.status",
+        "contact.email",
+        "contact.phone",
+        "department.code",
+        "location.code",
+        "employeeCode",
+        "employment.jobLevel",
+        "contact.phone",
+        "contact.email",
+        "location.code",
+        "location.name",
+        "location.timezone",
+        "compensation.currency",
+        "location.locationId",
+        "_id",
+        "department.departmentId",
+        "employment.managerId",
+        "location.code",
+        "location.city",
+        "employment.isRemote",
+        "employment.status",
+        "location.country",
+        "location.timezone",
+        "employeeCode",
+        "compensation.baseSalary"
+      ],
+      "source_fingerprint": "f64f573ee80a450f",
+      "destination_fingerprint": "6e2a499d66d8a9b8",
+      "detail_level": "typed",
+      "source_field_count": 8,
+      "destination_path_count": 19,
+      "source_table_count": 1
+    },
+    "system": "You map columns from a legacy MySQL table to field paths in a MongoDB collection.\n\nRules:\n1. For each source field, choose the single best destination path from the candidate list given for that field, or null if none is a genuine semantic match.\n2. Never invent a path. Only paths listed as candidates for that field are valid.\n3. Prefer null over a weak guess. A wrong mapping is more expensive than an acknowledged gap.\n4. reasoning must be exactly one plain-English sentence explaining the match.\n5. notes must describe any value-transform logic a migration would have to write (code lookups, boolean conversion, ID remapping, precision loss), or be null when the value moves across unchanged.\n6. confidence is your own certainty from 0 to 1, judged on semantics rather than on how similar the names look.",
+    "user": "Source table `emp_master` maps to destination collection `employees`.\n\nRelevant conventions:\n  [iso-4217] ISO 4217 currency codes are exactly three uppercase letters (USD, GBP, JPY). A CHAR(3) currency column maps to a String with no value transform; validate against the ISO list.\n  [iso-3166] ISO 3166-1 alpha-2 country codes are two uppercase letters (US, GB, JP). A CHAR(2) country column maps to a String unchanged.\n  [mysql-bool-idiom] MySQL has no native boolean; TINYINT(1) with values 0 and 1 is the idiom. It maps to a MongoDB Boolean with 0 to false and 1 to true.\n  [denormalization] Document stores often denormalize a joined label alongside its reference, for example department.code and department.name next to department.departmentId. Those copies have no counterpart column in the referencing table; they are populated by joining the referenced table during migration.\n\nMap these 8 source fields:\n  1. mgr_emp_id (INT, FK, -> emp_master.emp_id)\n    candidate destination paths:\n      - employment.managerId (ObjectId, references employees._id)\n      - _id (ObjectId)\n      - department.departmentId (ObjectId, references departments._id)\n      - location.locationId (ObjectId, references locations._id)\n      - employeeCode (String, unique human-readable ID)\n      - department.code (String)\n  2. job_lvl_cd (VARCHAR(10), // e.g. L1, L2, IC3, M1)\n    candidate destination paths:\n      - employment.jobLevel (String, e.g. L1, IC3, M1)\n      - department.code (String)\n      - location.code (String)\n      - employeeCode (String, unique human-readable ID)\n      - contact.email (String)\n      - contact.phone (String)\n  3. base_sal (DECIMAL(12,2))\n    candidate destination paths:\n      - compensation.baseSalary (Number)\n      - compensation.currency (String, ISO 4217)\n      - contact.email (String)\n      - employment.jobLevel (String, e.g. L1, IC3, M1)\n      - fullName.lastName (String)\n  4. sal_currency (CHAR(3), // ISO 4217, e.g. USD)\n    candidate destination paths:\n      - compensation.currency (String, ISO 4217)\n      - compensation.baseSalary (Number)\n      - employment.jobLevel (String, e.g. L1, IC3, M1)\n      - location.country (String, ISO 3166-1 alpha-2)\n      - department.code (String)\n      - employment.status (String, active / inactive / terminated)\n  5. work_email (VARCHAR(120), UNIQUE)\n    candidate destination paths:\n      - contact.email (String)\n      - contact.phone (String)\n      - department.code (String)\n      - location.code (String)\n      - employeeCode (String, unique human-readable ID)\n      - employment.jobLevel (String, e.g. L1, IC3, M1)\n  6. work_phone (VARCHAR(20))\n    candidate destination paths:\n      - contact.phone (String)\n      - contact.email (String)\n      - location.code (String)\n      - location.name (String)\n      - location.timezone (String, IANA timezone)\n      - compensation.currency (String, ISO 4217)\n  7. office_loc_id (INT, FK, -> locations.loc_id)\n    candidate destination paths:\n      - location.locationId (ObjectId, references locations._id)\n      - _id (ObjectId)\n      - department.departmentId (ObjectId, references departments._id)\n      - employment.managerId (ObjectId, references employees._id)\n      - location.code (String)\n      - location.city (String)\n  8. is_remote (TINYINT(1), // 0 or 1)\n    candidate destination paths:\n      - employment.isRemote (Boolean)\n      - employment.status (String, active / inactive / terminated)\n      - location.country (String, ISO 3166-1 alpha-2)\n      - location.timezone (String, IANA timezone)\n      - employeeCode (String, unique human-readable ID)\n      - compensation.baseSalary (Number)\n\nReturn one entry per source field through the tool, using the exact source field names given above.",
+    "response_text": "",
+    "response_data": {
+      "mappings": [
+        {
+          "source_field": "mgr_emp_id",
+          "destination_field": "employment.managerId",
+          "confidence": 0.95,
+          "reasoning": "This foreign key to emp_master.emp_id semantically represents a manager reference, which maps directly to the employment.managerId ObjectId field that references employees._id.",
+          "notes": "ID remapping required: convert MySQL INT emp_id to MongoDB ObjectId reference in employees collection."
+        },
+        {
+          "source_field": "job_lvl_cd",
+          "destination_field": "employment.jobLevel",
+          "confidence": 0.98,
+          "reasoning": "The job level code (L1, L2, IC3, M1) is a direct semantic match to employment.jobLevel which stores the same format."
+        },
+        {
+          "source_field": "base_sal",
+          "destination_field": "compensation.baseSalary",
+          "confidence": 0.99,
+          "reasoning": "The base salary DECIMAL value maps directly to compensation.baseSalary as a Number with no transformation needed."
+        },
+        {
+          "source_field": "sal_currency",
+          "destination_field": "compensation.currency",
+          "confidence": 0.99,
+          "reasoning": "The ISO 4217 currency code (CHAR(3)) maps directly to compensation.currency as a String, validated against the ISO 4217 standard."
+        },
+        {
+          "source_field": "work_email",
+          "destination_field": "contact.email",
+          "confidence": 0.99,
+          "reasoning": "The work email address maps directly to contact.email as a String with no transformation needed."
+        },
+        {
+          "source_field": "work_phone",
+          "destination_field": "contact.phone",
+          "confidence": 0.99,
+          "reasoning": "The work phone number maps directly to contact.phone as a String with no transformation needed."
+        },
+        {
+          "source_field": "office_loc_id",
+          "destination_field": "location.locationId",
+          "confidence": 0.95,
+          "reasoning": "This foreign key to locations.loc_id represents the office location and maps to location.locationId as an ObjectId reference to the locations collection."
+        },
+        {
+          "source_field": "is_remote",
+          "destination_field": "employment.isRemote",
+          "confidence": 0.99,
+          "reasoning": "The TINYINT(1) boolean flag maps to employment.isRemote as a Boolean following the mysql-bool-idiom convention (0 to false, 1 to true)."
+        }
+      ]
+    },
+    "input_tokens": 2091,
+    "output_tokens": 680,
+    "latency_ms": 4603,
+    "cache_hit": false,
+    "source": "cassette",
+    "prompt_chars": 4545
+  },
+  {
+    "stage": "adjudicate",
+    "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "manifest": {
+      "stage": "adjudicate",
+      "source_tables": [
+        "emp_master"
+      ],
+      "source_fields": [
+        "emp_master.rec_stat",
+        "emp_master.created_ts",
+        "emp_master.updated_ts"
+      ],
+      "destination_collections": [
+        "employees"
+      ],
+      "destination_paths": [
+        "employment.status",
+        "fullName.firstName",
+        "contact.email",
+        "contact.phone",
+        "compensation.currency",
+        "fullName.lastName",
+        "meta.createdAt",
+        "meta.updatedAt",
+        "employment.endDate",
+        "employment.startDate",
+        "employment.status",
+        "contact.email",
+        "meta.updatedAt",
+        "meta.createdAt",
+        "employment.endDate",
+        "employment.startDate",
+        "fullName.lastName",
+        "department.name"
+      ],
+      "source_fingerprint": "f64f573ee80a450f",
+      "destination_fingerprint": "6e2a499d66d8a9b8",
+      "detail_level": "typed",
+      "source_field_count": 3,
+      "destination_path_count": 11,
+      "source_table_count": 1
+    },
+    "system": "You map columns from a legacy MySQL table to field paths in a MongoDB collection.\n\nRules:\n1. For each source field, choose the single best destination path from the candidate list given for that field, or null if none is a genuine semantic match.\n2. Never invent a path. Only paths listed as candidates for that field are valid.\n3. Prefer null over a weak guess. A wrong mapping is more expensive than an acknowledged gap.\n4. reasoning must be exactly one plain-English sentence explaining the match.\n5. notes must describe any value-transform logic a migration would have to write (code lookups, boolean conversion, ID remapping, precision loss), or be null when the value moves across unchanged.\n6. confidence is your own certainty from 0 to 1, judged on semantics rather than on how similar the names look.",
+    "user": "Source table `emp_master` maps to destination collection `employees`.\n\nRelevant conventions:\n  [audit-timestamps] Legacy created_ts and updated_ts audit columns conventionally move into a meta sub-document as createdAt and updatedAt.\n  [char-code-enum] Single-character CHAR(1) status codes require a lookup transform to readable enum strings, and the legend is usually documented in the column comment.\n  [datetime-timezone] MySQL DATETIME has no timezone. MongoDB ISODate is always UTC, so the migration must state the assumed source timezone; assuming UTC without checking silently shifts every timestamp.\n  [naming-snake-to-camel] Legacy MySQL uses snake_case; the MongoDB target uses camelCase. A trailing _cd means code, _nm means name, _dt means date, _ts means timestamp, and an is_ prefix means a boolean flag.\n\nMap these 3 source fields:\n  1. rec_stat (CHAR(1), // A=Active, I=Inactive, T=Terminated)\n    candidate destination paths:\n      - employment.status (String, active / inactive / terminated)\n      - fullName.firstName (String)\n      - contact.email (String)\n      - contact.phone (String)\n      - compensation.currency (String, ISO 4217)\n      - fullName.lastName (String)\n  2. created_ts (DATETIME, // record creation timestamp)\n    candidate destination paths:\n      - meta.createdAt (ISODate)\n      - meta.updatedAt (ISODate)\n      - employment.endDate (ISODate, null if currently employed)\n      - employment.startDate (ISODate)\n      - employment.status (String, active / inactive / terminated)\n      - contact.email (String)\n  3. updated_ts (DATETIME, // last update timestamp)\n    candidate destination paths:\n      - meta.updatedAt (ISODate)\n      - meta.createdAt (ISODate)\n      - employment.endDate (ISODate, null if currently employed)\n      - employment.startDate (ISODate)\n      - fullName.lastName (String)\n      - department.name (String)\n\nReturn one entry per source field through the tool, using the exact source field names given above.",
+    "response_text": "",
+    "response_data": {
+      "mappings": [
+        {
+          "source_field": "rec_stat",
+          "destination_field": "employment.status",
+          "confidence": 0.95,
+          "reasoning": "The CHAR(1) status code field with A/I/T values maps directly to the employment status enum that accepts active/inactive/terminated strings.",
+          "notes": "Lookup transform required: A→'active', I→'inactive', T→'terminated'"
+        },
+        {
+          "source_field": "created_ts",
+          "destination_field": "meta.createdAt",
+          "confidence": 0.98,
+          "reasoning": "The audit convention explicitly maps created_ts to meta.createdAt as an ISODate.",
+          "notes": "Convert MySQL DATETIME to ISODate; assume UTC timezone for source timestamps"
+        },
+        {
+          "source_field": "updated_ts",
+          "destination_field": "meta.updatedAt",
+          "confidence": 0.98,
+          "reasoning": "The audit convention explicitly maps updated_ts to meta.updatedAt as an ISODate.",
+          "notes": "Convert MySQL DATETIME to ISODate; assume UTC timezone for source timestamps"
+        }
+      ]
+    },
+    "input_tokens": 1515,
+    "output_tokens": 320,
+    "latency_ms": 2630,
+    "cache_hit": false,
+    "source": "cassette",
+    "prompt_chars": 2786
+  },
+  {
+    "stage": "adjudicate",
+    "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "manifest": {
+      "stage": "adjudicate",
+      "source_tables": [
+        "dept_info"
+      ],
+      "source_fields": [
+        "dept_info.dept_id",
+        "dept_info.dept_cd",
+        "dept_info.dept_nm",
+        "dept_info.parent_dept_id",
+        "dept_info.dept_head_id",
+        "dept_info.cost_ctr_cd",
+        "dept_info.dept_stat"
+      ],
+      "destination_collections": [
+        "departments"
+      ],
+      "destination_paths": [
+        "_id",
+        "parentDepartmentId",
+        "headEmployeeId",
+        "code",
+        "costCenterCode",
+        "code",
+        "costCenterCode",
+        "parentDepartmentId",
+        "name",
+        "headEmployeeId",
+        "_id",
+        "name",
+        "parentDepartmentId",
+        "code",
+        "costCenterCode",
+        "parentDepartmentId",
+        "_id",
+        "headEmployeeId",
+        "costCenterCode",
+        "code",
+        "headEmployeeId",
+        "parentDepartmentId",
+        "_id",
+        "code",
+        "costCenterCode",
+        "costCenterCode",
+        "code",
+        "name",
+        "parentDepartmentId",
+        "headEmployeeId",
+        "_id",
+        "isActive",
+        "code",
+        "parentDepartmentId",
+        "costCenterCode",
+        "name"
+      ],
+      "source_fingerprint": "f64f573ee80a450f",
+      "destination_fingerprint": "6e2a499d66d8a9b8",
+      "detail_level": "typed",
+      "source_field_count": 7,
+      "destination_path_count": 7,
+      "source_table_count": 1
+    },
+    "system": "You map columns from a legacy MySQL table to field paths in a MongoDB collection.\n\nRules:\n1. For each source field, choose the single best destination path from the candidate list given for that field, or null if none is a genuine semantic match.\n2. Never invent a path. Only paths listed as candidates for that field are valid.\n3. Prefer null over a weak guess. A wrong mapping is more expensive than an acknowledged gap.\n4. reasoning must be exactly one plain-English sentence explaining the match.\n5. notes must describe any value-transform logic a migration would have to write (code lookups, boolean conversion, ID remapping, precision loss), or be null when the value moves across unchanged.\n6. confidence is your own certainty from 0 to 1, judged on semantics rather than on how similar the names look.",
+    "user": "Source table `dept_info` maps to destination collection `departments`.\n\nRelevant conventions:\n  [denormalization] Document stores often denormalize a joined label alongside its reference, for example department.code and department.name next to department.departmentId. Those copies have no counterpart column in the referencing table; they are populated by joining the referenced table during migration.\n  [pk-to-objectid] A relational INT primary key maps to MongoDB _id, but ObjectId values are generated by MongoDB rather than carried over. Retain the original integer in a legacy field so foreign keys can be resolved during migration.\n  [char-code-enum] Single-character CHAR(1) status codes require a lookup transform to readable enum strings, and the legend is usually documented in the column comment.\n  [fk-to-ref] A relational foreign key maps to an ObjectId reference field. The migration needs an ID remap table from legacy integer keys to generated ObjectIds, applied after the referenced collection is loaded.\n\nMap these 7 source fields:\n  1. dept_id (INT, PK, NOT NULL)\n    candidate destination paths:\n      - _id (ObjectId)\n      - parentDepartmentId (ObjectId, references departments._id, self-ref)\n      - headEmployeeId (ObjectId, references employees._id)\n      - code (String)\n      - costCenterCode (String)\n  2. dept_cd (VARCHAR(20), UNIQUE)\n    candidate destination paths:\n      - code (String)\n      - costCenterCode (String)\n      - parentDepartmentId (ObjectId, references departments._id, self-ref)\n      - name (String)\n      - headEmployeeId (ObjectId, references employees._id)\n      - _id (ObjectId)\n  3. dept_nm (VARCHAR(100))\n    candidate destination paths:\n      - name (String)\n      - parentDepartmentId (ObjectId, references departments._id, self-ref)\n      - code (String)\n      - costCenterCode (String)\n  4. parent_dept_id (INT, FK, -> dept_info.dept_id, // self-referencing)\n    candidate destination paths:\n      - parentDepartmentId (ObjectId, references departments._id, self-ref)\n      - _id (ObjectId)\n      - headEmployeeId (ObjectId, references employees._id)\n      - costCenterCode (String)\n      - code (String)\n  5. dept_head_id (INT, FK, -> emp_master.emp_id)\n    candidate destination paths:\n      - headEmployeeId (ObjectId, references employees._id)\n      - parentDepartmentId (ObjectId, references departments._id, self-ref)\n      - _id (ObjectId)\n      - code (String)\n      - costCenterCode (String)\n  6. cost_ctr_cd (VARCHAR(20), // finance cost center code)\n    candidate destination paths:\n      - costCenterCode (String)\n      - code (String)\n      - name (String)\n      - parentDepartmentId (ObjectId, references departments._id, self-ref)\n      - headEmployeeId (ObjectId, references employees._id)\n      - _id (ObjectId)\n  7. dept_stat (CHAR(1), // A=Active, I=Inactive)\n    candidate destination paths:\n      - isActive (Boolean)\n      - code (String)\n      - parentDepartmentId (ObjectId, references departments._id, self-ref)\n      - costCenterCode (String)\n      - name (String)\n\nReturn one entry per source field through the tool, using the exact source field names given above.",
+    "response_text": "",
+    "response_data": {
+      "mappings": [
+        {
+          "source_field": "dept_id",
+          "destination_field": "_id",
+          "confidence": 0.95,
+          "reasoning": "The primary key of the source table maps to the MongoDB document identifier, with the original integer retained in a legacy field for foreign key resolution.",
+          "notes": "Store original INT value in legacyDeptId field; MongoDB will generate the ObjectId for _id during migration."
+        },
+        {
+          "source_field": "dept_cd",
+          "destination_field": "code",
+          "confidence": 0.95,
+          "reasoning": "The department code column maps directly to the code field as a unique string identifier."
+        },
+        {
+          "source_field": "dept_nm",
+          "destination_field": "name",
+          "confidence": 0.95,
+          "reasoning": "The department name column maps directly to the name field."
+        },
+        {
+          "source_field": "parent_dept_id",
+          "destination_field": "parentDepartmentId",
+          "confidence": 0.95,
+          "reasoning": "The self-referencing foreign key to the parent department maps to the parentDepartmentId ObjectId reference field using the ID remap table."
+        },
+        {
+          "source_field": "dept_head_id",
+          "destination_field": "headEmployeeId",
+          "confidence": 0.95,
+          "reasoning": "The foreign key to the employee master table maps to the headEmployeeId ObjectId reference field using the ID remap table."
+        },
+        {
+          "source_field": "cost_ctr_cd",
+          "destination_field": "costCenterCode",
+          "confidence": 0.95,
+          "reasoning": "The finance cost center code column maps directly to the costCenterCode field as a string."
+        },
+        {
+          "source_field": "dept_stat",
+          "destination_field": "isActive",
+          "confidence": 0.95,
+          "reasoning": "The single-character status code requires a lookup transform to convert 'A' to true and 'I' to false for the boolean isActive field.",
+          "notes": "Transform CHAR(1) status code: 'A' → true (Active), 'I' → false (Inactive)."
+        }
+      ]
+    },
+    "input_tokens": 1851,
+    "output_tokens": 590,
+    "latency_ms": 4308,
+    "cache_hit": false,
+    "source": "cassette",
+    "prompt_chars": 3963
+  },
+  {
+    "stage": "adjudicate",
+    "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "manifest": {
+      "stage": "adjudicate",
+      "source_tables": [
+        "locations"
+      ],
+      "source_fields": [
+        "locations.loc_id",
+        "locations.loc_cd",
+        "locations.loc_nm",
+        "locations.city",
+        "locations.state_prov",
+        "locations.country_cd",
+        "locations.postal_cd",
+        "locations.tz_cd"
+      ],
+      "destination_collections": [
+        "locations"
+      ],
+      "destination_paths": [
+        "_id",
+        "code",
+        "postalCode",
+        "code",
+        "postalCode",
+        "city",
+        "stateOrProvince",
+        "country",
+        "timezone",
+        "name",
+        "country",
+        "timezone",
+        "postalCode",
+        "city",
+        "code",
+        "city",
+        "country",
+        "code",
+        "timezone",
+        "postalCode",
+        "stateOrProvince",
+        "stateOrProvince",
+        "postalCode",
+        "timezone",
+        "name",
+        "country",
+        "city",
+        "country",
+        "code",
+        "postalCode",
+        "city",
+        "timezone",
+        "name",
+        "postalCode",
+        "code",
+        "stateOrProvince",
+        "country",
+        "city",
+        "name",
+        "timezone",
+        "code",
+        "postalCode",
+        "city",
+        "stateOrProvince",
+        "country"
+      ],
+      "source_fingerprint": "f64f573ee80a450f",
+      "destination_fingerprint": "6e2a499d66d8a9b8",
+      "detail_level": "typed",
+      "source_field_count": 8,
+      "destination_path_count": 8,
+      "source_table_count": 1
+    },
+    "system": "You map columns from a legacy MySQL table to field paths in a MongoDB collection.\n\nRules:\n1. For each source field, choose the single best destination path from the candidate list given for that field, or null if none is a genuine semantic match.\n2. Never invent a path. Only paths listed as candidates for that field are valid.\n3. Prefer null over a weak guess. A wrong mapping is more expensive than an acknowledged gap.\n4. reasoning must be exactly one plain-English sentence explaining the match.\n5. notes must describe any value-transform logic a migration would have to write (code lookups, boolean conversion, ID remapping, precision loss), or be null when the value moves across unchanged.\n6. confidence is your own certainty from 0 to 1, judged on semantics rather than on how similar the names look.",
+    "user": "Source table `locations` maps to destination collection `locations`.\n\nRelevant conventions:\n  [iso-3166] ISO 3166-1 alpha-2 country codes are two uppercase letters (US, GB, JP). A CHAR(2) country column maps to a String unchanged.\n  [iana-tz] IANA timezone identifiers look like Area/Location (America/Los_Angeles). Store as String verbatim; never convert to a UTC offset, which loses daylight-saving rules.\n  [datetime-timezone] MySQL DATETIME has no timezone. MongoDB ISODate is always UTC, so the migration must state the assumed source timezone; assuming UTC without checking silently shifts every timestamp.\n  [denormalization] Document stores often denormalize a joined label alongside its reference, for example department.code and department.name next to department.departmentId. Those copies have no counterpart column in the referencing table; they are populated by joining the referenced table during migration.\n\nMap these 8 source fields:\n  1. loc_id (INT, PK, NOT NULL)\n    candidate destination paths:\n      - _id (ObjectId)\n      - code (String)\n      - postalCode (String)\n  2. loc_cd (VARCHAR(20), UNIQUE)\n    candidate destination paths:\n      - code (String)\n      - postalCode (String)\n      - city (String)\n      - stateOrProvince (String)\n      - country (String, ISO 3166-1 alpha-2)\n      - timezone (String)\n  3. loc_nm (VARCHAR(100))\n    candidate destination paths:\n      - name (String)\n      - country (String, ISO 3166-1 alpha-2)\n      - timezone (String)\n      - postalCode (String)\n      - city (String)\n      - code (String)\n  4. city (VARCHAR(80))\n    candidate destination paths:\n      - city (String)\n      - country (String, ISO 3166-1 alpha-2)\n      - code (String)\n      - timezone (String)\n      - postalCode (String)\n      - stateOrProvince (String)\n  5. state_prov (VARCHAR(80))\n    candidate destination paths:\n      - stateOrProvince (String)\n      - postalCode (String)\n      - timezone (String)\n      - name (String)\n      - country (String, ISO 3166-1 alpha-2)\n      - city (String)\n  6. country_cd (CHAR(2), // ISO 3166-1 alpha-2)\n    candidate destination paths:\n      - country (String, ISO 3166-1 alpha-2)\n      - code (String)\n      - postalCode (String)\n      - city (String)\n      - timezone (String)\n      - name (String)\n  7. postal_cd (VARCHAR(20))\n    candidate destination paths:\n      - postalCode (String)\n      - code (String)\n      - stateOrProvince (String)\n      - country (String, ISO 3166-1 alpha-2)\n      - city (String)\n      - name (String)\n  8. tz_cd (VARCHAR(50), // IANA timezone)\n    candidate destination paths:\n      - timezone (String)\n      - code (String)\n      - postalCode (String)\n      - city (String)\n      - stateOrProvince (String)\n      - country (String, ISO 3166-1 alpha-2)\n\nReturn one entry per source field through the tool, using the exact source field names given above.",
+    "response_text": "",
+    "response_data": {
+      "mappings": [
+        {
+          "source_field": "loc_id",
+          "destination_field": "_id",
+          "confidence": 0.95,
+          "reasoning": "The primary key of the source table should become the document identifier in MongoDB.",
+          "notes": "Convert INT to ObjectId by wrapping the integer value, or use as a numeric _id if the destination schema permits."
+        },
+        {
+          "source_field": "loc_cd",
+          "destination_field": "code",
+          "confidence": 0.95,
+          "reasoning": "A unique location code column maps directly to a code field in the destination.",
+          "notes": null
+        },
+        {
+          "source_field": "loc_nm",
+          "destination_field": "name",
+          "confidence": 0.95,
+          "reasoning": "A location name column maps directly to the name field in the destination.",
+          "notes": null
+        },
+        {
+          "source_field": "city",
+          "destination_field": "city",
+          "confidence": 0.95,
+          "reasoning": "The city column maps directly to the city field in the destination.",
+          "notes": null
+        },
+        {
+          "source_field": "state_prov",
+          "destination_field": "stateOrProvince",
+          "confidence": 0.95,
+          "reasoning": "The state or province column maps directly to the stateOrProvince field in the destination.",
+          "notes": null
+        },
+        {
+          "source_field": "country_cd",
+          "destination_field": "country",
+          "confidence": 0.95,
+          "reasoning": "An ISO 3166-1 alpha-2 country code column maps directly to the country field per the [iso-3166] convention.",
+          "notes": null
+        },
+        {
+          "source_field": "postal_cd",
+          "destination_field": "postalCode",
+          "confidence": 0.95,
+          "reasoning": "A postal code column maps directly to the postalCode field in the destination.",
+          "notes": null
+        },
+        {
+          "source_field": "tz_cd",
+          "destination_field": "timezone",
+          "confidence": 0.95,
+          "reasoning": "An IANA timezone identifier column maps directly to the timezone field per the [iana-tz] convention.",
+          "notes": null
+        }
+      ]
+    },
+    "input_tokens": 1838,
+    "output_tokens": 614,
+    "latency_ms": 3583,
+    "cache_hit": false,
+    "source": "cassette",
+    "prompt_chars": 3673
+  },
+  {
+    "stage": "reflect",
+    "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "manifest": {
+      "stage": "reflect",
+      "source_tables": [
+        "emp_master"
+      ],
+      "source_fields": [
+        "emp_master.dob"
+      ],
+      "destination_collections": [
+        "employees"
+      ],
+      "destination_paths": [
+        "employment.endDate",
+        "employment.startDate",
+        "meta.createdAt",
+        "meta.updatedAt",
+        "employment.jobLevel",
+        "department.code"
+      ],
+      "source_fingerprint": "f64f573ee80a450f",
+      "destination_fingerprint": "6e2a499d66d8a9b8",
+      "detail_level": "typed",
+      "source_field_count": 1,
+      "destination_path_count": 6,
+      "source_table_count": 1
+    },
+    "system": "You are reviewing one uncertain schema-mapping decision made by another model. Confirm it or replace it with a better choice from the same candidate list. Be willing to answer null if no candidate is a genuine match.",
+    "user": "Source field: dob (DATE)\n\nCandidate destination paths:\n      - employment.endDate (ISODate, null if currently employed)\n      - employment.startDate (ISODate)\n      - meta.createdAt (ISODate)\n      - meta.updatedAt (ISODate)\n      - employment.jobLevel (String, e.g. L1, IC3, M1)\n      - department.code (String)\n\nOriginal decision: null (no match)\nOriginal confidence: 0.95\nOriginal reasoning: The source field dob (date of birth) represents an employee's birth date, but none of the candidate paths relate to personal birth information—they cover employment dates, metadata timestamps, job level, and department code.\n\nReview this decision. Reply with the destination path you would keep or choose instead (or null), your confidence, one sentence of reasoning, any required value transform in notes, and whether you changed the decision.",
+    "response_text": "",
+    "response_data": {
+      "destination_field": null,
+      "confidence": 0.98,
+      "reasoning": "The source field dob (date of birth) is personal demographic information that has no semantic relationship to any of the employment dates, metadata timestamps, job levels, or department codes in the candidate list.",
+      "notes": "None of the candidates represent birth date or personal information fields; this is clearly a case where the appropriate destination field is not available in the schema.",
+      "changed": false
+    },
+    "input_tokens": 990,
+    "output_tokens": 170,
+    "latency_ms": 23825,
+    "cache_hit": false,
+    "source": "cassette",
+    "prompt_chars": 1057
+  },
+  {
+    "stage": "reflect",
+    "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "manifest": {
+      "stage": "reflect",
+      "source_tables": [
+        "dept_info"
+      ],
+      "source_fields": [
+        "dept_info.dept_head_id"
+      ],
+      "destination_collections": [
+        "departments"
+      ],
+      "destination_paths": [
+        "headEmployeeId",
+        "parentDepartmentId",
+        "_id",
+        "code",
+        "costCenterCode"
+      ],
+      "source_fingerprint": "f64f573ee80a450f",
+      "destination_fingerprint": "6e2a499d66d8a9b8",
+      "detail_level": "typed",
+      "source_field_count": 1,
+      "destination_path_count": 5,
+      "source_table_count": 1
+    },
+    "system": "You are reviewing one uncertain schema-mapping decision made by another model. Confirm it or replace it with a better choice from the same candidate list. Be willing to answer null if no candidate is a genuine match.",
+    "user": "Source field: dept_head_id (INT, FK, -> emp_master.emp_id)\n\nCandidate destination paths:\n      - headEmployeeId (ObjectId, references employees._id)\n      - parentDepartmentId (ObjectId, references departments._id, self-ref)\n      - _id (ObjectId)\n      - code (String)\n      - costCenterCode (String)\n\nOriginal decision: headEmployeeId\nOriginal confidence: 0.95\nOriginal reasoning: The foreign key to the employee master table maps to the headEmployeeId ObjectId reference field using the ID remap table.\n\nReview this decision. Reply with the destination path you would keep or choose instead (or null), your confidence, one sentence of reasoning, any required value transform in notes, and whether you changed the decision.",
+    "response_text": "",
+    "response_data": {
+      "destination_field": "headEmployeeId",
+      "confidence": 0.95,
+      "reasoning": "The dept_head_id foreign key referencing emp_master.emp_id clearly maps to headEmployeeId which references employees._id, representing the department head employee relationship.",
+      "notes": "Requires ID remapping from INT emp_id to ObjectId employees._id using the migration ID mapping table.",
+      "changed": false
+    },
+    "input_tokens": 961,
+    "output_tokens": 164,
+    "latency_ms": 4068,
+    "cache_hit": false,
+    "source": "cassette",
+    "prompt_chars": 943
+  }
+]

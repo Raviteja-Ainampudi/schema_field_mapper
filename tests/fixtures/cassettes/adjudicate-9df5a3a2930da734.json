@@ -1,0 +1,193 @@
+{
+  "request": {
+    "stage": "adjudicate",
+    "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "system": "You map columns from a legacy MySQL table to field paths in a MongoDB collection.\n\nRules:\n1. For each source field, choose the single best destination path from the candidate list given for that field, or null if none is a genuine semantic match.\n2. Never invent a path. Only paths listed as candidates for that field are valid.\n3. Prefer null over a weak guess. A wrong mapping is more expensive than an acknowledged gap.\n4. reasoning must be exactly one plain-English sentence explaining the match.\n5. notes must describe any value-transform logic a migration would have to write (code lookups, boolean conversion, ID remapping, precision loss), or be null when the value moves across unchanged.\n6. confidence is your own certainty from 0 to 1, judged on semantics rather than on how similar the names look.",
+    "user": "Source table `emp_master` maps to destination collection `employees`.\n\nRelevant conventions:\n  [iso-4217] ISO 4217 currency codes are exactly three uppercase letters (USD, GBP, JPY). A CHAR(3) currency column maps to a String with no value transform; validate against the ISO list.\n  [iso-3166] ISO 3166-1 alpha-2 country codes are two uppercase letters (US, GB, JP). A CHAR(2) country column maps to a String unchanged.\n  [mysql-bool-idiom] MySQL has no native boolean; TINYINT(1) with values 0 and 1 is the idiom. It maps to a MongoDB Boolean with 0 to false and 1 to true.\n  [denormalization] Document stores often denormalize a joined label alongside its reference, for example department.code and department.name next to department.departmentId. Those copies have no counterpart column in the referencing table; they are populated by joining the referenced table during migration.\n\nMap these 8 source fields:\n  1. mgr_emp_id (INT, FK, -> emp_master.emp_id)\n    candidate destination paths:\n      - employment.managerId (ObjectId, references employees._id)\n      - _id (ObjectId)\n      - department.departmentId (ObjectId, references departments._id)\n      - location.locationId (ObjectId, references locations._id)\n      - employeeCode (String, unique human-readable ID)\n      - department.code (String)\n  2. job_lvl_cd (VARCHAR(10), // e.g. L1, L2, IC3, M1)\n    candidate destination paths:\n      - employment.jobLevel (String, e.g. L1, IC3, M1)\n      - department.code (String)\n      - location.code (String)\n      - employeeCode (String, unique human-readable ID)\n      - contact.email (String)\n      - contact.phone (String)\n  3. base_sal (DECIMAL(12,2))\n    candidate destination paths:\n      - compensation.baseSalary (Number)\n      - compensation.currency (String, ISO 4217)\n      - contact.email (String)\n      - employment.jobLevel (String, e.g. L1, IC3, M1)\n      - fullName.lastName (String)\n  4. sal_currency (CHAR(3), // ISO 4217, e.g. USD)\n    candidate destination paths:\n      - compensation.currency (String, ISO 4217)\n      - compensation.baseSalary (Number)\n      - employment.jobLevel (String, e.g. L1, IC3, M1)\n      - location.country (String, ISO 3166-1 alpha-2)\n      - department.code (String)\n      - employment.status (String, active / inactive / terminated)\n  5. work_email (VARCHAR(120), UNIQUE)\n    candidate destination paths:\n      - contact.email (String)\n      - contact.phone (String)\n      - department.code (String)\n      - location.code (String)\n      - employeeCode (String, unique human-readable ID)\n      - employment.jobLevel (String, e.g. L1, IC3, M1)\n  6. work_phone (VARCHAR(20))\n    candidate destination paths:\n      - contact.phone (String)\n      - contact.email (String)\n      - location.code (String)\n      - location.name (String)\n      - location.timezone (String, IANA timezone)\n      - compensation.currency (String, ISO 4217)\n  7. office_loc_id (INT, FK, -> locations.loc_id)\n    candidate destination paths:\n      - location.locationId (ObjectId, references locations._id)\n      - _id (ObjectId)\n      - department.departmentId (ObjectId, references departments._id)\n      - employment.managerId (ObjectId, references employees._id)\n      - location.code (String)\n      - location.city (String)\n  8. is_remote (TINYINT(1), // 0 or 1)\n    candidate destination paths:\n      - employment.isRemote (Boolean)\n      - employment.status (String, active / inactive / terminated)\n      - location.country (String, ISO 3166-1 alpha-2)\n      - location.timezone (String, IANA timezone)\n      - employeeCode (String, unique human-readable ID)\n      - compensation.baseSalary (Number)\n\nReturn one entry per source field through the tool, using the exact source field names given above.",
+    "tool_name": "emit_mappings",
+    "tool_schema": {
+      "type": "object",
+      "properties": {
+        "mappings": {
+          "type": "array",
+          "description": "One entry per source field, in the order given.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source_field": {
+                "type": "string"
+              },
+              "destination_field": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "A candidate path for this field, or null for no match."
+              },
+              "confidence": {
+                "type": "number"
+              },
+              "reasoning": {
+                "type": "string",
+                "description": "Exactly one plain-English sentence."
+              },
+              "notes": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Value-transform logic required, or null."
+              }
+            },
+            "required": [
+              "source_field",
+              "destination_field",
+              "confidence",
+              "reasoning",
+              "notes"
+            ]
+          }
+        }
+      },
+      "required": [
+        "mappings"
+      ]
+    },
+    "max_tokens": 3200,
+    "temperature": 0.0,
+    "manifest": {
+      "stage": "adjudicate",
+      "source_tables": [
+        "emp_master"
+      ],
+      "source_fields": [
+        "emp_master.mgr_emp_id",
+        "emp_master.job_lvl_cd",
+        "emp_master.base_sal",
+        "emp_master.sal_currency",
+        "emp_master.work_email",
+        "emp_master.work_phone",
+        "emp_master.office_loc_id",
+        "emp_master.is_remote"
+      ],
+      "destination_collections": [
+        "employees"
+      ],
+      "destination_paths": [
+        "employment.managerId",
+        "_id",
+        "department.departmentId",
+        "location.locationId",
+        "employeeCode",
+        "department.code",
+        "employment.jobLevel",
+        "department.code",
+        "location.code",
+        "employeeCode",
+        "contact.email",
+        "contact.phone",
+        "compensation.baseSalary",
+        "compensation.currency",
+        "contact.email",
+        "employment.jobLevel",
+        "fullName.lastName",
+        "compensation.currency",
+        "compensation.baseSalary",
+        "employment.jobLevel",
+        "location.country",
+        "department.code",
+        "employment.status",
+        "contact.email",
+        "contact.phone",
+        "department.code",
+        "location.code",
+        "employeeCode",
+        "employment.jobLevel",
+        "contact.phone",
+        "contact.email",
+        "location.code",
+        "location.name",
+        "location.timezone",
+        "compensation.currency",
+        "location.locationId",
+        "_id",
+        "department.departmentId",
+        "employment.managerId",
+        "location.code",
+        "location.city",
+        "employment.isRemote",
+        "employment.status",
+        "location.country",
+        "location.timezone",
+        "employeeCode",
+        "compensation.baseSalary"
+      ],
+      "source_fingerprint": "f64f573ee80a450f",
+      "destination_fingerprint": "6e2a499d66d8a9b8",
+      "source_field_count": 8,
+      "destination_path_count": 19,
+      "source_table_count": 1
+    }
+  },
+  "response": {
+    "text": "",
+    "data": {
+      "mappings": [
+        {
+          "source_field": "mgr_emp_id",
+          "destination_field": "employment.managerId",
+          "confidence": 0.95,
+          "reasoning": "This foreign key to emp_master.emp_id semantically represents a manager reference, which maps directly to the employment.managerId ObjectId field that references employees._id.",
+          "notes": "ID remapping required: convert MySQL INT emp_id to MongoDB ObjectId reference in employees collection."
+        },
+        {
+          "source_field": "job_lvl_cd",
+          "destination_field": "employment.jobLevel",
+          "confidence": 0.98,
+          "reasoning": "The job level code (L1, L2, IC3, M1) is a direct semantic match to employment.jobLevel which stores the same format."
+        },
+        {
+          "source_field": "base_sal",
+          "destination_field": "compensation.baseSalary",
+          "confidence": 0.99,
+          "reasoning": "The base salary DECIMAL value maps directly to compensation.baseSalary as a Number with no transformation needed."
+        },
+        {
+          "source_field": "sal_currency",
+          "destination_field": "compensation.currency",
+          "confidence": 0.99,
+          "reasoning": "The ISO 4217 currency code (CHAR(3)) maps directly to compensation.currency as a String, validated against the ISO 4217 standard."
+        },
+        {
+          "source_field": "work_email",
+          "destination_field": "contact.email",
+          "confidence": 0.99,
+          "reasoning": "The work email address maps directly to contact.email as a String with no transformation needed."
+        },
+        {
+          "source_field": "work_phone",
+          "destination_field": "contact.phone",
+          "confidence": 0.99,
+          "reasoning": "The work phone number maps directly to contact.phone as a String with no transformation needed."
+        },
+        {
+          "source_field": "office_loc_id",
+          "destination_field": "location.locationId",
+          "confidence": 0.95,
+          "reasoning": "This foreign key to locations.loc_id represents the office location and maps to location.locationId as an ObjectId reference to the locations collection."
+        },
+        {
+          "source_field": "is_remote",
+          "destination_field": "employment.isRemote",
+          "confidence": 0.99,
+          "reasoning": "The TINYINT(1) boolean flag maps to employment.isRemote as a Boolean following the mysql-bool-idiom convention (0 to false, 1 to true)."
+        }
+      ]
+    },
+    "input_tokens": 2091,
+    "output_tokens": 680,
+    "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "latency_ms": 4603,
+    "stop_reason": "tool_use"
+  }
+}

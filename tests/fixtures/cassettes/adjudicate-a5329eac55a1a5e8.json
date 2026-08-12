@@ -1,0 +1,103 @@
+{
+  "request": {
+    "stage": "adjudicate",
+    "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "system": "You map columns from a legacy MySQL table to field paths in a MongoDB collection.\n\nRules:\n1. For each source field, choose the single best destination path from the candidate list given for that field, or null if none is a genuine semantic match.\n2. Never invent a path. Only paths listed as candidates for that field are valid.\n3. Prefer null over a weak guess. A wrong mapping is more expensive than an acknowledged gap.\n4. reasoning must be exactly one plain-English sentence explaining the match.\n5. notes must describe any value-transform logic a migration would have to write (code lookups, boolean conversion, ID remapping, precision loss), or be null when the value moves across unchanged.\n6. confidence is your own certainty from 0 to 1, judged on semantics rather than on how similar the names look.",
+    "user": "Source table `emp_master` maps to destination collection `employees`.\n\nRelevant conventions:\n  [datetime-timezone] MySQL DATETIME has no timezone. MongoDB ISODate is always UTC, so the migration must state the assumed source timezone; assuming UTC without checking silently shifts every timestamp.\n  [naming-snake-to-camel] Legacy MySQL uses snake_case; the MongoDB target uses camelCase. A trailing _cd means code, _nm means name, _dt means date, _ts means timestamp, and an is_ prefix means a boolean flag.\n\nMap these 1 source fields:\n  1. dob (DATE)\n    candidate destination paths:\n      - employment.endDate (ISODate, null if currently employed)\n      - employment.startDate (ISODate)\n      - meta.createdAt (ISODate)\n      - meta.updatedAt (ISODate)\n      - employment.jobLevel (String, e.g. L1, IC3, M1)\n      - department.code (String)\n\nReturn one entry per source field through the tool, using the exact source field names given above.",
+    "tool_name": "emit_mappings",
+    "tool_schema": {
+      "type": "object",
+      "properties": {
+        "mappings": {
+          "type": "array",
+          "description": "One entry per source field, in the order given.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source_field": {
+                "type": "string"
+              },
+              "destination_field": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "A candidate path for this field, or null for no match."
+              },
+              "confidence": {
+                "type": "number"
+              },
+              "reasoning": {
+                "type": "string",
+                "description": "Exactly one plain-English sentence."
+              },
+              "notes": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Value-transform logic required, or null."
+              }
+            },
+            "required": [
+              "source_field",
+              "destination_field",
+              "confidence",
+              "reasoning",
+              "notes"
+            ]
+          }
+        }
+      },
+      "required": [
+        "mappings"
+      ]
+    },
+    "max_tokens": 400,
+    "temperature": 0.0,
+    "manifest": {
+      "stage": "adjudicate",
+      "source_tables": [
+        "emp_master"
+      ],
+      "source_fields": [
+        "emp_master.dob"
+      ],
+      "destination_collections": [
+        "employees"
+      ],
+      "destination_paths": [
+        "employment.endDate",
+        "employment.startDate",
+        "meta.createdAt",
+        "meta.updatedAt",
+        "employment.jobLevel",
+        "department.code"
+      ],
+      "source_fingerprint": "f64f573ee80a450f",
+      "destination_fingerprint": "6e2a499d66d8a9b8",
+      "source_field_count": 1,
+      "destination_path_count": 6,
+      "source_table_count": 1
+    }
+  },
+  "response": {
+    "text": "",
+    "data": {
+      "mappings": [
+        {
+          "source_field": "dob",
+          "destination_field": null,
+          "confidence": 0.95,
+          "reasoning": "The source field dob (date of birth) represents an employee's birth date, but none of the candidate paths relate to personal birth information—they cover employment dates, metadata timestamps, job level, and department code.",
+          "notes": null
+        }
+      ]
+    },
+    "input_tokens": 1245,
+    "output_tokens": 128,
+    "model_id": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+    "latency_ms": 3156,
+    "stop_reason": "tool_use"
+  }
+}

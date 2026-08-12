@@ -1,0 +1,84 @@
+{
+  "request": {
+    "stage": "route",
+    "model_id": "us.amazon.nova-lite-v1:0",
+    "system": "You are a data architect matching a legacy relational table to its equivalent collection in a document database. You see column names only, never types or sample data. Answer with the single best collection.",
+    "user": "Legacy table: emp_master\nIts column names: emp_id, emp_cd, f_name, l_name, dob, hire_dt, term_dt, dept_id, mgr_emp_id, job_lvl_cd, base_sal, sal_currency, work_email, work_phone, office_loc_id, is_remote, rec_stat, created_ts, updated_ts\n\nCandidate destination collections: employees, departments, locations\n\nWhich collection represents the same entity as this table? Reply through the tool with the collection name, a confidence between 0 and 1, and exactly one sentence of reasoning.",
+    "tool_name": "pair_table",
+    "tool_schema": {
+      "type": "object",
+      "properties": {
+        "destination_collection": {
+          "type": "string",
+          "description": "Exactly one of the offered collection names."
+        },
+        "confidence": {
+          "type": "number",
+          "description": "0 to 1, how certain this pairing is."
+        },
+        "reasoning": {
+          "type": "string",
+          "description": "One plain-English sentence explaining the pairing."
+        }
+      },
+      "required": [
+        "destination_collection",
+        "confidence",
+        "reasoning"
+      ]
+    },
+    "max_tokens": 400,
+    "temperature": 0.0,
+    "manifest": {
+      "stage": "route",
+      "source_tables": [
+        "emp_master"
+      ],
+      "source_fields": [
+        "emp_master.emp_id",
+        "emp_master.emp_cd",
+        "emp_master.f_name",
+        "emp_master.l_name",
+        "emp_master.dob",
+        "emp_master.hire_dt",
+        "emp_master.term_dt",
+        "emp_master.dept_id",
+        "emp_master.mgr_emp_id",
+        "emp_master.job_lvl_cd",
+        "emp_master.base_sal",
+        "emp_master.sal_currency",
+        "emp_master.work_email",
+        "emp_master.work_phone",
+        "emp_master.office_loc_id",
+        "emp_master.is_remote",
+        "emp_master.rec_stat",
+        "emp_master.created_ts",
+        "emp_master.updated_ts"
+      ],
+      "destination_collections": [
+        "employees",
+        "departments",
+        "locations"
+      ],
+      "destination_paths": [],
+      "source_fingerprint": "f64f573ee80a450f",
+      "destination_fingerprint": "6e2a499d66d8a9b8",
+      "source_field_count": 19,
+      "destination_path_count": 0,
+      "source_table_count": 1
+    }
+  },
+  "response": {
+    "text": "",
+    "data": {
+      "confidence": 0.95,
+      "reasoning": "The column names suggest that this table contains detailed information about individual employees, which matches the 'employees' collection.",
+      "destination_collection": "employees"
+    },
+    "input_tokens": 644,
+    "output_tokens": 52,
+    "model_id": "us.amazon.nova-lite-v1:0",
+    "latency_ms": 24381,
+    "stop_reason": "tool_use"
+  }
+}

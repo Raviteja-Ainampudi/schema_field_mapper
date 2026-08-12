@@ -1,0 +1,198 @@
+{
+  "request": {
+    "stage": "adjudicate",
+    "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "system": "You map columns from a legacy MySQL table to field paths in a MongoDB collection.\n\nRules:\n1. For each source field, choose the single best destination path from the candidate list given for that field, or null if none is a genuine semantic match.\n2. Never invent a path. Only paths listed as candidates for that field are valid.\n3. Prefer null over a weak guess. A wrong mapping is more expensive than an acknowledged gap.\n4. reasoning must be exactly one plain-English sentence explaining the match.\n5. notes must describe any value-transform logic a migration would have to write (code lookups, boolean conversion, ID remapping, precision loss), or be null when the value moves across unchanged.\n6. confidence is your own certainty from 0 to 1, judged on semantics rather than on how similar the names look.",
+    "user": "Source table `locations` maps to destination collection `locations`.\n\nRelevant conventions:\n  [iso-3166] ISO 3166-1 alpha-2 country codes are two uppercase letters (US, GB, JP). A CHAR(2) country column maps to a String unchanged.\n  [iana-tz] IANA timezone identifiers look like Area/Location (America/Los_Angeles). Store as String verbatim; never convert to a UTC offset, which loses daylight-saving rules.\n  [datetime-timezone] MySQL DATETIME has no timezone. MongoDB ISODate is always UTC, so the migration must state the assumed source timezone; assuming UTC without checking silently shifts every timestamp.\n  [denormalization] Document stores often denormalize a joined label alongside its reference, for example department.code and department.name next to department.departmentId. Those copies have no counterpart column in the referencing table; they are populated by joining the referenced table during migration.\n\nMap these 8 source fields:\n  1. loc_id (INT, PK, NOT NULL)\n    candidate destination paths:\n      - _id (ObjectId)\n      - code (String)\n      - postalCode (String)\n  2. loc_cd (VARCHAR(20), UNIQUE)\n    candidate destination paths:\n      - code (String)\n      - postalCode (String)\n      - city (String)\n      - stateOrProvince (String)\n      - country (String, ISO 3166-1 alpha-2)\n      - timezone (String)\n  3. loc_nm (VARCHAR(100))\n    candidate destination paths:\n      - name (String)\n      - country (String, ISO 3166-1 alpha-2)\n      - timezone (String)\n      - postalCode (String)\n      - city (String)\n      - code (String)\n  4. city (VARCHAR(80))\n    candidate destination paths:\n      - city (String)\n      - country (String, ISO 3166-1 alpha-2)\n      - code (String)\n      - timezone (String)\n      - postalCode (String)\n      - stateOrProvince (String)\n  5. state_prov (VARCHAR(80))\n    candidate destination paths:\n      - stateOrProvince (String)\n      - postalCode (String)\n      - timezone (String)\n      - name (String)\n      - country (String, ISO 3166-1 alpha-2)\n      - city (String)\n  6. country_cd (CHAR(2), // ISO 3166-1 alpha-2)\n    candidate destination paths:\n      - country (String, ISO 3166-1 alpha-2)\n      - code (String)\n      - postalCode (String)\n      - city (String)\n      - timezone (String)\n      - name (String)\n  7. postal_cd (VARCHAR(20))\n    candidate destination paths:\n      - postalCode (String)\n      - code (String)\n      - stateOrProvince (String)\n      - country (String, ISO 3166-1 alpha-2)\n      - city (String)\n      - name (String)\n  8. tz_cd (VARCHAR(50), // IANA timezone)\n    candidate destination paths:\n      - timezone (String)\n      - code (String)\n      - postalCode (String)\n      - city (String)\n      - stateOrProvince (String)\n      - country (String, ISO 3166-1 alpha-2)\n\nReturn one entry per source field through the tool, using the exact source field names given above.",
+    "tool_name": "emit_mappings",
+    "tool_schema": {
+      "type": "object",
+      "properties": {
+        "mappings": {
+          "type": "array",
+          "description": "One entry per source field, in the order given.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source_field": {
+                "type": "string"
+              },
+              "destination_field": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "A candidate path for this field, or null for no match."
+              },
+              "confidence": {
+                "type": "number"
+              },
+              "reasoning": {
+                "type": "string",
+                "description": "Exactly one plain-English sentence."
+              },
+              "notes": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Value-transform logic required, or null."
+              }
+            },
+            "required": [
+              "source_field",
+              "destination_field",
+              "confidence",
+              "reasoning",
+              "notes"
+            ]
+          }
+        }
+      },
+      "required": [
+        "mappings"
+      ]
+    },
+    "max_tokens": 3200,
+    "temperature": 0.0,
+    "manifest": {
+      "stage": "adjudicate",
+      "source_tables": [
+        "locations"
+      ],
+      "source_fields": [
+        "locations.loc_id",
+        "locations.loc_cd",
+        "locations.loc_nm",
+        "locations.city",
+        "locations.state_prov",
+        "locations.country_cd",
+        "locations.postal_cd",
+        "locations.tz_cd"
+      ],
+      "destination_collections": [
+        "locations"
+      ],
+      "destination_paths": [
+        "_id",
+        "code",
+        "postalCode",
+        "code",
+        "postalCode",
+        "city",
+        "stateOrProvince",
+        "country",
+        "timezone",
+        "name",
+        "country",
+        "timezone",
+        "postalCode",
+        "city",
+        "code",
+        "city",
+        "country",
+        "code",
+        "timezone",
+        "postalCode",
+        "stateOrProvince",
+        "stateOrProvince",
+        "postalCode",
+        "timezone",
+        "name",
+        "country",
+        "city",
+        "country",
+        "code",
+        "postalCode",
+        "city",
+        "timezone",
+        "name",
+        "postalCode",
+        "code",
+        "stateOrProvince",
+        "country",
+        "city",
+        "name",
+        "timezone",
+        "code",
+        "postalCode",
+        "city",
+        "stateOrProvince",
+        "country"
+      ],
+      "source_fingerprint": "f64f573ee80a450f",
+      "destination_fingerprint": "6e2a499d66d8a9b8",
+      "source_field_count": 8,
+      "destination_path_count": 8,
+      "source_table_count": 1
+    }
+  },
+  "response": {
+    "text": "",
+    "data": {
+      "mappings": [
+        {
+          "source_field": "loc_id",
+          "destination_field": "_id",
+          "confidence": 0.95,
+          "reasoning": "The primary key of the source table should become the document identifier in MongoDB.",
+          "notes": "Convert INT to ObjectId by wrapping the integer value, or use as a numeric _id if the destination schema permits."
+        },
+        {
+          "source_field": "loc_cd",
+          "destination_field": "code",
+          "confidence": 0.95,
+          "reasoning": "A unique location code column maps directly to a code field in the destination.",
+          "notes": null
+        },
+        {
+          "source_field": "loc_nm",
+          "destination_field": "name",
+          "confidence": 0.95,
+          "reasoning": "A location name column maps directly to the name field in the destination.",
+          "notes": null
+        },
+        {
+          "source_field": "city",
+          "destination_field": "city",
+          "confidence": 0.95,
+          "reasoning": "The city column maps directly to the city field in the destination.",
+          "notes": null
+        },
+        {
+          "source_field": "state_prov",
+          "destination_field": "stateOrProvince",
+          "confidence": 0.95,
+          "reasoning": "The state or province column maps directly to the stateOrProvince field in the destination.",
+          "notes": null
+        },
+        {
+          "source_field": "country_cd",
+          "destination_field": "country",
+          "confidence": 0.95,
+          "reasoning": "An ISO 3166-1 alpha-2 country code column maps directly to the country field per the [iso-3166] convention.",
+          "notes": null
+        },
+        {
+          "source_field": "postal_cd",
+          "destination_field": "postalCode",
+          "confidence": 0.95,
+          "reasoning": "A postal code column maps directly to the postalCode field in the destination.",
+          "notes": null
+        },
+        {
+          "source_field": "tz_cd",
+          "destination_field": "timezone",
+          "confidence": 0.95,
+          "reasoning": "An IANA timezone identifier column maps directly to the timezone field per the [iana-tz] convention.",
+          "notes": null
+        }
+      ]
+    },
+    "input_tokens": 1838,
+    "output_tokens": 614,
+    "model_id": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "latency_ms": 3583,
+    "stop_reason": "tool_use"
+  }
+}

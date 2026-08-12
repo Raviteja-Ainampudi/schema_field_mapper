@@ -1,0 +1,131 @@
+{
+  "_comment": [
+    "Hand-derived ground truth for the assignment's two schemas, written from the",
+    "schemas directly rather than from pipeline output, so it can disagree with the",
+    "pipeline. Shape tests prove the output is well formed; this proves it is right.",
+    "",
+    "Counts: 34 source columns (19 + 7 + 8), 40 destination leaf paths (25 + 7 + 8),",
+    "33 mappings, 1 justified unmapped source field, 7 unmapped destination paths.",
+    "",
+    "Container objects (fullName, employment, compensation, contact, department,",
+    "location, meta) are not destinations and are excluded from the 40."
+  ],
+
+  "counts": {
+    "source_fields": 34,
+    "destination_fields": 40,
+    "mappings": 33,
+    "unmapped_source_fields": 1,
+    "unmapped_destination_fields": 7
+  },
+
+  "tables": [
+    {
+      "source_table": "emp_master",
+      "destination_collection": "employees",
+      "mappings": {
+        "emp_id": "_id",
+        "emp_cd": "employeeCode",
+        "f_name": "fullName.firstName",
+        "l_name": "fullName.lastName",
+        "hire_dt": "employment.startDate",
+        "term_dt": "employment.endDate",
+        "dept_id": "department.departmentId",
+        "mgr_emp_id": "employment.managerId",
+        "job_lvl_cd": "employment.jobLevel",
+        "base_sal": "compensation.baseSalary",
+        "sal_currency": "compensation.currency",
+        "work_email": "contact.email",
+        "work_phone": "contact.phone",
+        "office_loc_id": "location.locationId",
+        "is_remote": "employment.isRemote",
+        "rec_stat": "employment.status",
+        "created_ts": "meta.createdAt",
+        "updated_ts": "meta.updatedAt"
+      },
+      "unmapped_source_fields": {
+        "dob": "The destination employee document has no birth-date path anywhere; date of birth is simply not carried over."
+      },
+      "unmapped_destination_fields": {
+        "department.code": "Denormalized copy of dept_info.dept_cd, populated by joining dept_info during migration.",
+        "department.name": "Denormalized copy of dept_info.dept_nm, populated by joining dept_info during migration.",
+        "location.code": "Denormalized copy of locations.loc_cd, populated by joining locations during migration.",
+        "location.name": "Denormalized copy of locations.loc_nm, populated by joining locations during migration.",
+        "location.city": "Denormalized copy of locations.city, populated by joining locations during migration.",
+        "location.country": "Denormalized copy of locations.country_cd, populated by joining locations during migration.",
+        "location.timezone": "Denormalized copy of locations.tz_cd, populated by joining locations during migration."
+      }
+    },
+    {
+      "source_table": "dept_info",
+      "destination_collection": "departments",
+      "mappings": {
+        "dept_id": "_id",
+        "dept_cd": "code",
+        "dept_nm": "name",
+        "parent_dept_id": "parentDepartmentId",
+        "dept_head_id": "headEmployeeId",
+        "cost_ctr_cd": "costCenterCode",
+        "dept_stat": "isActive"
+      },
+      "unmapped_source_fields": {},
+      "unmapped_destination_fields": {}
+    },
+    {
+      "source_table": "locations",
+      "destination_collection": "locations",
+      "mappings": {
+        "loc_id": "_id",
+        "loc_cd": "code",
+        "loc_nm": "name",
+        "city": "city",
+        "state_prov": "stateOrProvince",
+        "country_cd": "country",
+        "postal_cd": "postalCode",
+        "tz_cd": "timezone"
+      },
+      "unmapped_source_fields": {},
+      "unmapped_destination_fields": {}
+    }
+  ],
+
+  "_transform_comment": [
+    "Transforms the pipeline must get right, checked by substring rather than exact",
+    "wording so the model keeps its own voice. 'notes_required' means notes must not",
+    "be null, because a silent cast would hide real migration work."
+  ],
+  "transform_expectations": {
+    "emp_master.emp_id": {
+      "type_transform_contains": ["ObjectId"],
+      "notes_required": true,
+      "notes_contains_any": ["legacy", "traceability", "remap", "original"]
+    },
+    "emp_master.dept_id": { "type_transform_contains": ["ObjectId"], "notes_required": true },
+    "emp_master.mgr_emp_id": { "type_transform_contains": ["ObjectId"], "notes_required": true },
+    "emp_master.office_loc_id": { "type_transform_contains": ["ObjectId"], "notes_required": true },
+    "emp_master.rec_stat": {
+      "type_transform_contains": ["String"],
+      "notes_required": true,
+      "notes_contains_any": ["active", "inactive", "terminated"]
+    },
+    "emp_master.is_remote": { "type_transform_contains": ["Boolean"] },
+    "emp_master.base_sal": { "type_transform_contains": ["Number"] },
+    "emp_master.hire_dt": { "type_transform_contains": ["ISODate"] },
+    "emp_master.term_dt": { "type_transform_contains": ["ISODate"] },
+    "emp_master.created_ts": { "type_transform_contains": ["ISODate"] },
+    "emp_master.updated_ts": { "type_transform_contains": ["ISODate"] },
+    "emp_master.f_name": { "type_transform_contains": ["String"] },
+    "emp_master.sal_currency": { "type_transform_contains": ["String"] },
+    "dept_info.dept_id": { "type_transform_contains": ["ObjectId"], "notes_required": true },
+    "dept_info.parent_dept_id": { "type_transform_contains": ["ObjectId"], "notes_required": true },
+    "dept_info.dept_head_id": { "type_transform_contains": ["ObjectId"], "notes_required": true },
+    "dept_info.dept_stat": {
+      "type_transform_contains": ["Boolean"],
+      "notes_required": true,
+      "notes_contains_any": ["true", "false", "lossy", "active"]
+    },
+    "locations.loc_id": { "type_transform_contains": ["ObjectId"], "notes_required": true },
+    "locations.country_cd": { "type_transform_contains": ["String"] },
+    "locations.tz_cd": { "type_transform_contains": ["String"] }
+  }
+}
