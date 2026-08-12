@@ -1,15 +1,21 @@
-# Write-up: prompt structure and design decisions
+# Schema Field Mapper: Prompt Design and Design Decisions
 
-Mapping `legacy_hrm` (MySQL, 34 columns across 3 tables) to `people_platform` (MongoDB, 40 paths
-across 3 collections). Result: **33 of 34 source fields mapped**, one deliberate non-mapping
-(`emp_master.dob`), 11 model calls, about $0.04 and 35 seconds per run. All prompt text is in one
-file, [`src/schema_mapper/prompts.py`](../src/schema_mapper/prompts.py).
+Prepared by Raviteja Ainampudi. Scope: mapping `legacy_hrm` (MySQL, 34 columns, three tables) to
+`people_platform` (MongoDB, 40 paths, three collections).
 
-## The constraint shaped the architecture
+## 1. Summary
 
-I read "you cannot pass both schemas in a single prompt and receive a finished mapping" strictly:
-no single call may have enough context to produce the answer. Six stages, four of them pure
-Python, with the model used only where judgment is required.
+The pipeline mapped 33 of the 34 source columns and declined one, `emp_master.dob`, on the grounds
+that no destination path is a genuine semantic match. A run uses 11 model calls, costs about $0.04
+and takes about 35 seconds. Mean confidence is 0.865 (13 high, 16 medium, 4 flagged for review). All
+prompt text is held in one module, [`src/schema_mapper/prompts.py`](../src/schema_mapper/prompts.py).
+
+## 2. Approach
+
+The assignment prohibits passing both schemas to a model in one prompt and receiving a finished
+mapping. This was interpreted strictly: no single call should hold enough context to produce the
+answer. The work is divided into six stages, four of them deterministic Python, with the model
+reserved for decisions requiring judgement.
 
 ```mermaid
 flowchart LR
@@ -22,78 +28,83 @@ flowchart LR
     s0 --> s1 --> s2 --> s3 --> s4 --> s5
 ```
 
-Two things keep that honest. LLM-facing code physically cannot reach a whole schema: its only
-access is a scoped tool surface ([`tools.py`](../src/schema_mapper/tools.py)) where
-`get_source_fields()` raises if asked for more than one batch and `lookup_candidates()` returns
-at most six paths for one named field. And every request is recorded, so
-[`tests/test_constraint.py`](../tests/test_constraint.py) asserts against the text actually sent:
-the worst-case prompt carried 8 of 34 typed fields, 22 of 40 destination paths, 1 of 3 tables,
-and no call returned more than 8 of the 33 mappings.
+Two controls make that boundary verifiable rather than declared. Model-facing code has no route to a
+complete schema, its only access being a scoped tool surface
+([`tools.py`](../src/schema_mapper/tools.py)) where a request for more than one batch raises an
+error and candidate lookup returns at most six paths for one named field. Every request is recorded,
+and [`tests/test_constraint.py`](../tests/test_constraint.py) asserts against the text actually
+sent: the largest prompt carried 8 of 34 typed fields, 22 of 40 destination paths and one of three
+tables, and no response returned more than 8 of the 33 mappings. Decomposition constrains what each
+decision depends upon rather than reducing token volume; the largest prompt is 2,091 input tokens
+against roughly 1,630 for both schemas concatenated.
 
-Worth admitting: the largest prompt is 2,091 tokens against ~1,630 for both raw schemas
-concatenated. Decomposition bounds *what each decision depends on*; it is not a token saving.
+## 3. Prompt design
 
-## How the prompts are structured
+Four templates are used, each paired with a JSON tool schema so that response structure is enforced
+by constrained decoding rather than requested in prose.
 
-Four templates, each with a JSON tool schema for its output, so structure is enforced by
-constrained decoding rather than by asking for JSON in prose.
-
-| Stage | Sees | Returns |
+| Stage | Input provided | Output required |
 | --- | --- | --- |
-| Route | One table's column names and the collection names. No types | One collection, confidence, one sentence |
-| Adjudicate | Up to 8 fields, each with its own <=6 candidate paths (type, comment, references), plus 3-5 retrieved convention snippets | One entry per field: path or null, confidence, one sentence, notes |
-| Reflect | One low-confidence field, the same candidates, and the prior decision | Confirm or replace, plus a `changed` flag |
-| Tie-break | One contested path and exactly the two competing columns | The winning column |
+| Route | One table's column names and the candidate collection names, without types | One collection, a confidence, one sentence |
+| Adjudicate | Up to 8 fields, each with its own six candidate paths including type, comment and references, plus three to five convention snippets | Per field: a path or null, confidence, one sentence, transform notes |
+| Reflect | One low-confidence field, the same candidates, and the previous decision | Confirmation or replacement, with a change flag |
+| Tie-break | One contested path and the two competing columns | The column that retains the path |
 
-The adjudication system prompt is six numbered rules. Two of them do the real work: *never invent
-a path, only listed candidates are valid* (backed by a code-level allowlist that can force a
-mapping back to null), and *prefer null over a weak guess, a wrong mapping is more expensive than
-an acknowledged gap* — which is why `dob` comes back null with a sentence explaining the refusal
-rather than being forced into `employment.startDate`.
+Two of the six adjudication rules govern quality. Paths may not be invented and only listed
+candidates are valid, enforced additionally by an allowlist in code. Null is preferred to a weak
+guess, since an incorrect mapping costs more to unwind than an acknowledged gap, which is why `dob`
+is reported as unmapped with a justification rather than assigned to `employment.startDate`.
 
-Three things are deliberately kept **out**:
+Three categories of information are withheld by design. Retrieval scores are not shown, as they
+would anchor the model to the highest-ranked candidate and make the blended confidence
+self-confirming. The `type_transform` value is derived in code from the actual types and never
+requested, so an inconsistent pairing such as "VARCHAR to Number" cannot be expressed. No field sees
+another field's candidates, and no prompt spans more than one table.
 
-- **Retrieval scores.** Showing them would anchor the model to the top-ranked candidate and make
-  the blended confidence circular instead of two weakly-correlated signals.
-- **`type_transform`.** Rendered deterministically from the real types, never requested, which
-  makes an impossible pairing like "VARCHAR -> Number" unrepresentable rather than unlikely.
-- **Other fields and other tables.** Each field sees only its own candidates.
+## 4. Design decisions
 
-## Design decisions
+Deterministic logic is used wherever it can be shown correct. The Stage 2 scorer combines lexical
+overlap with abbreviation and synonym expansion, fuzzy similarity, comment similarity, type
+compatibility and key role; on this pair it recalls the correct path within the top six in every case
+and ranks it first. The model's contribution on these datasets is therefore the reasoning, the
+transform notes and the null decision rather than the pairing itself.
 
-- **Deterministic where determinism is provably right.** The Stage 2 scorer (five explainable
-  components: lexical overlap with abbreviation and synonym expansion, fuzzy, comment similarity,
-  type compatibility, key role) reaches recall@6 of 100% *and* rank@1 of 100% here. So on these
-  datasets the model's real contribution is the reasoning, the notes, the null decision, and
-  robustness where lexical signal is weaker — not the pairing itself. Better to say that than to
-  imply the LLM found what the code could not.
-- **Confidence blends two signals**: 60% model self-report, 40% retrieval score, penalised for
-  type mismatch and capped at 0.85 when a hand-written value transform is needed. Reflection
-  triggers below 0.75 on the *blended* value, since a field the model is sure about that barely
-  beat its runner-up is exactly what deserves review. Result: 13 high, 16 medium, 4 for review.
-- **A cascade, not one model.** Nova Lite routes; Claude Haiku 4.5 answers every batch; only
-  fields below 0.80 escalate to Sonnet 4.5. Escalation rate 5.9%, which is what keeps a run at
-  four cents.
-- **Retrieval yes, vector database no.** The shortlist is retrieval, and a small conventions pack
-  supplies snippets the model can cite (it also powers synonym expansion — without it
-  `dept_stat -> isActive` has zero lexical overlap). For 40 paths, a vector store would cost more
-  per month than the pipeline costs to run, and recall is already perfect.
-- **Bounded agentic patterns**: orchestrator-worker plus an evaluator-optimizer critic over a
-  scoped tool surface, and no free-roaming agent — a self-directed loop would dissolve the very
-  boundary the constraint requires.
-- **Validation is deterministic and adversarial to my own output**: contract shape, every path
-  checked against the real schema, coverage accounting, and an explanation for every unmapped
-  field on both sides. The 7 untargeted destination paths are all denormalized copies such as
-  `department.name` that a migration fills by joining — an explanation, not a gap.
-- **Reproducibility.** Every Bedrock call is recorded, so the pipeline replays offline byte for
-  byte with no credentials and no spend, which is what makes the 286 tests runnable by a reviewer
-  without an AWS account.
+Confidence combines two weakly correlated signals, weighted 60 per cent to the model's own assessment
+and 40 per cent to the retrieval score, penalised for type mismatch and capped at 0.85 where a manual
+value transform is required. Reflection is triggered below 0.75 on the blended value, so a confident
+answer that only narrowly beat its alternative is still reviewed.
 
-## Limits
+Cost is managed by cascade: Nova Lite routes, Claude Haiku 4.5 takes the first pass, and only fields
+below 0.80 escalate to Sonnet 4.5, an escalation rate of 5.9 per cent. Retrieval is used but no
+vector database was introduced, since for 40 destination paths a managed store would cost more per
+month than the pipeline costs to operate and shortlist recall is already complete. Agentic patterns
+are bounded to an orchestrator with stage workers and an evaluator-optimizer review step over the
+scoped tool surface; a self-directed agent would remove the boundary the constraint requires.
 
-Perfect retrieval means this schema pair is comparatively easy, so it does not prove the design on
-harder input. The pre-run check that two schemas belong together separates true from crossed pairs
-by only 0.049, so it warns and never blocks. Embeddings are wired but off and unverified.
+## 5. Validation
 
-Detail lives in [PIPELINE.md](PIPELINE.md) (stages, decision states, cost control) and
-[ARCHITECTURE.md](ARCHITECTURE.md) (components, data model, deployment).
+Deterministic validation runs before any artifact is written, covering the output contract, the
+existence of every destination path in the real schema, coverage reconciliation on both sides and an
+explanation for each unmapped field. The seven destination paths that receive no mapping are all
+denormalized copies, such as `department.name`, that a migration populates by join. Every model call
+is recorded, so the pipeline replays offline and the suite of 286 tests runs without an AWS account.
+
+## 6. Credentials and access
+
+Local development and the delivery of this exercise load configuration and credentials from a `.env`
+file excluded from version control; no keys appear in code, logs or documentation. The deployed
+function uses no static credentials, assuming instead an IAM execution role limited to Bedrock model
+invocation, with optional write access to a single artifact prefix. For production the access model
+would be tightened further: per-service roles scoped and reviewed against least privilege,
+configuration held in Secrets Manager or SSM Parameter Store rather than in a file, and no long-lived
+access keys issued to the application.
+
+## 7. Limitations
+
+Retrieval performance on this pair is perfect, which indicates a comparatively straightforward
+mapping problem and does not demonstrate the design on harder input. The pre-run check that two
+schemas belong to the same domain separates matched from mismatched pairs by only 0.049, so it warns
+rather than blocks. Embedding support is implemented but disabled and not access-verified.
+
+Further detail is in [PIPELINE.md](PIPELINE.md) for the stages and
+[ARCHITECTURE.md](ARCHITECTURE.md) for components and deployment.
