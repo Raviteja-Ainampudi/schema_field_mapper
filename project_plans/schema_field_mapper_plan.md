@@ -20,11 +20,13 @@ A naive solution pastes both schemas into one prompt. That is forbidden, and it 
 
 Instead the work is decomposed so that **no single prompt contains both full schemas, and no single call produces the finished mapping**. Stated precisely, because this is the load-bearing claim: any semantic matcher must see fragments of both sides somewhere, so each prompt carries a small, bounded slice - never the whole of either schema, and never enough to answer the whole problem in one shot:
 
-- Stage 1 sees only *table names and column-name lists* (no types, no comments, no structure) to decide which table pairs with which collection. It returns pairings, not mappings.
-- Stage 3 sees, per call, *one batch of ~8 source fields from one table* plus, for each of those fields, only its *top-6 pre-shortlisted destination paths* - at most 48 destination paths against 74 total fields, and typically far fewer.
+- Stage 1 runs **once per source table**, and each call sees only *that one table's column-name list* plus the three collection names (no types, no comments, no nesting). It returns a pairing, not mappings. Routing three tables is lexically trivial, so this could be pure code; it stays an LLM call because it is where the assignment's table-level `confidence` and `reasoning` legitimately come from. Splitting it per table costs a fraction of a cent and removes the only prompt in the run that would otherwise carry every column name from one side and every collection name from the other.
+- Stage 3 sees, per call, *one batch of ~8 source fields from one table* plus, for each of those fields, only its *top-6 pre-shortlisted destination paths* - at most 48 destination paths against 74 total fields, and typically far fewer. Batches are **stateless**: each call is built from scratch, with no accumulated conversation history, so context cannot grow toward "both schemas" across the run.
 - Stage 4 tie-breaks see only the two conflicting candidates.
 
 The write-up states this formulation explicitly and quantifies it from the prompt trace (largest prompt of the run: fields, paths, tokens, versus the ~3,900-token both-schemas counterfactual), so a reviewer probing the constraint finds the argument already made.
+
+Because the claim is load-bearing, it is also **machine-checked rather than asserted**. Every LLM request is recorded with a manifest - source-table count, source-field count, destination-path count, and the schema fingerprints it touched - and a test asserts that no single recorded request contains all 34 source fields, or all 40 destination paths, or produces more than one table's worth of mappings. A regression that quietly widens a prompt fails the suite instead of shipping.
 
 The heavy lifting of "which destination paths are even plausible" is done **deterministically in code** (Stage 2), which is cheaper, faster, auditable, and makes hallucinated paths impossible to slip through.
 
@@ -135,9 +137,10 @@ flowchart TB
           +-----------------------+--------------------------+
                                   v
           +--------------------------------------------------+
-          | [1] ROUTE                              LLM  x1   |
-          | in : table names + column NAMES only             |
-          | out: 3 table -> collection pairings              |
+          | [1] ROUTE                              LLM  x3   |
+          | one call per source table:                       |
+          | in : that table's column NAMES + collection names|
+          | out: that table -> collection pairing            |
           +-----------------------+--------------------------+
                                   v
           +--------------------------------------------------+
@@ -176,7 +179,7 @@ flowchart LR
     B["Dataset B<br/>MongoDB JSON"] --> S0
 
     S0["Stage 0 - NORMALIZE<br/>no LLM<br/>flatten nested paths,<br/>expand abbreviations"]
-    S1["Stage 1 - ROUTE<br/>LLM x1, names only<br/>table to collection"]
+    S1["Stage 1 - ROUTE<br/>LLM x3, one per source table<br/>column names to collection"]
     S2["Stage 2 - SHORTLIST<br/>no LLM<br/>top-6 candidates per field"]
     S3["Stage 3 - ADJUDICATE<br/>LLM x N batches<br/>8 fields + their candidates"]
     S4["Stage 4 - VALIDATE & REPAIR<br/>schema check, path guard,<br/>collision tie-break"]
@@ -205,9 +208,11 @@ DestField(collection, path, bson_type, comment, is_ref)
 
 Also builds an abbreviation lexicon used by Stage 2 (`f_name` -> first name, `dob` -> date of birth, `cd` -> code, `nm` -> name, `dt` -> date, `ts` -> timestamp, `sal` -> salary, `mgr` -> manager, `lvl` -> level, `stat` -> status, `ctr` -> center, `tz` -> timezone).
 
-### Stage 1 - Table routing (1 cheap LLM call)
+### Stage 1 - Table routing (3 cheap LLM calls, one per source table)
 
-Prompt carries only table names + bare column-name lists and collection names + top-level field names. Returns the three pairings with confidence and one-sentence reasoning. Runs on **Nova Lite** - it is a 3-way matching problem, not a reasoning problem.
+Each prompt carries one source table's name and bare column-name list, plus the three collection names. It returns that table's pairing with a confidence and a one-sentence reasoning. Runs on **Nova Lite** - it is a 3-way matching problem, not a reasoning problem, and three calls at this size are still a rounding error on the run cost.
+
+Two pairings that resolve to the same collection are a hard error rather than a silent overwrite, since the three source tables are known to be distinct entities.
 
 ### Stage 2 - Candidate shortlisting (deterministic, free)
 
@@ -219,13 +224,19 @@ For each source field, score **only destination paths inside its matched collect
 - key-role bonus (PK -> `_id`, FK -> `*Id` ref paths),
 - optional Bedrock **Titan Embeddings v2** cosine similarity (toggle in UI, ~$0.00002 per run).
 
-Keeps top 6. This is the cost lever: prompts stay ~300-500 tokens instead of thousands.
+Keeps top 6, and a candidate must clear a minimum score of 0.15 to be offered at all. This is the cost lever: prompts stay ~300-500 tokens instead of thousands.
+
+It is also the accuracy ceiling, which is easy to miss. A field whose true destination is absent from its shortlist cannot be mapped correctly by any model at any price, so **shortlist recall is the metric that matters most** and is gated by a test (section 8.5) rather than inferred from output quality.
 
 ### Stage 3 - Field adjudication (LLM, batched)
 
 One call per ~8 source fields of one table. Each field arrives with its own shortlist plus an explicit `null` option for "no good match". Output is forced through a **Converse tool-use JSON schema**, so the response is structurally valid by construction. Temperature 0. Runs on the user-selected mapper model (default Claude Sonnet class).
 
 Returned `destination_field` is checked against the Stage 0 path set - a path that does not exist cannot survive.
+
+**What `confidence` means.** The assignment requires the number but does not define it, and an LLM's self-reported certainty is poorly calibrated on its own, so the emitted value is a blend: `0.6 * model_confidence + 0.4 * normalized_retrieval_score`, where the retrieval score is the Stage 2 margin between the chosen candidate and the runner-up. A field the model is sure about *and* that won its shortlist decisively scores high; a field the model likes but that barely beat an alternative is pulled down into the review band, which is exactly where a human should look. Type incompatibility applies a fixed penalty, and a mapping requiring a value transform that cannot be expressed as a rule is capped at 0.85. The weights and the formula are stated in the write-up so the number is defensible rather than mysterious.
+
+Table-level `confidence` is likewise deterministic, not a second guess: it is the mean of that table's field confidences, scaled by source-field coverage, so it cannot claim 0.97 for a table that mapped half its columns.
 
 ### Stage 4 - Validate & repair (deterministic + at most tiny LLM calls)
 
@@ -237,7 +248,12 @@ Returned `destination_field` is checked against the Stage 0 path set - a path th
 
 ### Stage 5 - Assemble
 
-Emits `outputs/mapping_legacy_hrm_to_people_platform.json` exactly in the required shape, plus `outputs/run_report.json` with per-stage model, token counts, latency, USD cost, cache hits, and the full text of every prompt sent (the prompt trace doubles as evidence that the constraint was respected).
+Emits `outputs/mapping_legacy_hrm_to_people_platform.json` exactly in the required shape, plus `outputs/run_report.json` with per-stage model, token counts, latency, USD cost, cache hits, and the full text of every prompt sent with its manifest (the prompt trace doubles as evidence that the constraint was respected).
+
+Two output conventions are pinned here because "matches this schema exactly" leaves them ambiguous:
+
+- **Destination fields are leaf paths only.** `fullName` and `employment` are containers, not fields, so they never appear as a `destination_field` or in `unmapped_destination_fields`. That is what makes the destination side exactly 40 paths rather than 40 plus eight container names.
+- **`type_transform` uses the ASCII arrow `->`**, matching the assignment's JSON example (`"INT -> ObjectId"`) rather than the `→` used in its prose bullets. The golden test pins this, since a Unicode arrow would be a gratuitous diff against the stated contract.
 
 ### Stage 3b - Model cascade (cost lever)
 
@@ -274,7 +290,9 @@ Fixed thresholds shared by the pipeline, UI, and write-up: confidence bands at 0
 
 ### Agent mode (experimental, built last)
 
-To make that rejection a measurement rather than an assertion, a toggle runs the same schemas through a genuine tool-calling agent loop over the **identical scoped tool surface**: `list_tables()`, `get_source_fields(table)`, `lookup_candidates(field_id)`. No tool can return a whole schema, so agent mode stays compliant and the comparison is honest - both paths see the same information and differ only in who controls sequencing. Hard caps: 40 tool calls, a token budget, temperature 0, and the same output contract so the diff view works unchanged.
+To make that rejection a measurement rather than an assertion, a toggle runs the same schemas through a genuine tool-calling agent loop over the **identical scoped tool surface**: `list_tables()`, `get_source_fields(table)`, `lookup_candidates(field_id)`. Hard caps: 40 tool calls, a token budget, temperature 0, and the same output contract so the diff view works unchanged.
+
+**Scoped tools alone do not make the agent compliant, and the plan previously overclaimed that they did.** A tool-calling loop carries every prior tool result forward in its context, so an agent that walks all three tables ends up holding both schemas in one context window while being asked for mappings - functionally the thing the assignment forbids, even though no individual tool ever returned a whole schema. Compliance therefore comes from **per-task context reset**: the agent is restarted with empty history for each bounded subtask (one table's routing, or one batch of fields), and the same prompt-manifest assertion that guards the pipeline is applied to agent turns. Agent mode is additionally kept out of the graded path - the committed output JSON always comes from the pipeline - so this experiment can never be what a reviewer evaluates the constraint against.
 
 Expected finding is three to five times the tokens for similar or slightly worse consistency, which costs pennies to demonstrate. If the agent wins on specific fields, the write-up reports that and explains why. This is the first feature cut if time runs short.
 
@@ -314,11 +332,11 @@ The centerpiece is an **interactive mapping graph** rather than a data grid: sou
  | INPUT     |          MAPPING GRAPH        [graph | grid]     | FIELD DETAIL    |
  | source    | emp_master            employees                  | rec_stat        |
  | 3 tbl     |  emp_cd    =========> employeeCode        0.99    |  CHAR(1)        |
- | 33 col    |  f_name    =====\                                 | -> employment   |
+ | 34 col    |  f_name    =====\                                 | -> employment   |
  |           |  l_name    ===\  \==> fullName                    |    .status 0.95 |
  | dest      |  dob        ==\ \===>   .firstName       0.98     |                 |
  | 3 coll    |  rec_stat  ~~~~\ \==>   .lastName        0.98     | candidates:     |
- | 41 path   |  is_remote  ==\ \===> employment          --      |  .status  0.91  |
+ | 40 path   |  is_remote  ==\ \===> employment          --      |  .status  0.91  |
  |           |                \ \==>   .status          0.95     |  .jobLevel 0.22 |
  | [sample]  |                 \===>   .isRemote        0.99     |  .isRemote 0.11 |
  |           |                                                   |                 |
@@ -441,7 +459,12 @@ src/schema_mapper/
   cli.py           # headless run, same code path as the API
 api/main.py        # FastAPI + SSE
 api/static/index.html
-tests/             # normalize, candidates, validate, contract, golden output
+tests/
+  fixtures/expected_mapping.json    # the 33-pair oracle + justified unmapped lists
+  fixtures/cassettes/               # recorded Bedrock exchanges; power --offline and the suite
+  test_normalize.py, test_candidates.py   # incl. shortlist-recall gate
+  test_validate.py, test_contract.py      # incl. golden output + exact header strings
+  test_constraint.py                # prompt-manifest assertions
 infra/Dockerfile, infra/template.yaml, infra/DEPLOY.md
 outputs/           # generated mapping + run report
 docs/WRITEUP.md    # required write-up
@@ -467,30 +490,67 @@ LOG_LEVEL=INFO
 
 Model IDs are validated at startup against `bedrock:ListFoundationModels` / inference profiles, so a wrong or not-yet-enabled model surfaces as a clear error in the UI rather than a runtime 400 mid-run.
 
+## 8.5 Acceptance criteria and quality gates
+
+Shape validation proves the output is well formed; it says nothing about whether the mapping is *right*. These gates close that gap, and every number below is derived by hand from the assignment schemas so the suite can fail before a reviewer does.
+
+### The counts
+
+- **34 source fields**: `emp_master` 19, `dept_info` 7, `locations` 8.
+- **40 destination leaf paths**: `employees` 25, `departments` 7, `locations` 8.
+- **33 field mappings**, one justified unmapped source field, seven unmapped destination paths.
+
+### The expected-mapping oracle
+
+A fixture pins the correct destination for all 33 mappable fields, and the suite asserts the pipeline reproduces it. The pairs are unambiguous, so this is a strict equality check on `source_field` to `destination_field`; `reasoning` and `notes` are free text and are checked for required substance rather than exact wording.
+
+- `emp_master` to `employees` - 18 mappings. `dob` is the single justified `unmapped_source_fields` entry, because the destination employee document has no birth-date path anywhere. Seven `unmapped_destination_fields`: `department.code`, `department.name`, `location.code`, `location.name`, `location.city`, `location.country`, `location.timezone` - all denormalized copies that a migration fills by joining `dept_info` and `locations`, not from any `emp_master` column. Each carries a note saying so, since an empty explanation here reads as a miss rather than a decision.
+- `dept_info` to `departments` - 7 mappings, nothing unmapped on either side.
+- `locations` to `locations` - 8 mappings, nothing unmapped on either side.
+
+Transforms the fixture checks explicitly, because they are where a plausible-looking mapping goes wrong: `rec_stat` `CHAR(1)` to `employment.status` string enum (`A` to active, `I` to inactive, `T` to terminated); `dept_stat` `CHAR(1)` to `departments.isActive` Boolean (`A` to true, `I` to false, a deliberately lossy narrowing that the note must flag); `is_remote` `TINYINT(1)` to Boolean; the four `INT` primary and foreign keys to `ObjectId`, each noting that an ID remap table is required and that the legacy integer should be retained; `DECIMAL(12,2)` to `Number`, noting the float-precision caveat; and `DATE`/`DATETIME` to `ISODate` with a timezone assumption stated.
+
+### Shortlist recall
+
+For every one of the 33 mappable fields, the expected destination path must appear in the Stage 2 top-6. This runs with no LLM and no network, so it is fast and free, and it is the first thing to check when output quality drops - a miss here is unfixable downstream at any model price. Paired negative check: `dob` must produce no candidate above the 0.15 floor, so it falls out as unmapped rather than being forced onto a weak match.
+
+### Contract hardening
+
+Beyond the existing golden test: reject unexpected keys at every level (`additionalProperties: false`), assert `0 <= confidence <= 1` at both table and field level, apply the one-sentence `reasoning` rule to table-level reasoning as well as field-level, assert `notes` is either a non-empty string or `null` and never an empty string, assert `type_transform` uses the ASCII `->`, and assert the deterministic table-confidence aggregation matches its inputs.
+
+### Constraint assertions
+
+Replay the recorded prompt manifests and assert that no single request contained all 34 source fields, no single request contained all 40 destination paths, no request carried both a full source table and the full destination schema, and no single response produced more than one table's mappings.
+
+### Offline replay for reviewers
+
+A reviewer almost certainly has no Bedrock credentials, which would reduce "working pipeline code" to code they can only read. Since every prompt and response is already recorded, `python -m schema_mapper.cli --offline` replays the committed cassettes under `tests/fixtures/cassettes/` and regenerates the exact committed output JSON with no AWS account, no keys, and no spend. The same cassettes back the unit suite, so this costs nothing extra to maintain and makes the primary deliverable executable by anyone who clones the repo.
+
 ## 9. Deliverables mapped to the assignment
 
-- **Working pipeline code** - `src/schema_mapper/` plus a headless CLI and the FastAPI/UI wrapper.
-- **Generated output JSON** - `outputs/mapping_legacy_hrm_to_people_platform.json`, committed. The golden test pins the exact header strings the assignment specifies - `"source": "legacy_hrm (MySQL)"`, `"destination": "people_platform (MongoDB)"`, `"mapping_version": "1.0"`, ISO-8601 `generated_at` - alongside the full structural contract, since the assignment says "matches this schema exactly".
-- **Write-up** - `docs/WRITEUP.md`: prompt structure per stage, the precise constraint formulation from section 1 with numbers from the prompt trace, why retrieval is deterministic, confidence calibration, cost/model trade-offs, and what would change at production scale.
+- **Working pipeline code** - `src/schema_mapper/` plus a headless CLI and the FastAPI/UI wrapper. Runnable by a reviewer with no AWS account via `--offline` cassette replay, which regenerates the committed JSON byte-for-byte.
+- **Generated output JSON** - `outputs/mapping_legacy_hrm_to_people_platform.json`, committed, produced by a real Bedrock run. The golden test pins the exact header strings the assignment specifies - `"source": "legacy_hrm (MySQL)"`, `"destination": "people_platform (MongoDB)"`, `"mapping_version": "1.0"`, ISO-8601 `generated_at` - alongside the full structural contract and the semantic oracle of section 8.5, since the assignment says "matches this schema exactly" and "must cover every field".
+- **Write-up** - `docs/WRITEUP.md`: prompt structure per stage, the precise constraint formulation from section 1 with numbers from the prompt trace, why retrieval is deterministic, the confidence formula and why it is blended rather than model-reported, how the seven denormalized destination paths and the one unmapped source field were decided, cost/model trade-offs, and what would change at production scale. Kept short - it is a "short write-up", so depth goes into the numbers, not the word count.
 
 ## 10. Build order
 
-Steps 1-7 are the assignment-complete milestone: pipeline code, committed output JSON, and a drafted write-up. Everything after is showcase, cuttable without touching a graded deliverable.
+Steps 1-8 are the assignment-complete milestone: pipeline code, committed output JSON, and a drafted write-up. Everything after is showcase, cuttable without touching a graded deliverable. The plan carries a lot of showcase surface - mapping graph, arena, persistence, Lambda, agent mode - and the honest risk is spending it before the graded work is finished, so **the milestone is a hard stop: reassess remaining time before starting step 9.** Diagram exports moved out of first position for the same reason; they are presentation, not deliverable.
 
-0. Export the three diagrams to PNG/SVG under `project_plans/diagrams/` and embed them here.
-1. Normalized schema fixtures + IR + tests.
-2. Output contract models and JSON Schema validation, golden test pinning exact header strings.
-3. Bedrock Converse client with usage capture, retries, cache, and cost ledger.
-4. Deterministic candidate retrieval + scoped tool surface + tests.
-5. Conventions knowledge pack and retrieval.
-6. Prompts and orchestrator for Stages 1, 3, 4, 5, including cascade, reflection, and the reasoning-format validator; produce the committed output JSON via CLI.
-7. **Draft `docs/WRITEUP.md`** while the prompt decisions are fresh - the write-up is a graded deliverable, the UI is not. Finalized in step 13.
+1. Normalized schema fixtures + IR + tests, asserting 34 source fields and 40 destination leaf paths.
+2. Output contract models and JSON Schema validation; golden test pinning exact header strings, ASCII `->`, confidence bounds, and the one-sentence reasoning rule.
+3. `tests/fixtures/expected_mapping.json` - the 33-pair oracle, `dob` unmapped, the seven denormalized destination paths - written from the schemas by hand, before any pipeline output exists to bias it.
+4. Deterministic candidate retrieval + scoped tool surface + the shortlist-recall gate against that oracle. Do not proceed until recall is 100%.
+5. Bedrock Converse client with usage capture, retries, cassette record/replay, cache, and cost ledger.
+6. Conventions knowledge pack and retrieval.
+7. Prompts and orchestrator for Stages 1, 3, 4, 5, including cascade, reflection, the reasoning-format validator, and the prompt-manifest constraint assertions; produce the committed output JSON via a real Bedrock run, then record cassettes so `--offline` reproduces it.
+8. **Draft `docs/WRITEUP.md`** while the prompt decisions are fresh - the write-up is a graded deliverable, the UI is not. Finalized in step 14.
 
---- assignment complete; showcase below ---
+--- assignment complete; reassess time before continuing ---
 
-8. FastAPI API with SSE, then the SPA shell and the mapping graph.
-9. Remaining UI surfaces: candidate race, constraint meter, cost panel, transform playground, grid view, exports.
-10. Persistence (S3 + DynamoDB), history list, and the arena/diff view.
-11. Dockerfile, SAM template, deploy notes, budget guardrails.
-12. Experimental agent mode plus the pipeline-vs-agent comparison.
-13. Finalize write-up (add agent-mode findings and UI notes) and README.
+9. Diagram exports to PNG/SVG under `project_plans/diagrams/`, embedded here and in the write-up.
+10. FastAPI API with SSE, then the SPA shell and the mapping graph.
+11. Remaining UI surfaces: candidate race, constraint meter, cost panel, transform playground, grid view, exports.
+12. Dockerfile, SAM template, deploy notes, budget guardrails.
+13. Persistence (S3 + DynamoDB), history list, and the arena/diff view.
+14. Finalize write-up and README.
+15. Experimental agent mode with per-task context reset, plus the pipeline-vs-agent comparison. Last, and never on the graded output path.
