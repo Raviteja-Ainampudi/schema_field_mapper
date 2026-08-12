@@ -55,7 +55,7 @@ Ubuntu 22.04+ / Debian (often available directly):
   sudo apt update
   sudo apt install -y python3.12 python3.12-venv
 
-Or install with pyenv (honors .python-version in this repo):
+Or install with pyenv (the second line writes a local, gitignored .python-version):
   pyenv install 3.12
   pyenv local 3.12
 

@@ -751,6 +751,9 @@ table.grid tr.clickable:hover td { background: var(--panel-2); }
 .log .m.err { color: var(--review); }
 .log .m.ok { color: var(--high); }
 
+.json-actions { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+.json-actions .dl { display: inline-flex; text-decoration: none; }
+
 pre.json {
   margin: 0;
   font-family: var(--mono);

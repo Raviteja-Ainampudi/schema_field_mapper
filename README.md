@@ -8,7 +8,8 @@ Retrieval narrows each column to its few plausible destinations, a language mode
 Bedrock judges only that shortlist, and a critic pass re-examines the weakest decisions. Three
 of the six stages use no model at all, which is what makes the result auditable.
 
-Developed by **Raviteja Ainampudi**. Assignment text: `InterviewAssignment.txt`.
+Developed by **Raviteja Ainampudi**. Built for a take-home assignment whose brief is not
+redistributed here; the requirements it had to meet are restated below.
 
 ## What it does and why that is useful
 

@@ -6,7 +6,7 @@ Append-only working memory for this project. Agents: add dated bullets; do not d
 
 - Interview challenge: map MySQL `legacy_hrm` → MongoDB `people_platform` field-by-field.
 - Critical constraint: cannot dump both full schemas into one LLM call for the complete mapping.
-- Assignment source of truth: `InterviewAssignment.txt`.
+- Assignment source of truth: `InterviewAssignment.txt` (local only, gitignored).
 - Local venv: `.venv` (Python 3.12). Platform-specific — run `scripts/setup_venv.ps1` (Windows) or `scripts/setup_venv.sh` (WSL/Linux) when switching OS. WSL Ubuntu 20.04 needs deadsnakes `python3.12`.
 
 ## Decisions

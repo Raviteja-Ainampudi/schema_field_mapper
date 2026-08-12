@@ -23,6 +23,9 @@ outputs/runs
 outputs/test_runs
 outputs/prompt_trace.json
 
+# Not ours to publish, and not needed to run anything.
+InterviewAssignment.*
+
 # Not needed to serve the app.
 docs
 project_plans

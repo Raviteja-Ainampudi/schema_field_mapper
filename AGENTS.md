@@ -6,7 +6,8 @@ Guidance for coding agents working in this repository.
 
 Build an AI pipeline that maps every field from a MySQL source schema (`legacy_hrm`) to a MongoDB destination schema (`people_platform`), emitting one JSON document in the assignment’s expected format.
 
-Human-facing assignment text: `InterviewAssignment.txt`.
+Human-facing assignment text: `InterviewAssignment.txt` — present locally, deliberately
+untracked (it is not ours to publish), so do not expect it in a fresh clone.
 
 ## Hard constraints
 

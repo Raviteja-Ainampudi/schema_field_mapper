@@ -593,13 +593,25 @@ function JsonPanel({ mapping, runId }) {
   const [copied, setCopied] = useState(false);
   if (!mapping) return html`<p class="note">No mapping document yet.</p>`;
   const text = JSON.stringify(mapping, null, 2);
+  // A finished run has the file on the server, so download it from there and get
+  // the exact bytes. The committed artifact loaded at startup has no run id, and
+  // hiding the download until someone spends a run is worse than writing the
+  // same text out from the browser.
+  const saveLocally = () => {
+    const url = URL.createObjectURL(new Blob([`${text}\n`], { type: "application/json" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "mapping.json";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
   return html`<div>
     <div class="row-between" style="margin-bottom:8px">
       <h3 class="section" style="margin:0">
         The deliverable — ${mapping.tables.length} tables,
         ${mapping.tables.reduce((n, t) => n + t.field_mappings.length, 0)} field mappings
       </h3>
-      <div style="display:flex;gap:6px">
+      <div class="json-actions">
         <button
           onClick=${async () => {
             await navigator.clipboard.writeText(text);
@@ -607,10 +619,15 @@ function JsonPanel({ mapping, runId }) {
             setTimeout(() => setCopied(false), 1600);
           }}
         >${copied ? "Copied" : "Copy JSON"}</button>
-        ${runId &&
-        html`<a href=${`/api/runs/${runId}/mapping.json`} download>
-          <button>Download</button>
-        </a>`}
+        ${runId
+          ? html`<a class="dl" href=${`/api/runs/${runId}/mapping.json`} download>
+              <button class="primary">Download</button>
+            </a>`
+          : html`<button
+              class="primary"
+              title="Save the mapping document currently shown"
+              onClick=${saveLocally}
+            >Download</button>`}
       </div>
     </div>
     <pre class="json">${text}</pre>
