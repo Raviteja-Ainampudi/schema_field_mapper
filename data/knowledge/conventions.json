@@ -1,0 +1,195 @@
+{
+  "version": "1.0",
+  "_comment": [
+    "Local knowledge pack. Two distinct jobs:",
+    "1. 'abbreviations', 'field_aliases', 'synonyms', 'stopwords' drive deterministic",
+    "   token expansion in Stage 2 scoring. Without synonym expansion, dept_stat -> isActive",
+    "   has literally zero lexical overlap and would never reach the shortlist.",
+    "2. 'snippets' are retrieved (3-5 per batch) and injected into Stage 3 prompts, giving",
+    "   the model an authority to cite in its reasoning instead of inventing one.",
+    "Small enough to stay in memory; a vector database for this corpus would cost more",
+    "per month than the entire pipeline costs to run."
+  ],
+
+  "abbreviations": {
+    "emp": "employee",
+    "empl": "employee",
+    "mgr": "manager",
+    "dept": "department",
+    "loc": "location",
+    "cd": "code",
+    "nm": "name",
+    "dt": "date",
+    "ts": "timestamp",
+    "tm": "time",
+    "sal": "salary",
+    "lvl": "level",
+    "stat": "status",
+    "ctr": "center",
+    "ctry": "country",
+    "tz": "timezone",
+    "dob": "date birth",
+    "prov": "province",
+    "rec": "record",
+    "addr": "address",
+    "amt": "amount",
+    "qty": "quantity",
+    "num": "number",
+    "desc": "description",
+    "co": "company",
+    "acct": "account",
+    "mrr": "monthly recurring revenue",
+    "pct": "percent",
+    "yr": "year",
+    "mo": "month",
+    "ref": "reference",
+    "org": "organization",
+    "hr": "human resources",
+    "f": "first",
+    "l": "last",
+    "m": "middle",
+    "ph": "phone",
+    "tel": "telephone",
+    "id": "identifier",
+    "pk": "identifier",
+    "fk": "identifier"
+  },
+
+  "field_aliases": {
+    "f_name": "first name",
+    "l_name": "last name",
+    "m_name": "middle name",
+    "fname": "first name",
+    "lname": "last name",
+    "dob": "date of birth birthday",
+    "hire_dt": "hire start employment date",
+    "term_dt": "termination end employment date",
+    "rec_stat": "record status state",
+    "dept_stat": "department status state active",
+    "is_remote": "remote work flag",
+    "base_sal": "base salary compensation",
+    "sal_currency": "salary currency",
+    "work_email": "work email contact",
+    "work_phone": "work phone contact",
+    "office_loc_id": "office location identifier",
+    "mgr_emp_id": "manager employee identifier",
+    "job_lvl_cd": "job level code grade",
+    "cost_ctr_cd": "cost center code finance",
+    "created_ts": "created timestamp audit metadata",
+    "updated_ts": "updated modified timestamp audit metadata",
+    "state_prov": "state province region",
+    "postal_cd": "postal zip code",
+    "country_cd": "country code",
+    "tz_cd": "timezone code"
+  },
+
+  "synonyms": [
+    ["status", "state", "active", "inactive", "terminated", "flag", "enabled", "lifecycle"],
+    ["name", "title", "label"],
+    ["code", "identifier", "key", "reference"],
+    ["start", "hire", "begin", "joined", "signup", "created"],
+    ["end", "termination", "terminated", "leave", "exit", "churn"],
+    ["salary", "compensation", "pay", "wage", "remuneration"],
+    ["remote", "telework", "wfh"],
+    ["email", "mail", "contact"],
+    ["phone", "telephone", "mobile", "contact"],
+    ["timestamp", "date", "time", "at"],
+    ["metadata", "meta", "audit"],
+    ["manager", "supervisor", "reports"],
+    ["department", "division", "team", "org", "organization"],
+    ["location", "office", "site", "place"],
+    ["city", "town", "municipality"],
+    ["province", "state", "region"],
+    ["postal", "zip"],
+    ["timezone", "tz"],
+    ["level", "grade", "band", "tier"],
+    ["center", "centre"],
+    ["employee", "person", "staff", "worker", "people"],
+    ["birth", "born", "birthday"],
+    ["primary", "main"],
+    ["currency", "iso4217"],
+    ["country", "iso3166", "nation"]
+  ],
+
+  "stopwords": ["of", "the", "a", "an", "is", "in", "on", "at", "to", "for", "and", "or"],
+
+  "type_map": [
+    { "from": "INT PRIMARY KEY", "to": "ObjectId", "render": "INT -> ObjectId", "note": "MongoDB generates _id; keep the legacy integer for traceability." },
+    { "from": "INT FOREIGN KEY", "to": "ObjectId", "render": "INT -> ObjectId", "note": "Resolve through an ID remap table built during migration." },
+    { "from": "INT", "to": "Number", "render": "INT -> Number" },
+    { "from": "DECIMAL", "to": "Number", "render": "DECIMAL -> Number", "note": "Number is a double; use Decimal128 if exact currency arithmetic is required." },
+    { "from": "VARCHAR", "to": "String", "render": "VARCHAR -> String" },
+    { "from": "CHAR", "to": "String", "render": "CHAR -> String" },
+    { "from": "CHAR(1) code", "to": "String enum", "render": "CHAR(1) code -> String enum", "note": "Requires a value lookup from single-character codes to readable strings." },
+    { "from": "CHAR(1) code", "to": "Boolean", "render": "CHAR(1) code -> Boolean", "note": "Lossy: collapses a multi-state code into two states." },
+    { "from": "TINYINT(1)", "to": "Boolean", "render": "TINYINT(1) -> Boolean", "note": "MySQL boolean integer idiom maps to a native Boolean." },
+    { "from": "DATE", "to": "ISODate", "render": "DATE -> ISODate", "note": "Date-only value becomes midnight UTC; confirm the intended timezone." },
+    { "from": "DATETIME", "to": "ISODate", "render": "DATETIME -> ISODate", "note": "MySQL DATETIME carries no timezone; assume UTC unless the source says otherwise." },
+    { "from": "TEXT", "to": "String", "render": "TEXT -> String" }
+  ],
+
+  "snippets": [
+    {
+      "id": "iso-4217",
+      "tags": ["currency", "sal_currency", "iso"],
+      "text": "ISO 4217 currency codes are exactly three uppercase letters (USD, GBP, JPY). A CHAR(3) currency column maps to a String with no value transform; validate against the ISO list."
+    },
+    {
+      "id": "iso-3166",
+      "tags": ["country", "country_cd", "iso"],
+      "text": "ISO 3166-1 alpha-2 country codes are two uppercase letters (US, GB, JP). A CHAR(2) country column maps to a String unchanged."
+    },
+    {
+      "id": "iana-tz",
+      "tags": ["timezone", "tz_cd", "iana"],
+      "text": "IANA timezone identifiers look like Area/Location (America/Los_Angeles). Store as String verbatim; never convert to a UTC offset, which loses daylight-saving rules."
+    },
+    {
+      "id": "naming-snake-to-camel",
+      "tags": ["naming", "convention"],
+      "text": "Legacy MySQL uses snake_case; the MongoDB target uses camelCase. A trailing _cd means code, _nm means name, _dt means date, _ts means timestamp, and an is_ prefix means a boolean flag."
+    },
+    {
+      "id": "mysql-bool-idiom",
+      "tags": ["boolean", "tinyint", "is_remote"],
+      "text": "MySQL has no native boolean; TINYINT(1) with values 0 and 1 is the idiom. It maps to a MongoDB Boolean with 0 to false and 1 to true."
+    },
+    {
+      "id": "char-code-enum",
+      "tags": ["enum", "status", "rec_stat", "dept_stat"],
+      "text": "Single-character CHAR(1) status codes require a lookup transform to readable enum strings, and the legend is usually documented in the column comment."
+    },
+    {
+      "id": "pk-to-objectid",
+      "tags": ["primary key", "objectid", "_id"],
+      "text": "A relational INT primary key maps to MongoDB _id, but ObjectId values are generated by MongoDB rather than carried over. Retain the original integer in a legacy field so foreign keys can be resolved during migration."
+    },
+    {
+      "id": "fk-to-ref",
+      "tags": ["foreign key", "objectid", "reference"],
+      "text": "A relational foreign key maps to an ObjectId reference field. The migration needs an ID remap table from legacy integer keys to generated ObjectIds, applied after the referenced collection is loaded."
+    },
+    {
+      "id": "denormalization",
+      "tags": ["denormalized", "join", "department", "location"],
+      "text": "Document stores often denormalize a joined label alongside its reference, for example department.code and department.name next to department.departmentId. Those copies have no counterpart column in the referencing table; they are populated by joining the referenced table during migration."
+    },
+    {
+      "id": "decimal-precision",
+      "tags": ["decimal", "money", "salary"],
+      "text": "DECIMAL(12,2) is exact; the MongoDB Number type is an IEEE 754 double and is not. For monetary values prefer Decimal128, or store minor units as an integer."
+    },
+    {
+      "id": "audit-timestamps",
+      "tags": ["metadata", "created", "updated", "audit"],
+      "text": "Legacy created_ts and updated_ts audit columns conventionally move into a meta sub-document as createdAt and updatedAt."
+    },
+    {
+      "id": "datetime-timezone",
+      "tags": ["date", "datetime", "timezone"],
+      "text": "MySQL DATETIME has no timezone. MongoDB ISODate is always UTC, so the migration must state the assumed source timezone; assuming UTC without checking silently shifts every timestamp."
+    }
+  ],
+
+  "verified_overrides": []
+}

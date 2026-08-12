@@ -1,0 +1,83 @@
+{
+  "_comment": [
+    "Realistic legacy_hrm rows used to verify that the value transforms the",
+    "pipeline claims in `notes` actually execute. Consumed by the transform",
+    "playground in the UI and by tests/test_transforms.py.",
+    "Row 3 is deliberately awkward: terminated employee, null manager, non-USD",
+    "currency, and a job level in a different format."
+  ],
+  "emp_master": [
+    {
+      "emp_id": 10045,
+      "emp_cd": "E-10045",
+      "f_name": "Asha",
+      "l_name": "Raman",
+      "dob": "1991-06-14",
+      "hire_dt": "2019-04-01 09:12:44",
+      "term_dt": null,
+      "dept_id": 44,
+      "mgr_emp_id": 10002,
+      "job_lvl_cd": "IC3",
+      "base_sal": "142500.00",
+      "sal_currency": "USD",
+      "work_email": "asha.raman@example.com",
+      "work_phone": "+1-415-555-0134",
+      "office_loc_id": 1,
+      "is_remote": 1,
+      "rec_stat": "A",
+      "created_ts": "2019-04-01 09:12:44",
+      "updated_ts": "2026-02-17 14:03:09"
+    },
+    {
+      "emp_id": 10046,
+      "emp_cd": "E-10046",
+      "f_name": "Marcus",
+      "l_name": "Oyelaran",
+      "dob": "1985-11-02",
+      "hire_dt": "2021-08-16 08:01:00",
+      "term_dt": "2025-11-30 17:00:00",
+      "dept_id": 21,
+      "mgr_emp_id": 10002,
+      "job_lvl_cd": "M1",
+      "base_sal": "168000.00",
+      "sal_currency": "GBP",
+      "work_email": "marcus.o@example.com",
+      "work_phone": "+44-20-7946-0812",
+      "office_loc_id": 2,
+      "is_remote": 0,
+      "rec_stat": "T",
+      "created_ts": "2021-08-16 08:01:00",
+      "updated_ts": "2025-12-01 10:22:31"
+    },
+    {
+      "emp_id": 10099,
+      "emp_cd": "E-10099",
+      "f_name": "Yuki",
+      "l_name": "Tanaka",
+      "dob": null,
+      "hire_dt": "2023-01-09 00:00:00",
+      "term_dt": null,
+      "dept_id": 44,
+      "mgr_emp_id": null,
+      "job_lvl_cd": "L2",
+      "base_sal": "9850000.00",
+      "sal_currency": "JPY",
+      "work_email": "yuki.tanaka@example.com",
+      "work_phone": null,
+      "office_loc_id": 3,
+      "is_remote": 1,
+      "rec_stat": "I",
+      "created_ts": "2023-01-09 11:45:02",
+      "updated_ts": "2026-01-30 08:15:00"
+    }
+  ],
+  "dept_info": [
+    { "dept_id": 44, "dept_cd": "ENG-PLT", "dept_nm": "Platform Engineering", "parent_dept_id": 40, "dept_head_id": 10002, "cost_ctr_cd": "CC-4410", "dept_stat": "A" },
+    { "dept_id": 21, "dept_cd": "FIN-OPS", "dept_nm": "Finance Operations", "parent_dept_id": null, "dept_head_id": 10004, "cost_ctr_cd": "CC-2130", "dept_stat": "I" }
+  ],
+  "locations": [
+    { "loc_id": 1, "loc_cd": "SFO-HQ", "loc_nm": "San Francisco HQ", "city": "San Francisco", "state_prov": "California", "country_cd": "US", "postal_cd": "94105", "tz_cd": "America/Los_Angeles" },
+    { "loc_id": 2, "loc_cd": "LON-01", "loc_nm": "London Bridge", "city": "London", "state_prov": "Greater London", "country_cd": "GB", "postal_cd": "SE1 9SG", "tz_cd": "Europe/London" },
+    { "loc_id": 3, "loc_cd": "TYO-02", "loc_nm": "Tokyo Shibuya", "city": "Tokyo", "state_prov": "Tokyo", "country_cd": "JP", "postal_cd": "150-0002", "tz_cd": "Asia/Tokyo" }
+  ]
+}

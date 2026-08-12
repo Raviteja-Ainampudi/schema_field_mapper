@@ -1,0 +1,20 @@
+{
+  "_comment": "Small unrelated schema pair (with tiny_crm.mongo.json) for fast smoke runs and for proving the pipeline is not hard-coded to the HR schemas. One LLM batch, cents of a cent.",
+  "database": "legacy_crm",
+  "type": "MySQL (Relational)",
+  "tables": {
+    "cust_master": {
+      "columns": [
+        { "name": "cust_id", "type": "INT", "key": "PK", "nullable": false },
+        { "name": "cust_cd", "type": "VARCHAR(20)", "unique": true, "comment": "human-readable customer code" },
+        { "name": "co_nm", "type": "VARCHAR(120)", "comment": "company name" },
+        { "name": "signup_dt", "type": "DATETIME" },
+        { "name": "acct_stat", "type": "CHAR(1)", "comment": "A=Active, C=Churned" },
+        { "name": "is_vip", "type": "TINYINT(1)", "comment": "0 or 1" },
+        { "name": "mrr_amt", "type": "DECIMAL(10,2)", "comment": "monthly recurring revenue" },
+        { "name": "amt_currency", "type": "CHAR(3)", "comment": "ISO 4217" },
+        { "name": "billing_email", "type": "VARCHAR(120)" }
+      ]
+    }
+  }
+}

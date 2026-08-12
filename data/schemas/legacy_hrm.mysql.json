@@ -1,0 +1,52 @@
+{
+  "database": "legacy_hrm",
+  "type": "MySQL (Relational)",
+  "tables": {
+    "emp_master": {
+      "columns": [
+        { "name": "emp_id", "type": "INT", "key": "PK", "nullable": false },
+        { "name": "emp_cd", "type": "VARCHAR(20)", "unique": true, "nullable": false, "comment": "human-readable employee code" },
+        { "name": "f_name", "type": "VARCHAR(50)", "nullable": false },
+        { "name": "l_name", "type": "VARCHAR(50)", "nullable": false },
+        { "name": "dob", "type": "DATE" },
+        { "name": "hire_dt", "type": "DATETIME" },
+        { "name": "term_dt", "type": "DATETIME", "comment": "null if still active" },
+        { "name": "dept_id", "type": "INT", "key": "FK", "references": "dept_info.dept_id" },
+        { "name": "mgr_emp_id", "type": "INT", "key": "FK", "references": "emp_master.emp_id" },
+        { "name": "job_lvl_cd", "type": "VARCHAR(10)", "comment": "e.g. L1, L2, IC3, M1" },
+        { "name": "base_sal", "type": "DECIMAL(12,2)" },
+        { "name": "sal_currency", "type": "CHAR(3)", "comment": "ISO 4217, e.g. USD" },
+        { "name": "work_email", "type": "VARCHAR(120)", "unique": true },
+        { "name": "work_phone", "type": "VARCHAR(20)" },
+        { "name": "office_loc_id", "type": "INT", "key": "FK", "references": "locations.loc_id" },
+        { "name": "is_remote", "type": "TINYINT(1)", "comment": "0 or 1" },
+        { "name": "rec_stat", "type": "CHAR(1)", "comment": "A=Active, I=Inactive, T=Terminated" },
+        { "name": "created_ts", "type": "DATETIME", "comment": "record creation timestamp" },
+        { "name": "updated_ts", "type": "DATETIME", "comment": "last update timestamp" }
+      ]
+    },
+    "dept_info": {
+      "columns": [
+        { "name": "dept_id", "type": "INT", "key": "PK", "nullable": false },
+        { "name": "dept_cd", "type": "VARCHAR(20)", "unique": true },
+        { "name": "dept_nm", "type": "VARCHAR(100)" },
+        { "name": "parent_dept_id", "type": "INT", "key": "FK", "references": "dept_info.dept_id", "comment": "self-referencing" },
+        { "name": "dept_head_id", "type": "INT", "key": "FK", "references": "emp_master.emp_id" },
+        { "name": "cost_ctr_cd", "type": "VARCHAR(20)", "comment": "finance cost center code" },
+        { "name": "dept_stat", "type": "CHAR(1)", "comment": "A=Active, I=Inactive" }
+      ]
+    },
+    "locations": {
+      "columns": [
+        { "name": "loc_id", "type": "INT", "key": "PK", "nullable": false },
+        { "name": "loc_cd", "type": "VARCHAR(20)", "unique": true },
+        { "name": "loc_nm", "type": "VARCHAR(100)" },
+        { "name": "city", "type": "VARCHAR(80)" },
+        { "name": "state_prov", "type": "VARCHAR(80)" },
+        { "name": "country_cd", "type": "CHAR(2)", "comment": "ISO 3166-1 alpha-2" },
+        { "name": "postal_cd", "type": "VARCHAR(20)" },
+        { "name": "tz_cd", "type": "VARCHAR(50)", "comment": "IANA timezone" }
+      ]
+    }
+  }
+}

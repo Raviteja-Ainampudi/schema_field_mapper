@@ -368,7 +368,7 @@ S3 holds full artifacts per run (mapping JSON, run report, prompt traces) and is
 
 ```text
    +----------------------+        +-----------------------------------+
-   | Local dev            |        | Docker image                      |
+   | Local dev (win/WSL2) |        | Docker image                      |
    | uvicorn + .env creds |------->| python:3.12-slim +                |
    +----------------------+        | AWS Lambda Web Adapter            |
                                    +-----------------+-----------------+
@@ -428,7 +428,22 @@ flowchart LR
 
 Lambda is the right fit here: the workload is bursty demo traffic, idle cost is zero, and the Lambda Web Adapter lets the identical FastAPI app run locally and in Lambda with SSE streaming intact. Deployment is a SAM template (`infra/template.yaml`) plus `sam deploy --guided`.
 
-Prerequisites to install before deploying: AWS CLI (`winget install Amazon.AWSCLI`) and SAM CLI (`pip install aws-sam-cli`). Docker is already present.
+Prerequisites to install before deploying: AWS CLI (`winget install Amazon.AWSCLI`) and SAM CLI (`pip install aws-sam-cli`). Docker Desktop is present with a `linux/x86_64` daemon, and WSL2 Ubuntu is available.
+
+### Local development environments
+
+Two environments, deliberately, because the deploy target is Linux and Windows hides three classes of bug until after deploy:
+
+- **Windows venv** (`scripts\setup_venv.ps1`) for day-to-day work: editing, unit tests, and live Bedrock runs. Fastest loop, and what the pipeline is developed against.
+- **WSL2 Ubuntu** (`bash scripts/setup_venv.sh`) as the Linux-parity check before shipping: the container build, the Lambda handler under the Runtime Interface Emulator, and the full test suite on a case-sensitive filesystem. Run it at least once before deploying and after touching path handling.
+
+The three Windows-only illusions this catches, all of which pass locally and fail in Lambda:
+
+- **Case sensitivity.** `Data/Schemas` resolves on Windows and does not on Linux. Asset filenames are lowercase and referenced with exact casing; `config.py` resolves them relative to the package rather than the working directory.
+- **Writable filesystem.** The Lambda task root is read-only apart from `/tmp`, so every write goes through `config.writable_dir()`, which returns `/tmp/schema_mapper` when `AWS_LAMBDA_FUNCTION_NAME` is set and the repo root otherwise. Nothing writes next to its source module.
+- **Line endings.** `.gitattributes` pins `eol=lf` so a CRLF shell script or JSON fixture cannot end up in the image.
+
+One practical gotcha: a `.venv` built on Windows cannot be used from WSL and vice versa, because the interpreter and native wheels differ. Each setup script detects and replaces a foreign venv rather than failing halfway through an install, so switching sides is one command.
 
 **EC2 alternative** (documented, not default): same container on a `t4g.small` behind Caddy for TLS. Simpler to reason about and fine on free tier, but always-on and roughly $6-12/month afterwards, plus you own patching and TLS renewal.
 
@@ -436,11 +451,20 @@ Prerequisites to install before deploying: AWS CLI (`winget install Amazon.AWSCL
 
 ```
 .env.sample                      # documented placeholders, no secrets
-requirements.txt
+.gitattributes                   # eol=lf, so no CRLF reaches the Linux image
+requirements.txt                 # runtime deps
+requirements-dev.txt             # + pytest, httpx
+scripts/setup_venv.ps1           # Windows venv bootstrap
+scripts/setup_venv.sh            # WSL/Linux/macOS venv bootstrap
+scripts/check_bedrock.py         # credential + model-access diagnostic
 project_plans/schema_field_mapper_plan.md
 project_plans/diagrams/          # architecture|pipeline|deployment .mmd + .png + .svg + render.ps1
 data/schemas/legacy_hrm.mysql.json
 data/schemas/people_platform.mongo.json
+data/samples/legacy_hrm.ddl.sql            # same source schema as DDL (parser fixture)
+data/samples/people_platform.sample_docs.json  # destination inferred from mongoexport docs
+data/samples/emp_master_rows.json          # rows for transform verification
+data/samples/tiny_crm.*.json               # small unrelated pair for smoke runs
 data/knowledge/conventions.json  # ISO standards, abbreviations, type map, approved exemplars
 src/schema_mapper/
   config.py        # env, model registry + pricing, role defaults, cascade thresholds

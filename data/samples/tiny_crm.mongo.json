@@ -1,0 +1,39 @@
+{
+  "_comment": "Destination for tiny_crm.mysql.json. Deliberately includes accountManagerId, which has no source counterpart, so a smoke run also exercises unmapped_destination_fields.",
+  "database": "revenue_platform",
+  "type": "MongoDB (Document)",
+  "collections": {
+    "customers": {
+      "fields": [
+        { "name": "_id", "type": "ObjectId" },
+        { "name": "customerCode", "type": "String" },
+        { "name": "companyName", "type": "String" },
+        {
+          "name": "lifecycle",
+          "type": "Object",
+          "fields": [
+            { "name": "signedUpAt", "type": "ISODate" },
+            { "name": "status", "type": "String", "comment": "active / churned" },
+            { "name": "isVip", "type": "Boolean" }
+          ]
+        },
+        {
+          "name": "revenue",
+          "type": "Object",
+          "fields": [
+            { "name": "monthlyRecurring", "type": "Number" },
+            { "name": "currency", "type": "String", "comment": "ISO 4217" }
+          ]
+        },
+        {
+          "name": "contact",
+          "type": "Object",
+          "fields": [
+            { "name": "billingEmail", "type": "String" },
+            { "name": "accountManagerId", "type": "ObjectId", "references": "employees._id", "comment": "no legacy counterpart" }
+          ]
+        }
+      ]
+    }
+  }
+}

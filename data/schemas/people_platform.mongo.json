@@ -1,0 +1,100 @@
+{
+  "database": "people_platform",
+  "type": "MongoDB (Document)",
+  "collections": {
+    "employees": {
+      "fields": [
+        { "name": "_id", "type": "ObjectId" },
+        { "name": "employeeCode", "type": "String", "comment": "unique human-readable ID" },
+        {
+          "name": "fullName",
+          "type": "Object",
+          "fields": [
+            { "name": "firstName", "type": "String" },
+            { "name": "lastName", "type": "String" }
+          ]
+        },
+        {
+          "name": "employment",
+          "type": "Object",
+          "fields": [
+            { "name": "startDate", "type": "ISODate" },
+            { "name": "endDate", "type": "ISODate", "comment": "null if currently employed" },
+            { "name": "status", "type": "String", "comment": "active / inactive / terminated" },
+            { "name": "jobLevel", "type": "String", "comment": "e.g. L1, IC3, M1" },
+            { "name": "isRemote", "type": "Boolean" },
+            { "name": "managerId", "type": "ObjectId", "references": "employees._id" }
+          ]
+        },
+        {
+          "name": "compensation",
+          "type": "Object",
+          "fields": [
+            { "name": "baseSalary", "type": "Number" },
+            { "name": "currency", "type": "String", "comment": "ISO 4217" }
+          ]
+        },
+        {
+          "name": "contact",
+          "type": "Object",
+          "fields": [
+            { "name": "email", "type": "String" },
+            { "name": "phone", "type": "String" }
+          ]
+        },
+        {
+          "name": "department",
+          "type": "Object",
+          "fields": [
+            { "name": "departmentId", "type": "ObjectId", "references": "departments._id" },
+            { "name": "code", "type": "String" },
+            { "name": "name", "type": "String" }
+          ]
+        },
+        {
+          "name": "location",
+          "type": "Object",
+          "fields": [
+            { "name": "locationId", "type": "ObjectId", "references": "locations._id" },
+            { "name": "code", "type": "String" },
+            { "name": "name", "type": "String" },
+            { "name": "city", "type": "String" },
+            { "name": "country", "type": "String", "comment": "ISO 3166-1 alpha-2" },
+            { "name": "timezone", "type": "String", "comment": "IANA timezone" }
+          ]
+        },
+        {
+          "name": "meta",
+          "type": "Object",
+          "fields": [
+            { "name": "createdAt", "type": "ISODate" },
+            { "name": "updatedAt", "type": "ISODate" }
+          ]
+        }
+      ]
+    },
+    "departments": {
+      "fields": [
+        { "name": "_id", "type": "ObjectId" },
+        { "name": "code", "type": "String" },
+        { "name": "name", "type": "String" },
+        { "name": "parentDepartmentId", "type": "ObjectId", "references": "departments._id", "comment": "self-ref" },
+        { "name": "headEmployeeId", "type": "ObjectId", "references": "employees._id" },
+        { "name": "costCenterCode", "type": "String" },
+        { "name": "isActive", "type": "Boolean" }
+      ]
+    },
+    "locations": {
+      "fields": [
+        { "name": "_id", "type": "ObjectId" },
+        { "name": "code", "type": "String" },
+        { "name": "name", "type": "String" },
+        { "name": "city", "type": "String" },
+        { "name": "stateOrProvince", "type": "String" },
+        { "name": "country", "type": "String", "comment": "ISO 3166-1 alpha-2" },
+        { "name": "postalCode", "type": "String" },
+        { "name": "timezone", "type": "String" }
+      ]
+    }
+  }
+}

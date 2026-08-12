@@ -1,0 +1,121 @@
+{
+  "_comment": [
+    "Destination schema expressed as sample documents in MongoDB Extended JSON,",
+    "the shape you get from mongoexport. Types are inferred from values:",
+    "$oid -> ObjectId, $date -> ISODate, true/false -> Boolean, numbers -> Number.",
+    "Two documents per collection so that fields nullable in one (endDate) still",
+    "have an inferable type from the other.",
+    "Usage: python -m schema_mapper.cli --destination data/samples/people_platform.sample_docs.json --offline"
+  ],
+  "database": "people_platform",
+  "collections": {
+    "employees": [
+      {
+        "_id": { "$oid": "652f1a2b3c4d5e6f70819201" },
+        "employeeCode": "E-10045",
+        "fullName": { "firstName": "Asha", "lastName": "Raman" },
+        "employment": {
+          "startDate": { "$date": "2019-04-01T00:00:00Z" },
+          "endDate": null,
+          "status": "active",
+          "jobLevel": "IC3",
+          "isRemote": true,
+          "managerId": { "$oid": "652f1a2b3c4d5e6f70819202" }
+        },
+        "compensation": { "baseSalary": 142500.0, "currency": "USD" },
+        "contact": { "email": "asha.raman@example.com", "phone": "+1-415-555-0134" },
+        "department": {
+          "departmentId": { "$oid": "652f1a2b3c4d5e6f70819301" },
+          "code": "ENG-PLT",
+          "name": "Platform Engineering"
+        },
+        "location": {
+          "locationId": { "$oid": "652f1a2b3c4d5e6f70819401" },
+          "code": "SFO-HQ",
+          "name": "San Francisco HQ",
+          "city": "San Francisco",
+          "country": "US",
+          "timezone": "America/Los_Angeles"
+        },
+        "meta": {
+          "createdAt": { "$date": "2019-04-01T09:12:44Z" },
+          "updatedAt": { "$date": "2026-02-17T14:03:09Z" }
+        }
+      },
+      {
+        "_id": { "$oid": "652f1a2b3c4d5e6f70819203" },
+        "employeeCode": "E-10046",
+        "fullName": { "firstName": "Marcus", "lastName": "Oyelaran" },
+        "employment": {
+          "startDate": { "$date": "2021-08-16T00:00:00Z" },
+          "endDate": { "$date": "2025-11-30T00:00:00Z" },
+          "status": "terminated",
+          "jobLevel": "M1",
+          "isRemote": false,
+          "managerId": { "$oid": "652f1a2b3c4d5e6f70819202" }
+        },
+        "compensation": { "baseSalary": 168000.0, "currency": "GBP" },
+        "contact": { "email": "marcus.o@example.com", "phone": "+44-20-7946-0812" },
+        "department": {
+          "departmentId": { "$oid": "652f1a2b3c4d5e6f70819302" },
+          "code": "FIN-OPS",
+          "name": "Finance Operations"
+        },
+        "location": {
+          "locationId": { "$oid": "652f1a2b3c4d5e6f70819402" },
+          "code": "LON-01",
+          "name": "London Bridge",
+          "city": "London",
+          "country": "GB",
+          "timezone": "Europe/London"
+        },
+        "meta": {
+          "createdAt": { "$date": "2021-08-16T08:01:00Z" },
+          "updatedAt": { "$date": "2025-12-01T10:22:31Z" }
+        }
+      }
+    ],
+    "departments": [
+      {
+        "_id": { "$oid": "652f1a2b3c4d5e6f70819301" },
+        "code": "ENG-PLT",
+        "name": "Platform Engineering",
+        "parentDepartmentId": { "$oid": "652f1a2b3c4d5e6f70819300" },
+        "headEmployeeId": { "$oid": "652f1a2b3c4d5e6f70819202" },
+        "costCenterCode": "CC-4410",
+        "isActive": true
+      },
+      {
+        "_id": { "$oid": "652f1a2b3c4d5e6f70819302" },
+        "code": "FIN-OPS",
+        "name": "Finance Operations",
+        "parentDepartmentId": null,
+        "headEmployeeId": { "$oid": "652f1a2b3c4d5e6f70819204" },
+        "costCenterCode": "CC-2130",
+        "isActive": false
+      }
+    ],
+    "locations": [
+      {
+        "_id": { "$oid": "652f1a2b3c4d5e6f70819401" },
+        "code": "SFO-HQ",
+        "name": "San Francisco HQ",
+        "city": "San Francisco",
+        "stateOrProvince": "California",
+        "country": "US",
+        "postalCode": "94105",
+        "timezone": "America/Los_Angeles"
+      },
+      {
+        "_id": { "$oid": "652f1a2b3c4d5e6f70819402" },
+        "code": "LON-01",
+        "name": "London Bridge",
+        "city": "London",
+        "stateOrProvince": "Greater London",
+        "country": "GB",
+        "postalCode": "SE1 9SG",
+        "timezone": "Europe/London"
+      }
+    ]
+  }
+}
