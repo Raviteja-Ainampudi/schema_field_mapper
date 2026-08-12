@@ -141,11 +141,24 @@ Both forms produce identical leaf paths, which a test pins. The `--` comment is 
 is load-bearing for matching, see below) and a `ref -> collection.path` comment is read as
 a reference.
 
-One rule resolves the ambiguity between the two forms: a JSON object is treated as a
-**field spec** if it carries any of `name`, `type`, `bson_type`, `fields`, `comment`, or
-`references`, and as an **inline sub-document** otherwise. So
-`{"amount": {"type": "Number"}}` is one field named `amount`, while
-`{"fullName": {"firstName": "String"}}` is a sub-document with one leaf.
+One rule resolves the ambiguity between the two forms. In the name-keyed form, an object is
+a **field spec** only if *every* one of its keys is a spec key — `type`, `bson_type`,
+`fields`, `comment`, `references`, or `name` — and at least one is something other than
+`name`. Otherwise it is an **inline sub-document**. So:
+
+| Written as | Read as | Why |
+| --- | --- | --- |
+| `{"amount": {"type": "Number"}}` | one leaf, `amount` | every key is a spec key |
+| `{"fullName": {"firstName": "String"}}` | leaf `fullName.firstName` | `firstName` is not a spec key |
+| `{"author": {"name": "String"}}` | leaf `author.name` | the outer key already names the field, so an inner `name` alone does not make a spec |
+| `{"payment": {"type": "String", "amount": "Number"}}` | leaves `payment.type`, `payment.amount` | `amount` is not a spec key, so this is a sub-document |
+
+The `author.name` case is the one that matters in practice, and it is worth knowing why the
+rule is shaped this way: `name` is both a spec key and one of the most common leaf names
+there is. Treating an inner `name` as a spec marker silently collapses `author.name` into a
+leaf called `author` — a path that does not exist in your schema but is still offered to the
+model as a candidate. A test asserts that no leaf in any bundled sample is a prefix of
+another leaf, which is the structural signature of that mistake.
 
 Nesting is flattened to dot-notation leaf paths during normalization, which is what makes
 `fullName.firstName` a first-class mapping target rather than something a model has to
@@ -192,6 +205,40 @@ readable destination path, so keep them in your DDL or JSON:
 
 Comment-to-name similarity turned out to be the strongest non-obvious signal in the
 deterministic scorer. Without it, both of those fields fall out of the shortlist entirely.
+
+## Ready-made test files
+
+All of these are in `data/samples/` and appear in the **Load sample…** dropdown on the
+matching side. Each pair is a complete, self-consistent schema pair in a different format,
+so pick a pair rather than mixing across domains.
+
+| Pair | File | Side | Format | Size |
+| --- | --- | --- | --- | --- |
+| Assignment | `legacy_hrm.ddl.sql` | source | MySQL DDL | 3 tables, 34 columns |
+| | `people_platform.sample_docs.json` | destination | Mongo documents | 3 collections, 40 paths |
+| Library | `library_legacy.ddl.sql` | source | MySQL DDL | 3 tables, 31 columns |
+| | `library_platform.mongo.json` | destination | Mongo schema, terse inline | 3 collections, 33 paths |
+| School | `school_sis.mysql.json` | source | MySQL JSON, shorthand | 2 tables, 19 columns |
+| | `school_platform.sample_docs.json` | destination | Mongo documents | 2 collections, 21 paths |
+| CRM | `tiny_crm.mysql.json` | source | MySQL JSON | 1 table, 9 columns |
+| | `tiny_crm.mongo.json` | destination | Mongo schema | 1 collection, 10 paths |
+| — | `invalid_on_purpose.txt` | either | none | fails on purpose |
+
+What each pair is for:
+
+- **Library** exercises the two formats the assignment schemas do not: a destination written
+  in the terse inline style, and a source with a compound `DECIMAL` + currency split. It is
+  also the widest test, at 31 columns across three tables with two foreign keys.
+- **School** is the "paste the assignment" path: the source uses the shorthand type-string
+  form and the destination is inferred from real Extended JSON documents. It includes a
+  `dob` equivalent and a `$numberDecimal` GPA.
+- **CRM** is the fastest smoke test at one table, and its destination deliberately contains
+  `contact.accountManagerId` with no source counterpart, so `unmapped_destination_fields`
+  is exercised.
+- **invalid_on_purpose.txt** should be rejected. Use it to confirm the guard works.
+
+Every one of these is checked by `bash scripts/smoke_input.sh`, which fetches each sample
+and asserts it parses, so a broken sample fails a check rather than surprising you.
 
 ## Testing with your own schema
 

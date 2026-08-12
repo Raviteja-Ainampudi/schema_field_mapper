@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Per-run snapshots (committed deliverable lives in outputs/ root)
+outputs/runs/

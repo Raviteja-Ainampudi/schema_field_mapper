@@ -1,7 +1,12 @@
 # Schema Field Mapper
 
-Maps **every field** of a legacy MySQL HR schema (`legacy_hrm`) to its semantic equivalent in
-a MongoDB people-platform schema (`people_platform`), producing one reviewable JSON document.
+An **AI pipeline** that maps **every field** of a legacy MySQL HR schema (`legacy_hrm`) to its
+semantic equivalent in a MongoDB people-platform schema (`people_platform`), producing one
+reviewable JSON document.
+
+Retrieval narrows each column to its few plausible destinations, a language model on Amazon
+Bedrock judges only that shortlist, and a critic pass re-examines the weakest decisions. Three
+of the six stages use no model at all, which is what makes the result auditable.
 
 Developed by **Raviteja Ainampudi**. Assignment text: `InterviewAssignment.txt`.
 
@@ -36,6 +41,15 @@ LLM at all:
 [4] validate    no LLM   contract, hallucinated-path guard, collisions, coverage
 [5] assemble    no LLM   the deliverable + run report + prompt trace
 ```
+
+The AI design, in one list: **retrieval before generation** (the model only ever picks from a
+scored shortlist, so it cannot name a path it was never shown), an **orchestrator with narrow
+workers** (deterministic code owns control flow and batching), a **model cascade** (cheap model
+first, escalate only low confidence), an **evaluator–optimizer** reflection pass over the
+weakest decisions, **constrained JSON decoding** followed by verification against the real
+schema, and a **blended confidence** score that mixes the model's self-report with the
+retrieval margin. No embeddings or vector store: at this schema size the lexical and structural
+signals retrieved better, so a vector database would add a dependency for no measurable recall.
 
 This is **machine-checked, not asserted**. Every request is recorded with a manifest, and
 tests assert that no single prompt carried all 34 source fields or all 40 destination paths,

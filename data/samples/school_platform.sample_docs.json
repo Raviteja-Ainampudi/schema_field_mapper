@@ -1,0 +1,58 @@
+{
+  "_comment": "Test input: DESTINATION side, real MongoDB documents as mongoexport Extended JSON. No schema is written out - types are inferred from the values, so you can point the pipeline at a database dump. Two documents per collection, because a field that is null in one must carry a value in another for its type to be inferable. Pair it with school_sis.mysql.json.",
+  "database": "school_platform",
+  "collections": {
+    "students": [
+      {
+        "_id": { "$oid": "6650a1f4c3a54b1d2e8f0a11" },
+        "studentNumber": "S-2024-0117",
+        "name": { "first": "Amara", "last": "Okonkwo" },
+        "dateOfBirth": { "$date": "2008-03-14T00:00:00Z" },
+        "academics": {
+          "gradeLevel": 11,
+          "gpa": { "$numberDecimal": "3.82" },
+          "enrollmentStatus": "enrolled",
+          "enrolledAt": { "$date": "2022-08-22T00:00:00Z" },
+          "homeroomCourseId": { "$oid": "6650a1f4c3a54b1d2e8f0b01" }
+        },
+        "flags": { "isInternational": false },
+        "guardian": { "email": "n.okonkwo@example.com", "phone": "+1-415-555-0142" }
+      },
+      {
+        "_id": { "$oid": "6650a1f4c3a54b1d2e8f0a12" },
+        "studentNumber": "S-2023-0042",
+        "name": { "first": "Tobias", "last": "Lindqvist" },
+        "dateOfBirth": { "$date": "2007-11-02T00:00:00Z" },
+        "academics": {
+          "gradeLevel": 12,
+          "gpa": { "$numberDecimal": "3.15" },
+          "enrollmentStatus": "graduated",
+          "enrolledAt": { "$date": "2021-08-23T00:00:00Z" },
+          "homeroomCourseId": { "$oid": "6650a1f4c3a54b1d2e8f0b02" }
+        },
+        "flags": { "isInternational": true },
+        "guardian": { "email": "s.lindqvist@example.com", "phone": "+46-8-555-0199" }
+      }
+    ],
+    "courses": [
+      {
+        "_id": { "$oid": "6650a1f4c3a54b1d2e8f0b01" },
+        "courseCode": "MATH-301",
+        "title": "Advanced Algebra",
+        "department": "Mathematics",
+        "credits": { "$numberDecimal": "1.00" },
+        "capacity": { "seats": 28, "waitlistSeats": 5 },
+        "isOffered": true
+      },
+      {
+        "_id": { "$oid": "6650a1f4c3a54b1d2e8f0b02" },
+        "courseCode": "HIST-210",
+        "title": "Modern World History",
+        "department": "Humanities",
+        "credits": { "$numberDecimal": "0.50" },
+        "capacity": { "seats": 32, "waitlistSeats": 8 },
+        "isOffered": false
+      }
+    ]
+  }
+}

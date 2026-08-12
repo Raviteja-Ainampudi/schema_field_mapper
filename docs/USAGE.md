@@ -72,8 +72,55 @@ As you type, the line under each editor reports what was understood —
 **Run pipeline** is disabled while the input does not parse, so a bad paste cannot waste a
 paid run. **Reset to bundled schemas** restores the originals.
 
-One limit worth knowing: **your own schemas cannot run offline.** Cassette replay is keyed
-by request hash, so a schema pair with no recording needs live credentials.
+### What "upload" actually does
+
+Nothing is uploaded in the usual sense. The browser reads the file locally with `FileReader`
+and drops its **text** into the editor; the file itself never leaves your machine and the
+server never writes it to disk. What travels is the text, in the body of `POST /api/parse`
+while you type and `POST /api/run` when you press the button. So there is no upload step to
+wait for, no stored copy to clean up, and editing the box after loading a file is the same
+thing as having pasted it.
+
+### Do you need both sides?
+
+No. Each side falls back to the bundled schema independently, and the validation line tells
+you which you are getting — `bundled default` or `pasted`. Supplying only a source maps your
+tables onto `people_platform`, which is occasionally what you want and usually not. **For a
+meaningful result, load both halves of one pair**, because mapping a library source onto an
+HR destination correctly produces mostly unmapped fields.
+
+### After loading: what to press, and how to tell it worked
+
+1. Confirm both validation lines are green and read the counts back. If a line is red,
+   nothing else will work; fix it there.
+2. The header chip should now read your two database names and `edited`. That is the
+   pre-flight check: it is what the next run will map.
+3. **Untick offline.** Replay is keyed by request hash, so a schema pair with no recording
+   has nothing to replay — see below.
+4. Press **Run pipeline** and watch the meter strip.
+
+It worked if all of the following hold, and each is visible without reading the JSON:
+
+| Signal | Where | What good looks like |
+| --- | --- | --- |
+| Validation badge | Header | `valid`, not `invalid` |
+| Coverage | Meter strip | Mapped + unmapped equals your source column count, with no remainder |
+| Constraint proof | Drawer tab | Every check passing, both-schemas count zero |
+| Confidence | Graph | Mostly green and amber; a wall of red means the pairing is wrong |
+| Unmapped | Coverage & quality | Each unmapped field carries a stated reason |
+
+A useful sanity check on a new schema: open a red wire and read its shortlist. If the right
+destination path is not even in the candidate list, the problem is retrieval, not the model —
+usually a column whose name and comment share no vocabulary with the destination.
+
+### Your own schemas cannot run offline
+
+Cassette replay matches a hash of each request, so an unrecorded schema has no recording.
+With **offline** ticked and edited input, the run stops on the first stage with
+`CassetteMissing: No cassette for stage 'route'` in the log rather than half-writing an
+artifact — and the interface warns you next to the run button before you press it. To map
+your own schemas you need live Bedrock credentials in `.env`; a run of this size costs a few
+cents. Verify access first with `bash scripts/dev.sh bedrock`.
 
 ## The drawer tabs
 

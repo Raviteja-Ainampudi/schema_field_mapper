@@ -613,7 +613,24 @@ def parse_mysql_ddl(text: str) -> SourceSchema:
 # ---------------------------------------------------------------------------
 
 
-_FIELD_SPEC_KEYS = {"name", "type", "bson_type", "fields", "comment", "references"}
+# Telling a field spec from an inline sub-document, in the name-keyed form.
+#
+# "name" is deliberately not sufficient on its own: in the keyed form the outer
+# key already supplies the field name, so an inner "name" is redundant there -
+# while `name` is an extremely common leaf name (`author.name`). Reading it as a
+# spec key silently collapsed `{"author": {"name": "String"}}` into one leaf
+# called `author`.
+#
+# Requiring *every* key to be a spec key also keeps a sub-document that happens
+# to contain a `type` or `comment` child intact, since its other children are
+# not spec keys.
+_SPEC_ONLY_KEYS = {"type", "bson_type", "fields", "comment", "references"}
+_SPEC_KEYS = _SPEC_ONLY_KEYS | {"name"}
+
+
+def _is_field_spec(spec: dict[str, Any]) -> bool:
+    keys = set(spec)
+    return bool(keys) and keys <= _SPEC_KEYS and bool(keys & _SPEC_ONLY_KEYS)
 
 # "ObjectId  -- ref -> employees._id" in the terse form.
 _DEST_REF = re.compile(r"\bref(?:erence[sd]?)?\s*(?:->|to)\s*([\w.]+)", re.IGNORECASE)
@@ -650,15 +667,14 @@ def _iter_field_specs(container: Any) -> Iterable[tuple[str, dict[str, Any]]]:
             if name.startswith("_comment"):
                 continue
             if isinstance(spec, dict):
-                # A dict is a field spec only if it carries spec keys. Otherwise
-                # it is a nested sub-document written inline - the terse form of
-                # the assignment's own schema - and its children are the fields.
-                # Without this, `"fullName": {"firstName": ...}` parses as one
-                # leaf named fullName and both real paths vanish.
-                if spec and not (_FIELD_SPEC_KEYS & spec.keys()):
-                    yield name, {"type": "Object", "fields": spec}
-                else:
+                # Otherwise it is a nested sub-document written inline - the
+                # terse form of the assignment's own schema - and its children
+                # are the fields. Without this, `"fullName": {"firstName": ...}`
+                # parses as one leaf named fullName and both real paths vanish.
+                if _is_field_spec(spec):
                     yield name, spec
+                else:
+                    yield name, {"type": "Object", "fields": spec}
             else:
                 yield name, _dest_spec_from_string(str(spec))
     else:

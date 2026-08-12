@@ -1,0 +1,30 @@
+{
+  "_comment": "Test input: SOURCE side, MySQL schema JSON in the shorthand form - each column is one type string carrying its keys and a trailing '--' comment. This is what you get by quoting the assignment's Dataset A. Pair it with school_platform.sample_docs.json.",
+  "database": "legacy_sis",
+  "type": "MySQL (Relational)",
+  "tables": {
+    "stu_master": {
+      "stu_id": "INT PRIMARY KEY",
+      "stu_cd": "VARCHAR(20) NOT NULL UNIQUE  -- human-readable student number",
+      "f_nm": "VARCHAR(60) NOT NULL           -- first name",
+      "l_nm": "VARCHAR(60) NOT NULL           -- last name",
+      "dob": "DATE                            -- date of birth",
+      "gr_lvl": "TINYINT                      -- grade level, 9 through 12",
+      "enr_stat": "CHAR(1) NOT NULL           -- E=Enrolled, G=Graduated, W=Withdrawn",
+      "gpa_val": "DECIMAL(3,2)                -- cumulative GPA on a 4.00 scale",
+      "is_intl": "TINYINT(1) NOT NULL         -- 1 = international student",
+      "guard_eml": "VARCHAR(140)              -- guardian email address",
+      "enr_dt": "DATETIME NOT NULL            -- when the student first enrolled",
+      "hm_crs_id": "INT FK -> crs_info.crs_id -- homeroom course"
+    },
+    "crs_info": {
+      "crs_id": "INT PRIMARY KEY",
+      "crs_cd": "VARCHAR(20) NOT NULL UNIQUE  -- course catalog code",
+      "crs_ttl": "VARCHAR(160) NOT NULL       -- course title",
+      "dept_nm": "VARCHAR(80)                 -- offering department",
+      "credit_hrs": "DECIMAL(4,2)             -- credit hours awarded",
+      "max_seats": "INT                       -- enrollment capacity",
+      "is_active": "TINYINT(1) NOT NULL       -- 1 = offered this term"
+    }
+  }
+}

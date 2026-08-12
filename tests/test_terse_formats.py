@@ -10,9 +10,11 @@ as the bundled schema rather than collapsing each sub-document into one leaf.
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
 
+from schema_mapper.config import DATA_DIR
 from schema_mapper.normalize import SchemaParseError, load_destination, load_source
 
 TERSE_DEST = json.dumps(
@@ -100,6 +102,55 @@ class TestTerseDestination:
         assert fields[0].comment == "cents"
 
 
+class TestSpecKeysAsChildNames:
+    """A sub-document whose child is called `name`, `type`, or `comment`.
+
+    These collide with the field-spec vocabulary. `author.name` is the realistic
+    case and it regressed once: the sub-document was read as a field spec and
+    collapsed to a single leaf called `author`, which then reached the model as a
+    candidate path that does not exist in the real schema.
+    """
+
+    def test_child_named_name_stays_a_leaf(self):
+        schema = load_destination(
+            json.dumps({"collections": {"books": {"author": {"name": "String"}}}})
+        )
+        assert [f.path for f in schema.collection("books")] == ["author.name"]
+
+    def test_child_named_name_keeps_its_type_and_comment(self):
+        schema = load_destination(
+            json.dumps(
+                {"collections": {"books": {"author": {"name": "String  -- full name"}}}}
+            )
+        )
+        field = schema.collection("books")[0]
+        assert field.bson_type == "String"
+        assert field.comment == "full name"
+
+    def test_subdocument_with_a_type_child_is_not_a_field_spec(self):
+        # `type` is a spec key, but `amount` is not, so this is a sub-document.
+        schema = load_destination(
+            json.dumps(
+                {"collections": {"c": {"payment": {"type": "String", "amount": "Number"}}}}
+            )
+        )
+        assert [f.path for f in schema.collection("c")] == ["payment.type", "payment.amount"]
+
+    def test_name_plus_a_spec_key_is_still_a_field_spec(self):
+        schema = load_destination(
+            json.dumps({"collections": {"c": {"isbn": {"name": "isbn", "type": "String"}}}})
+        )
+        fields = schema.collection("c")
+        assert [f.path for f in fields] == ["isbn"]
+        assert fields[0].bson_type == "String"
+
+    def test_bundled_list_form_is_unaffected(self, dest_schema):
+        # The list form takes `name` from the item itself, so it must not change.
+        paths = [f.path for f in dest_schema.collection("employees")]
+        assert "fullName.firstName" in paths
+        assert "employment.managerId" in paths
+
+
 class TestTerseSource:
     @staticmethod
     @pytest.fixture(scope="class")
@@ -120,6 +171,47 @@ class TestTerseSource:
         assert by_name["office_loc_id"].references == "locations.loc_id"
         assert by_name["rec_stat"].comment == "A=Active, I=Inactive, T=Terminated"
         assert by_name["f_name"].nullable is False
+
+
+class TestBundledSamplesFlattenCleanly:
+    """No container may leak into the leaf set, in any shipped sample.
+
+    The leaf count alone cannot catch this: reading `author.name` as `author`
+    keeps the total identical, which is exactly how it went unnoticed. The
+    structural invariant does catch it - a real leaf is never a prefix of
+    another leaf.
+    """
+
+    @staticmethod
+    def destination_samples() -> list[Path]:
+        return [
+            path
+            for path in sorted((DATA_DIR / "samples").glob("*.json"))
+            if "mysql" not in path.name.lower() and not path.name.endswith("_rows.json")
+        ]
+
+    def test_there_are_destination_samples_to_check(self):
+        assert self.destination_samples()
+
+    def test_no_leaf_is_a_prefix_of_another_leaf(self):
+        offenders = []
+        for path in self.destination_samples():
+            schema = load_destination(path.read_text(encoding="utf-8"))
+            for collection in schema.collection_names:
+                paths = [f.path for f in schema.collection(collection)]
+                for candidate in paths:
+                    prefix = f"{candidate}."
+                    if any(other.startswith(prefix) for other in paths):
+                        offenders.append(f"{path.name}:{collection}.{candidate}")
+        assert not offenders, f"container leaked as a leaf: {offenders}"
+
+    def test_library_sample_keeps_the_author_subdocument(self):
+        schema = load_destination(
+            (DATA_DIR / "samples" / "library_platform.mongo.json").read_text(encoding="utf-8")
+        )
+        paths = [f.path for f in schema.collection("books")]
+        assert "author.name" in paths
+        assert "author" not in paths
 
 
 class TestTerseParity:

@@ -1,0 +1,60 @@
+{
+  "_comment": "Test input: DESTINATION side, MongoDB schema in the terse inline form - sub-documents written as nested objects, types as strings, trailing '--' comments. This is the shape you get by quoting the assignment's own Dataset B. Pair it with library_legacy.ddl.sql.",
+  "database": "library_platform",
+  "type": "MongoDB (Document)",
+  "collections": {
+    "books": {
+      "_id": "ObjectId",
+      "isbn": "String                    -- unique human-readable identifier",
+      "title": "String",
+      "author": {
+        "name": "String                  -- primary author full name"
+      },
+      "publishedYear": "Number",
+      "category": "String                -- fiction / nonfiction / reference",
+      "inventory": {
+        "totalCopies": "Number",
+        "availableCopies": "Number",
+        "referenceOnly": "Boolean        -- true when the title cannot be borrowed"
+      },
+      "pricing": {
+        "amount": "Decimal128            -- acquisition price",
+        "currency": "String              -- ISO 4217"
+      },
+      "addedAt": "ISODate",
+      "branchId": "ObjectId              -- ref -> branches._id",
+      "tags": "Array                     -- subject tags, populated later by curation"
+    },
+    "members": {
+      "_id": "ObjectId",
+      "memberCode": "String              -- unique human-readable membership code",
+      "name": {
+        "first": "String",
+        "last": "String"
+      },
+      "contact": {
+        "email": "String",
+        "phone": "String"
+      },
+      "membership": {
+        "joinedAt": "ISODate",
+        "status": "String                -- active / suspended / expired",
+        "fineBalance": "Decimal128       -- outstanding fines owed",
+        "homeBranchId": "ObjectId        -- ref -> branches._id"
+      }
+    },
+    "branches": {
+      "_id": "ObjectId",
+      "name": "String",
+      "address": {
+        "line1": "String",
+        "city": "String",
+        "state": "String",
+        "postalCode": "String",
+        "country": "String               -- ISO 3166-1 alpha-2"
+      },
+      "isOpen": "Boolean",
+      "managerId": "ObjectId             -- ref -> members._id, no legacy counterpart"
+    }
+  }
+}

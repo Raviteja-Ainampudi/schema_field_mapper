@@ -1,0 +1,16 @@
+Test input: THIS FILE IS MEANT TO FAIL.
+
+Upload it on either side to see the guard work. The validation line under the
+editor should turn red with "Unrecognized schema format: expected JSON or MySQL
+DDL", and Run pipeline should go disabled - so a bad paste costs you nothing
+instead of failing halfway through a paid run.
+
+It is prose, not a schema. There is no CREATE TABLE statement and it is not JSON.
+
+Two more failure modes worth trying by hand:
+
+1. Valid JSON, wrong shape. Paste {"hello": "world"} - it parses as JSON but has
+   no "tables" or "collections" key, so it is rejected as an unrecognized format.
+
+2. Right shape, broken syntax. Delete a closing brace from any .json sample and
+   the error names the line and column.

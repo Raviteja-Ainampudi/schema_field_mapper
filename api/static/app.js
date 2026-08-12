@@ -698,6 +698,65 @@ function HelpPanel({ health, onOpenInput }) {
         migration caveat worth flagging. Columns with no honest destination are declared unmapped
         rather than forced onto a weak match.
       </p>
+      <h3 class="section">How the AI works</h3>
+      <p>
+        The interesting constraint is that handing both schemas to one model and printing its answer
+        is not allowed — and would not be trustworthy anyway. So the problem is decomposed into six
+        stages, and only three of them involve a model at all:
+      </p>
+      <table class="grid">
+        <thead>
+          <tr><th>Stage</th><th>Model?</th><th>What happens</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>0 · Normalize</td><td class="muted">no</td><td>Flatten nested paths to dot notation, expand legacy abbreviations</td></tr>
+          <tr><td>1 · Route</td><td><strong>yes</strong></td><td>One call per table, seeing column <em>names</em> only, to pick its collection</td></tr>
+          <tr><td>2 · Shortlist</td><td class="muted">no</td><td>Retrieval scores every candidate path and keeps the top few</td></tr>
+          <tr><td>3 · Adjudicate</td><td><strong>yes</strong></td><td>One call per batch of fields, each carrying only its own shortlist</td></tr>
+          <tr><td>3c · Reflect</td><td><strong>yes</strong></td><td>A critic pass re-examines the least confident decisions</td></tr>
+          <tr><td>4–5 · Validate, assemble</td><td class="muted">no</td><td>Contract, invented-path guard, collisions, coverage</td></tr>
+        </tbody>
+      </table>
+      <p>The patterns doing the work, and what each one buys:</p>
+      <ul>
+        <li>
+          <strong>Retrieval before generation.</strong> Lexical, fuzzy, type-compatibility, key-role,
+          and comment-similarity signals rank the destination paths, so the model chooses from a
+          shortlist instead of recalling a schema. It cannot propose a path it was never shown, and
+          the <strong>Decision</strong> tab shows you that shortlist with its score components.
+        </li>
+        <li>
+          <strong>Orchestrator and workers.</strong> Deterministic code owns control flow and batches
+          the fields; each model call is a narrow, replaceable worker rather than an agent free to
+          roam. That is what keeps any one prompt small enough to satisfy the constraint.
+        </li>
+        <li>
+          <strong>Model cascade.</strong> A cheap model answers first and only low-confidence fields
+          escalate to the strong one. Roughly a third of the cost, with no accuracy loss worth
+          measuring.
+        </li>
+        <li>
+          <strong>Evaluator and optimizer.</strong> The reflection pass is a second model reviewing
+          the weakest decisions with fresh eyes, bounded to a handful of fields so it cannot loop.
+        </li>
+        <li>
+          <strong>Constrained decoding, then verification.</strong> Responses are schema-constrained
+          JSON, and every path is checked against the real schema afterwards. Inventions are caught
+          and repaired — you can see them listed under <strong>Coverage &amp; quality</strong>.
+        </li>
+        <li>
+          <strong>Confidence you can trust more than a self-report.</strong> The score blends the
+          model's confidence with how decisively the winner beat its runner-up, penalizes type
+          mismatches, and caps anything needing manual value work. A model that is sure about a
+          barely-won match still lands in the review band.
+        </li>
+      </ul>
+      <p class="note">
+        No embeddings and no vector database: at this schema size the lexical and structural signals
+        retrieve better than embeddings did, and adding a vector store would cost latency and a
+        dependency for no measurable recall.
+      </p>
+
       <h3 class="section">Why it is useful</h3>
       <ul>
         <li>
@@ -780,6 +839,74 @@ function HelpPanel({ health, onOpenInput }) {
         Column comments matter more than you would expect. A legend like
         <code>A=Active, I=Inactive</code> is often the only signal that connects a cryptic
         <code>rec_stat</code> to <code>employment.status</code>, so keep them in your DDL.
+      </p>
+
+      <h3 class="section">What upload actually does</h3>
+      <p>
+        Nothing leaves your machine as a file. The browser reads it locally and puts its
+        <em>text</em> in the editor; the server stores nothing on disk. So there is no upload to
+        wait for, and editing the box afterwards is the same as having pasted it.
+      </p>
+      <p>
+        <strong>Both sides are optional but should match.</strong> Each falls back to the bundled
+        schema on its own, and the line under each editor says which you are getting. Load both
+        halves of one pair — mapping a library source onto an HR destination technically runs and
+        correctly produces mostly unmapped fields.
+      </p>
+
+      <h3 class="section">Sample pairs to test with</h3>
+      <p>Pick a pair, one file per side. Each is a different input format:</p>
+      <table class="grid">
+        <thead>
+          <tr><th>Pair</th><th>Source</th><th>Destination</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Assignment</td>
+            <td><code>legacy_hrm.ddl.sql</code><br /><span class="muted">DDL, 34 cols</span></td>
+            <td><code>people_platform.sample_docs.json</code><br /><span class="muted">documents, 40 paths</span></td>
+          </tr>
+          <tr>
+            <td>Library</td>
+            <td><code>library_legacy.ddl.sql</code><br /><span class="muted">DDL, 31 cols</span></td>
+            <td><code>library_platform.mongo.json</code><br /><span class="muted">terse schema, 33 paths</span></td>
+          </tr>
+          <tr>
+            <td>School</td>
+            <td><code>school_sis.mysql.json</code><br /><span class="muted">shorthand JSON, 19 cols</span></td>
+            <td><code>school_platform.sample_docs.json</code><br /><span class="muted">documents, 21 paths</span></td>
+          </tr>
+          <tr>
+            <td>CRM</td>
+            <td><code>tiny_crm.mysql.json</code><br /><span class="muted">JSON, 9 cols</span></td>
+            <td><code>tiny_crm.mongo.json</code><br /><span class="muted">schema, 10 paths</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note">
+        <code>data/samples/invalid_on_purpose.txt</code> is meant to be rejected — drag it in to
+        confirm the guard works.
+      </p>
+
+      <h3 class="section">After loading, how to tell it worked</h3>
+      <ol>
+        <li>Both validation lines green, and the counts match what you expect.</li>
+        <li>The header chip reads your two database names and <code>edited</code>.</li>
+        <li>
+          <strong>Untick offline</strong> — replay is keyed by a request hash, so a new schema
+          pair has no recording and the run would stop with <code>CassetteMissing</code>. Your own
+          schemas need live credentials; a run this size costs a few cents.
+        </li>
+        <li>
+          Run, then check four things: the <strong>valid</strong> badge, coverage adding up to your
+          column count with no remainder, <strong>Constraint proof</strong> all passing, and a graph
+          that is mostly green and amber. A wall of red means the two schemas are not really a pair.
+        </li>
+      </ol>
+      <p class="note">
+        On a red wire, open <strong>Decision</strong> and read the shortlist. If the right path is
+        not even a candidate, the problem is retrieval rather than the model — usually a column
+        whose name and comment share no vocabulary with the destination.
       </p>
     </section>
 
@@ -1287,6 +1414,9 @@ function App() {
 
   const totalFields = schemaInfo?.source.fields || report?.coverage.source_fields_total || 0;
   const progress = totalFields ? Math.min(1, liveWires.length / totalFields) : 0;
+  // Replay is keyed by request hash, so edited schemas have no recording to
+  // replay. Say so before the run rather than letting it fail mid-stage.
+  const replayGap = offline && edited && parse?.ok !== false;
 
   return html`<div class="shell">
     <header class="topbar">
@@ -1300,20 +1430,24 @@ function App() {
           <div>
             <h1>Schema Field Mapper</h1>
             <p class="byline">
-              Developed by <strong>Raviteja Ainampudi</strong>
+              <span class="kicker">AI schema-mapping pipeline</span>
               <span class="sep">·</span>
-              <span class="route">MySQL → MongoDB, field by field</span>
+              Developed by <strong>Raviteja Ainampudi</strong>
             </p>
           </div>
         </div>
         <p class="pitch">
           Migrating a relational schema to documents means deciding, for every single column, where it
-          lands and how its type and values convert. This does that work in minutes instead of days:
-          each column gets a destination path, a type transform, a confidence score, and a
-          one-sentence rationale you can review — with the guesswork made visible rather than hidden.
-          <button class="link" onClick=${openHelp}>How it works</button>
+          lands and how its type and values convert. A six-stage pipeline does that here: retrieval
+          narrows each column to its few plausible destinations, then a language model on Amazon
+          Bedrock judges only that shortlist, and a critic pass re-examines whatever it was least sure
+          about. Every column comes back with a destination path, a type transform, a confidence
+          score, and a one-sentence rationale — reasoning you can audit rather than a black box.
+          <button class="link" onClick=${openHelp}>How the AI works</button>
         </p>
         <div class="badges">
+          <span class="badge ai">Amazon Bedrock</span>
+          <span class="badge">LLM + retrieval</span>
           ${report && html`<span class=${`badge ${report.mode === "live" ? "live" : "offline"}`}>${report.mode}</span>`}
           ${report &&
           html`<span class=${`badge ${report.diagnostics.ok ? "ok" : "fail"}`}>
@@ -1388,11 +1522,19 @@ function App() {
             disabled=${running || parse?.ok === false}
             title=${parse?.ok === false
               ? "Fix the input schema before running; see the Input data tab"
-              : "Map every source field with the current input and settings"}
+              : replayGap
+                ? "Offline replay has no recording for your schemas; untick offline to map them live"
+                : "Map every source field with the current input and settings"}
           >
             ${running ? "Running…" : "Run pipeline"}
           </button>
         </div>
+        ${replayGap &&
+        html`<p class="run-hint">
+          Replay only covers the bundled schemas. Untick <strong>offline</strong> to map your own
+          input with a live model run, or reset the input under
+          <button class="link" onClick=${openInput}>Input data</button>.
+        </p>`}
       </div>
     </header>
 

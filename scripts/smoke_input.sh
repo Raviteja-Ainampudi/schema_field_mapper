@@ -58,4 +58,48 @@ echo "=== empty means bundled defaults"
 curl -sS -X POST "$BASE/api/parse" -H 'content-type: application/json' \
   -d '{}' | python3 -m json.tool
 
-exit "$GOOD"
+echo
+echo "=== a new schema cannot run offline, and says so plainly"
+# The single most likely surprise for someone testing their own file: replay is
+# keyed by request hash, so an unrecorded schema has no cassette to replay. That
+# must arrive as a named error event, not a hang or a half-written artifact.
+python3 - "$BASE" <<'PY'
+import json
+import sys
+import urllib.request
+
+base = sys.argv[1]
+payload = json.dumps(
+    {
+        "offline": True,
+        "source_text": "CREATE TABLE t (id INT PRIMARY KEY, f_name VARCHAR(60));",
+    }
+).encode()
+request = urllib.request.Request(
+    f"{base}/api/run", data=payload, headers={"content-type": "application/json"}
+)
+kinds, message = [], ""
+with urllib.request.urlopen(request, timeout=120) as response:
+    event = ""
+    for raw in response:
+        line = raw.decode().rstrip("\n")
+        if line.startswith("event:"):
+            event = line.split(":", 1)[1].strip()
+        elif line.startswith("data:") and event:
+            body = json.loads(line.split(":", 1)[1].strip())
+            kinds.append(event)
+            if event == "error":
+                message = f"{body.get('kind')}: {body.get('message', '')[:90]}"
+
+if "error" in kinds and "CassetteMissing" in message:
+    print(f"  ok   run refused with a named error -> {message}")
+    sys.exit(0)
+print(f"  FAIL expected a CassetteMissing error event, got {kinds[-3:]} {message}")
+sys.exit(1)
+PY
+OFFLINE_NEW=$?
+
+if [ "$GOOD" = "0" ] && [ "$OFFLINE_NEW" = "0" ]; then
+  exit 0
+fi
+exit 1
