@@ -20,11 +20,13 @@ sys.path.insert(0, str(ROOT / "src"))
 from schema_mapper.config import DATA_DIR  # noqa: E402
 from schema_mapper.knowledge import load_knowledge  # noqa: E402
 from schema_mapper.normalize import load_destination, load_source  # noqa: E402
-from schema_mapper.pairing import ALIGNED_AT, WEAK_AT, assess_pair  # noqa: E402
+from schema_mapper.pairing import ALIGNED_AT, UNRELATED_BELOW, assess_pair  # noqa: E402
 
 # Which source belongs with which destination.
 TRUE_PAIRS = {
     "legacy_hrm": "people_platform",
+    # legacy_hrm.ddl.sql declares no database, so it normalizes to "source".
+    "source": "people_platform",
     "legacy_library": "library_platform",
     "legacy_sis": "school_platform",
     "legacy_crm": "revenue_platform",
@@ -67,7 +69,7 @@ def main() -> int:
 
     print(f"sources: {sorted(sources)}")
     print(f"destinations: {sorted(destinations)}")
-    print(f"\nthresholds: aligned >= {ALIGNED_AT}, weak >= {WEAK_AT}\n")
+    print(f"\nthresholds: aligned >= {ALIGNED_AT}, unrelated < {UNRELATED_BELOW}\n")
     print(f"{'source':<16}{'destination':<20}{'score':>7}  {'verdict':<10}{'expected':<10}")
     print("-" * 72)
 
@@ -85,6 +87,13 @@ def main() -> int:
                 f"{src_name:<16}{dst_name:<20}{assessment.score:>7.3f}  "
                 f"{assessment.verdict:<10}{expected:<10}{flag}"
             )
+            if "--tables" in sys.argv:
+                for pairing in assessment.pairings:
+                    print(
+                        f"    {pairing.table:<12} -> {pairing.collection:<14}"
+                        f"affinity {pairing.affinity:.3f}  "
+                        f"placed {pairing.placed_fields}/{pairing.fields}"
+                    )
 
     print("-" * 72)
     if matched and crossed:

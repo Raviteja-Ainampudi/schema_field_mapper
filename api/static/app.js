@@ -953,6 +953,41 @@ curl -N -X POST localhost:8000/api/run \\
   </div>`;
 }
 
+/**
+ * Whether the two halves belong together. Parsing each side cleanly says nothing
+ * about this, and a mismatched pair is the one input mistake that costs a real
+ * run: nothing errors, it just maps books onto departments.
+ */
+function PairingNotice({ pairing }) {
+  const tone = { aligned: "ok", weak: "warn", unrelated: "bad" }[pairing.verdict] || "warn";
+  return html`<div class=${`pairing ${tone}`}>
+    <div class="pairing-head">
+      <span class="pairing-verdict">${pairing.headline}</span>
+      <span class="pairing-score">
+        affinity ${pairing.score.toFixed(2)} ·
+        ${pairing.placed_fields}/${pairing.total_fields} columns placeable
+      </span>
+    </div>
+    <p>${pairing.detail}</p>
+    <div class="pairing-rows">
+      ${pairing.pairings.map(
+        (p) => html`<span
+          key=${p.table}
+          class=${`pairing-row ${p.affinity < 0.45 ? "forced" : ""}`}
+          title=${`affinity ${p.affinity.toFixed(2)}, ${p.placed_fields} of ${p.fields} columns placeable`}
+        >
+          ${p.table} → ${p.collection}
+          <span class="muted">${p.affinity.toFixed(2)}</span>
+        </span>`
+      )}
+    </div>
+    <p class="note">
+      A likely routing preview, computed without a model call. It is a heuristic on name and
+      comment vocabulary, so treat it as a warning rather than a verdict — it never blocks a run.
+    </p>
+  </div>`;
+}
+
 function SchemaPanel({ sourceText, destText, onSource, onDest, onReset, samples, onSample, parse }) {
   return html`<div class="stack">
     <p class="note" style="margin:0">
@@ -981,6 +1016,7 @@ function SchemaPanel({ sourceText, destText, onSource, onDest, onReset, samples,
         status=${parse?.destination}
       />`}
     </div>
+    ${parse?.pairing && html`<${PairingNotice} pairing=${parse.pairing} />`}
   </div>`;
 }
 
@@ -1417,6 +1453,8 @@ function App() {
   // Replay is keyed by request hash, so edited schemas have no recording to
   // replay. Say so before the run rather than letting it fail mid-stage.
   const replayGap = offline && edited && parse?.ok !== false;
+  const pairing = parse?.pairing;
+  const mismatch = pairing && pairing.verdict !== "aligned" ? pairing : null;
 
   return html`<div class="shell">
     <header class="topbar">
@@ -1534,6 +1572,11 @@ function App() {
           Replay only covers the bundled schemas. Untick <strong>offline</strong> to map your own
           input with a live model run, or reset the input under
           <button class="link" onClick=${openInput}>Input data</button>.
+        </p>`}
+        ${mismatch &&
+        html`<p class=${`run-hint ${mismatch.verdict === "unrelated" ? "bad" : ""}`}>
+          <strong>${mismatch.headline}</strong> ${mismatch.detail}
+          <button class="link" onClick=${openInput}>Check the input</button>
         </p>`}
       </div>
     </header>

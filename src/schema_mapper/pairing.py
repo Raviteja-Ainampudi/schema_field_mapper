@@ -30,13 +30,29 @@ W_LEXICAL = 0.45
 W_FUZZY = 0.25
 W_COMMENT = 0.30
 
-# A field whose best destination clears this has a plausible home. Calibrated in
-# scripts/eval_pairing.py against every bundled pair, matched and mismatched.
+# A field whose best destination clears this has a plausible home. Used only for
+# the interpretable "N of M columns" counts, not for the verdict.
 FIELD_AFFINITY_FLOOR = 0.30
 
-# Verdict boundaries on the fraction of source fields that clear the floor.
-ALIGNED_AT = 0.55
-WEAK_AT = 0.30
+# Verdict boundaries on the field-weighted mean affinity, calibrated by
+# scripts/eval_pairing.py over all 16 source x destination combinations of the
+# four bundled pairs:
+#
+#   true pairs    0.477 .. 0.611
+#   crossed pairs 0.278 .. 0.429
+#
+# The gap is real but narrow, which is why this warns and never blocks: the
+# counting metric tried first (fraction of columns with any plausible
+# destination) could not separate them at all, because a crossed pair genuinely
+# does place generic columns - `locations -> branches` scores 0.528 on its own
+# merits, since both really are addresses.
+ALIGNED_AT = 0.45
+UNRELATED_BELOW = 0.38
+
+# A single table whose best collection scores below this is being forced, even if
+# the schema as a whole looks fine. Same calibration: real table pairings run
+# 0.456 and up, forced ones 0.436 and down, with two honest exceptions noted above.
+TABLE_ALIGNED_AT = 0.45
 
 
 @dataclass(frozen=True)
@@ -137,13 +153,22 @@ def assess_pair(
         placed_total += best.placed_fields
         field_total += best.fields
 
-    score = placed_total / field_total if field_total else 0.0
+    score = (
+        sum(p.affinity * p.fields for p in pairings) / field_total if field_total else 0.0
+    )
     if score >= ALIGNED_AT:
         verdict = "aligned"
-    elif score >= WEAK_AT:
+    elif score >= UNRELATED_BELOW:
         verdict = "weak"
     else:
         verdict = "unrelated"
+
+    forced = [p for p in pairings if p.affinity < TABLE_ALIGNED_AT]
+    # A single homeless table in an otherwise plausible schema is the common real
+    # case and the one worth naming, so it downgrades the verdict rather than
+    # being averaged away.
+    if verdict == "aligned" and forced:
+        verdict = "weak"
 
     headline = {
         "aligned": "These schemas look like a matching pair.",
@@ -152,17 +177,20 @@ def assess_pair(
     }[verdict]
 
     if verdict == "aligned":
-        detail = (
-            f"{placed_total} of {field_total} source columns have a plausible destination."
-        )
+        detail = f"{placed_total} of {field_total} source columns have a plausible destination."
     else:
-        worst = sorted(pairings, key=lambda p: p.placed_fields / max(p.fields, 1))
-        examples = ", ".join(f"{p.table} \u2192 {p.collection}" for p in worst[:2])
+        if forced:
+            named = ", ".join(f"{p.table} \u2192 {p.collection}" for p in forced[:3])
+            lead = (
+                f"{len(forced)} of {len(pairings)} source tables "
+                f"{'has' if len(forced) == 1 else 'have'} no clearly matching collection, "
+                f"so the closest available is forced ({named})."
+            )
+        else:
+            lead = "No source table has a clearly matching collection."
         detail = (
-            f"Only {placed_total} of {field_total} source columns have a plausible "
-            f"destination, and the best available pairings are forced ({examples}). "
-            "A run will still finish, but expect low confidence and many unmapped fields. "
-            "Check that both files come from the same pair."
+            f"{lead} A run will finish, but expect low confidence and many unmapped fields. "
+            "Check that both files are two halves of the same pair."
         )
 
     return PairAssessment(

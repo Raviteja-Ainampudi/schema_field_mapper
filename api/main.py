@@ -65,6 +65,7 @@ from schema_mapper.normalize import (
     load_source,
     load_source_file,
 )
+from schema_mapper.pairing import assess_pair
 from schema_mapper.pipeline import Pipeline
 from schema_mapper.transforms import apply_transform, build_document
 
@@ -313,8 +314,16 @@ def parse(request: ParseRequest) -> dict[str, Any]:
     so a format mistake surfaces before a paid run rather than as a failed one.
     """
 
+    resolved: dict[str, Any] = {}
+
     def summarize(text: str | None, kind: str) -> dict[str, Any]:
         if not text or not text.strip():
+            # The run will use the bundled schema, so assess that one for pairing.
+            resolved[kind] = (
+                load_source_file(DEFAULT_SOURCE_SCHEMA)
+                if kind == "source"
+                else load_destination_file(DEFAULT_DESTINATION_SCHEMA)
+            )
             return {"ok": True, "used": "bundled default", "chars": 0}
         if len(text) > MAX_UPLOAD_CHARS:
             return {
@@ -326,6 +335,7 @@ def parse(request: ParseRequest) -> dict[str, Any]:
             detected = detect_format(text)
             if kind == "source":
                 source_schema = load_source(text)
+                resolved[kind] = source_schema
                 containers = {t: len(source_schema.table(t)) for t in source_schema.table_names}
                 database, dialect, count = (
                     source_schema.database,
@@ -334,6 +344,7 @@ def parse(request: ParseRequest) -> dict[str, Any]:
                 )
             else:
                 dest_schema = load_destination(text)
+                resolved[kind] = dest_schema
                 containers = {
                     c: len(dest_schema.collection(c)) for c in dest_schema.collection_names
                 }
@@ -357,10 +368,20 @@ def parse(request: ParseRequest) -> dict[str, Any]:
 
     source = summarize(request.source_text, "source")
     destination = summarize(request.destination_text, "destination")
+
+    # Whether the two halves belong together is a separate question from whether
+    # each parses, and it is the one that silently wasted a run: pairing an HR
+    # destination with a library source maps books onto departments rather than
+    # failing. Deterministic, so it costs nothing to answer on every keystroke.
+    pairing = None
+    if "source" in resolved and "destination" in resolved:
+        pairing = assess_pair(resolved["source"], resolved["destination"]).as_dict()
+
     return {
         "ok": bool(source["ok"] and destination["ok"]),
         "source": source,
         "destination": destination,
+        "pairing": pairing,
     }
 
 

@@ -31,6 +31,87 @@ PY
 LINKS=$?
 
 echo
+echo "=== mermaid diagrams are well formed"
+# A broken diagram renders as an error box on GitHub, which is worse than no
+# diagram. No renderer is available here (system node is too old for mermaid-cli),
+# so this catches the mistakes that actually break rendering: unclosed fences,
+# unknown diagram types, unbalanced subgraph/end, and unquoted brackets or
+# parentheses inside node labels.
+python3 - <<'PY'
+import pathlib
+import re
+import sys
+
+KNOWN = (
+    "flowchart", "graph", "sequenceDiagram", "classDiagram", "stateDiagram",
+    "stateDiagram-v2", "erDiagram", "journey", "gantt", "pie", "gitGraph",
+    "mindmap", "timeline", "quadrantChart",
+)
+# A node label: id[...] id(...) id{...}. Mermaid needs quotes when the text
+# itself contains brackets, parentheses or a pipe.
+LABEL = re.compile(r"[A-Za-z_][\w-]*(\[|\(|\{)([^\]\)\}\n]*)")
+problems = []
+count = 0
+
+for doc in sorted(pathlib.Path("docs").rglob("*.md")) + [pathlib.Path("README.md")]:
+    lines = doc.read_text(encoding="utf-8").splitlines()
+    inside, block, start = False, [], 0
+    for number, line in enumerate(lines, start=1):
+        if not inside and line.strip().startswith("```mermaid"):
+            inside, block, start = True, [], number
+            continue
+        if inside and line.strip() == "```":
+            inside = False
+            count += 1
+            body = [b for b in block if b.strip() and not b.strip().startswith("%%")]
+            where = f"{doc}:{start}"
+            if not body:
+                problems.append(f"{where}: empty diagram")
+                continue
+            header = body[0].strip()
+            if not header.startswith(KNOWN):
+                problems.append(f"{where}: unknown diagram type {header[:40]!r}")
+
+            # `end` closes different things per diagram type: subgraph in a
+            # flowchart, but loop/alt/opt/par in a sequence diagram.
+            if header.startswith(("flowchart", "graph")):
+                opener_re = r"\s*subgraph\b"
+            elif header.startswith("sequenceDiagram"):
+                opener_re = r"\s*(loop|alt|opt|par|critical|break|rect|box)\b"
+            else:
+                opener_re = None
+            if opener_re:
+                opens = sum(1 for b in body if re.match(opener_re, b))
+                closes = sum(1 for b in body if b.strip() == "end")
+                if opens != closes:
+                    problems.append(f"{where}: {opens} block openers vs {closes} end")
+
+            # Label quoting only applies to flowchart node syntax; class, state
+            # and sequence diagrams use different grammars.
+            if header.startswith(("flowchart", "graph")):
+                for offset, text in enumerate(body):
+                    for _opener, label in LABEL.findall(text):
+                        stripped = label.strip()
+                        if not stripped or stripped.startswith('"'):
+                            continue
+                        if any(ch in stripped for ch in "()[]{}|"):
+                            problems.append(
+                                f"{where}+{offset}: quote this label -> {stripped[:44]!r}"
+                            )
+            continue
+        if inside:
+            block.append(line)
+    if inside:
+        problems.append(f"{doc}:{start}: unclosed ```mermaid fence")
+
+print(f"  checked {count} diagrams")
+for problem in problems:
+    print("  BROKEN", problem)
+sys.exit(1 if problems else 0)
+PY
+MERMAID=$?
+
+echo
 echo "=== documented API examples actually work"
 python3 - "$BASE" <<'PY'
 import json
@@ -149,9 +230,9 @@ PY
 EXAMPLES=$?
 
 echo
-if [ "$LINKS" = "0" ] && [ "$EXAMPLES" = "0" ]; then
+if [ "$LINKS" = "0" ] && [ "$EXAMPLES" = "0" ] && [ "$MERMAID" = "0" ]; then
   echo "DOCS CHECKS PASSED"
   exit 0
 fi
-echo "DOCS CHECKS FAILED (links=$LINKS examples=$EXAMPLES)"
+echo "DOCS CHECKS FAILED (links=$LINKS mermaid=$MERMAID examples=$EXAMPLES)"
 exit 1

@@ -33,6 +33,7 @@ from .config import (
 from .knowledge import KnowledgePack, load_knowledge
 from .models import MAX_REASONING_CHARS, FieldMapping, MappingDocument, TableMapping, now_iso
 from .normalize import DestinationSchema, DestField, SourceField, SourceSchema
+from .pairing import assess_pair
 from .prompts import (
     ADJUDICATE_SYSTEM,
     ADJUDICATE_TOOL,
@@ -1065,6 +1066,12 @@ class Pipeline:
                 "confidence": getattr(self, "routing_confidence", {}),
                 "conflicts": self.routing_conflicts,
             },
+            # Whether the two schemas belong together at all. A run against a
+            # mismatched pair still succeeds by every internal measure - it maps
+            # what it can and declares the rest unmapped - so the artifact has to
+            # carry the caveat, or a reader has no way to know why the confidence
+            # is low.
+            "pairing": assess_pair(self.source, self.destination, self.knowledge).as_dict(),
             "coverage": {
                 "source_fields_total": self.source.field_count,
                 "source_fields_mapped": mapped,
