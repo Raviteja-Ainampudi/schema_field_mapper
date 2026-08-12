@@ -17,6 +17,7 @@ Developed by Raviteja Ainampudi.
 | See how the system is put together | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Follow the workflow stage by stage | [PIPELINE.md](PIPELINE.md) |
 | Put it on AWS behind a shareable URL | [DEPLOY.md](DEPLOY.md) |
+| Read how the prompts are structured and why | [WRITEUP.md](WRITEUP.md) |
 | Understand the design and the assignment constraint | [../project_plans/schema_field_mapper_plan.md](../project_plans/schema_field_mapper_plan.md) |
 | See the UI design rationale | [superpowers/specs/2026-08-11-schema-mapper-ui-design.md](superpowers/specs/2026-08-11-schema-mapper-ui-design.md) |
 
@@ -34,11 +35,5 @@ the same ground as `USAGE.md` and `INPUT_FORMATS.md` without leaving the page.
 - `src/schema_mapper/` — the pipeline: normalize, route, shortlist, adjudicate, validate, assemble.
 - `api/` — FastAPI app serving the JSON API and the single-page interface.
 - `outputs/` — the committed deliverable: `mapping_legacy_hrm_to_people_platform.json`, plus the run report and prompt trace.
-- `tests/` — 245 tests, including the semantic oracle and the machine-checked constraint assertions.
+- `tests/` — 286 tests, including the semantic oracle and the machine-checked constraint assertions.
 - `data/samples/` — extra input files in every accepted format, for testing.
-
-## Not yet written
-
-- `DEPLOY.md` — arrives with `infra/` (Dockerfile and SAM template) in the deploy step. The
-  target and cost model are already specified in section 6 of the plan.
-- `WRITEUP.md` — the assignment's write-up deliverable.

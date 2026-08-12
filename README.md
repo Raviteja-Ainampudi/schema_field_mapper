@@ -199,13 +199,15 @@ Reference: [docs/API.md](docs/API.md).
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System context, components, data model, deployment |
 | [docs/PIPELINE.md](docs/PIPELINE.md) | The six stages, run sequence, decision states, cost control |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | AWS deploy, streaming setup, spend guards, teardown |
+| [docs/WRITEUP.md](docs/WRITEUP.md) | The assignment write-up: prompt structure and design decisions |
 | [project_plans/schema_field_mapper_plan.md](project_plans/schema_field_mapper_plan.md) | Design, cost model, deployment, acceptance criteria |
 
 ## Deliverables
 
 - **Working pipeline code** — `src/schema_mapper/`, runnable with no AWS account via offline replay.
 - **Generated mapping JSON** — committed under `outputs/`, produced by a real Bedrock run.
-- **Write-up** — `docs/WRITEUP.md` (pending).
+- **Write-up** — [docs/WRITEUP.md](docs/WRITEUP.md): how the prompts are structured, how the
+  constraint is enforced in code and machine-checked, and the design decisions with their evidence.
 
 ## Agent notes
 
